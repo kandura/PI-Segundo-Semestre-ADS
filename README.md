@@ -60,36 +60,40 @@ Repositories abstraem consultas ao banco
 
 Controllers retornam respostas HTTP ao frontend
 
-4. Estrutura de Pastas (Versão Atual do Projeto)
+### 4. Estrutura de Pastas (Versão Atual do Projeto)
+
+```
 PI-Segundo-Semestre-ADS/
 │
 ├── prisma/
-│   ├── schema.prisma           Modelo do banco
-│   └── database.db             Banco SQLite
+│   ├── schema.prisma        Modelo do banco
+│   └── database.db          Banco SQLite
 │
 ├── src/
-│   ├── controllers/            Camada de controle (recebe requisições)
-│   ├── database/               Conexão inicial / Prisma Client
-│   ├── dtos/                   Objetos de validação
-│   ├── entities/               Estruturas internas
-│   ├── middlewares/            Middlewares de validação
-│   ├── public/                 Arquivos HTML/CSS/JS servidos ao cliente
-│   │     ├── login.html
-│   │     ├── inicio.html
-│   │     ├── genero-gospel.html
-│   │     ├── genero-eletronica.html
-│   │     ├── genero-rock.html
-│   │     ├── genero-sertanejo.html
-│   │     ├── genero-funk.html
-│   │     └── genero-rap.html
-│   ├── repositories/           Consultas ao banco
-│   ├── routes/                 Definição das rotas
-│   └── services/               Regras de negócio
+│   ├── controllers/         Camada de controle (recebe as requisições)
+│   ├── database/            Conexão inicial / Prisma Client
+│   ├── dtos/                Objetos de validação
+│   ├── entities/            Estruturas internas
+│   ├── middlewares/         Middlewares de validação
+│   ├── public/              Arquivos HTML/CSS/JS servidos ao cliente
+│   │   ├── login.html
+│   │   ├── inicio.html
+│   │   ├── genero-gospel.html
+│   │   ├── genero-eletronica.html
+│   │   ├── genero-rock.html
+│   │   ├── genero-sertanejo.html
+│   │   ├── genero-funk.html
+│   │   └── genero-rap.html
+│   │
+│   ├── repositories/        Consultas ao banco
+│   ├── routes/              Definição das rotas
+│   └── services/            Regras de negócio
 │
-├── server.ts                   Inicialização do servidor Express
+├── server.ts                Inicialização do servidor Express
 ├── package.json
 ├── tsconfig.json
 └── README.md
+```
 
 5. Como Rodar o Projeto
 5.1. Clonar o repositório

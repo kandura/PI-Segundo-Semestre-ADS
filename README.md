@@ -1,192 +1,242 @@
-#  Smash Brothers – Sistema de Música & Mesas via QR Code  
-Documentação oficial do backend + frontend inicial do Projeto Integrador
+README – Hamburgueria Smash Bros
 
----
+Plataforma de gerenciamento de pedidos musicais para ambientes de restaurante
 
-##  Visão Geral do Projeto
+1. Visão Geral
 
-Este repositório contém o código do sistema da **Hamburgueria Smash Brothers**, responsável por:
+O projeto Hamburgueria Smash Bros é uma plataforma que permite que clientes de uma hamburgueria interajam com um sistema musical interno. Cada mesa possui um QR Code exclusivo que redireciona o cliente para o sistema, permitindo que ele informe seu nome, escolha gêneros musicais, sugira músicas, acompanhe a fila de reprodução e participe de um bate-papo com outras mesas.
 
-- Identificação de mesas via QR Code  
-- Registro do nome do cliente ao entrar no sistema  
-- Criação automática de sessões (SessaoCliente)  
-- Cadastro fixo de mesas (M01–M10) via seed  
-- Backend em **Node.js + Express + Prisma + TypeScript**  
-- Frontend simples em HTML/CSS para a tela de entrada
+O sistema foi projetado para funcionar exclusivamente dentro da rede Wi-Fi local do estabelecimento, garantindo controle de acesso e evitando uso indevido por pessoas de fora.
 
-O sistema está **funcionando** para registrar o cliente e vinculá-lo à mesa correspondente.
+A solução é composta por um backend em Node.js com Express e Prisma (utilizando SQLite) e um frontend em HTML/CSS/JS. O backend implementa lógica de sessão por mesa, registro de clientes, seed automático das mesas e fornecerá futuramente funcionalidades relacionadas à fila musical, chat e administração.
 
----
+2. Tecnologias Utilizadas
 
-#  O que já está 100% pronto
+Backend
 
-### 🔹 1. Banco de dados (Prisma)
-Models finalizados:
+Node.js + Express
 
-- **Mesa**
-- **Cliente** (não está em uso, mas já existe)
-- **SessaoCliente**
-- **Session** (não está sendo usado – será removido depois)
+TypeScript
 
-### 🔹 2. Backend funcionando
-- Express configurado  
-- Rotas organizadas  
-- Controllers + Services + Repositories  
-- Criação de sessão funcionando  
-- Seed das mesas funcionando  
-- Servidor servindo a página `/login.html`
+Prisma ORM
 
-###  3. Frontend inicial
-Arquivo: `public/login.html`
+SQLite como banco de dados
 
-Funções implementadas:
-- Detecta mesa pela URL
-- Exibe número da mesa
-- Registra nome do cliente
-- Envia requisição para o backend
+class-validator e class-transformer
 
-### 🔹 4. Seed com as mesas fixas
-Endpoint funcionando:
+tsx para desenvolvimento
 
-```
-POST /seed/mesas
-```
+Frontend
 
-Cria as mesas:
-- M01…M10
+HTML
 
----
+CSS
 
-#  O que falta fazer (Próximas Etapas)
+JavaScript
 
-## ETAPA 1 — Melhorias no fluxo do cliente
-- Criar página **pós-login** do cliente
-- Mostrar para qual mesa ele entrou
-- Criar tela de seleção de gêneros musicais
-- Criar tela de busca de música
-- Criar lista de solicitações enviadas
+3. Arquitetura da Aplicação
 
----
+A aplicação segue uma arquitetura em camadas, separando responsabilidades e facilitando manutenção e escalabilidade.
 
-## ETAPA 2 — Sistema de moderação (funcionário)
-Criar páginas e rotas para moderadores:
+Fluxo interno:
 
-- Tela para ver músicas sugeridas
-- Aprovar / Rejeitar sugestão
-- Ver fila atual
-- Marcar música como tocada
+O cliente acessa via QR Code, que identifica mesa.
 
----
+O frontend captura nome e mesa e envia ao backend.
 
-## ETAPA 3 — Integração com Spotify
-- Autenticação no Spotify
-- Buscar músicas
-- Enviar música para playlist real
-- Controlar playback
+O backend cria uma sessão vinculada a uma mesa.
 
-> Obs.: O backend está pronto para integrar esse módulo sem refatoração pesada.
+O frontend acessa páginas que carregam conteúdo dinâmico (em versões futuras).
 
----
+O backend fornecerá listas de músicas, fila, chat e painel de funcionário.
 
-## ETAPA 4 — Segurança & UX
-- Proibir acesso fora do Wi‑Fi local  
-- Implementar sistema de expiração da sessão  
-- Registrar IP, user-agent  
-- Impedir abuso (spam de sugestões)
+Fluxo das camadas internas:
 
----
+Rotas → Controllers → Services → Repositories → Prisma → Banco de dados
 
-## ETAPA 5 — Organização final do projeto
-Criar estrutura final como:
+Services validam regras de negócio
 
-```
-src/
- ├─ controllers/
- ├─ services/
- ├─ repositories/
- ├─ routes/
- ├─ config/
- ├─ middlewares/
- ├─ database/
- ├─ public/
-```
+Repositories abstraem consultas ao banco
 
----
+Controllers retornam respostas HTTP ao frontend
 
-#  Como rodar o projeto
+4. Estrutura de Pastas (Versão Atual do Projeto)
+PI-Segundo-Semestre-ADS/
+│
+├── prisma/
+│   ├── schema.prisma           Modelo do banco
+│   └── database.db             Banco SQLite
+│
+├── src/
+│   ├── controllers/            Camada de controle (recebe requisições)
+│   ├── database/               Conexão inicial / Prisma Client
+│   ├── dtos/                   Objetos de validação
+│   ├── entities/               Estruturas internas
+│   ├── middlewares/            Middlewares de validação
+│   ├── public/                 Arquivos HTML/CSS/JS servidos ao cliente
+│   │     ├── login.html
+│   │     ├── inicio.html
+│   │     ├── genero-gospel.html
+│   │     ├── genero-eletronica.html
+│   │     ├── genero-rock.html
+│   │     ├── genero-sertanejo.html
+│   │     ├── genero-funk.html
+│   │     └── genero-rap.html
+│   ├── repositories/           Consultas ao banco
+│   ├── routes/                 Definição das rotas
+│   └── services/               Regras de negócio
+│
+├── server.ts                   Inicialização do servidor Express
+├── package.json
+├── tsconfig.json
+└── README.md
 
-### Instalar dependências
-```
+5. Como Rodar o Projeto
+5.1. Clonar o repositório
+git clone https://github.com/kandura/PI-Segundo-Semestre-ADS
+
+5.2. Entrar na pasta do projeto
+cd PI-Segundo-Semestre-ADS
+
+5.3. Instalar dependências
 npm install
-```
 
-### Rodar o servidor
-```
+5.4. Criar o arquivo .env
+
+Dentro da raiz do projeto, crie um arquivo .env:
+
+DATABASE_URL="file:./database.db"
+
+5.5. Executar as migrations
+
+Para gerar o banco SQLite baseado no schema:
+
+npx prisma migrate dev
+
+5.6. Gerar o Prisma Client
+npx prisma generate
+
+5.7. Rodar o servidor
 npm run dev
-```
 
-### Abrir o Prisma Studio
-```
+
+O servidor será iniciado em:
+
+http://localhost:3000
+
+5.8. Acessar o Prisma Studio (opcional)
 npx prisma studio
-```
 
----
+6. O que Já Está Implementado
+Backend
 
-#  Como acessar o site pelo QR Code
+Estrutura completa do projeto em camadas
 
-Se o QR code apontar para:
+Rotas organizadas para clientes e sessões
 
-```
-http://192.168.0.50:3000/login.html?mesaId=3
-```
+Controllers funcionais para Cliente e Sessão
 
-O cliente será identificado automaticamente como **Mesa 3**.
+Services com regras básicas para criação de sessão e CRUD de cliente
 
----
+Repositórios operacionais
 
-#  Testando rotas pelo request.http
+Middlewares de validação
 
-O arquivo `request.http` já contém:
+Banco SQLite funcional
 
-- Criar sessão
-- Criar cliente
-- Listar clientes
-- Criar mesas via seed
+Seed automático de mesas (5 mesas pré-cadastradas)
 
----
+Servidor Express configurado
 
-#  Estrutura atual do repositório
+Rotas estáticas servindo arquivos do frontend
 
-```
-src/
- ├─ controllers/
- │   ├─ cliente.controller.ts
- │   ├─ sessao.controller.ts
- ├─ repositories/
- ├─ services/
- │   ├─ cliente.service.ts
- │   ├─ sessao.service.ts
- ├─ routes/
- │   ├─ cliente.routes.ts
- │   ├─ sessao.routes.ts
- ├─ database/
- │   ├─ prismaClient.ts
- ├─ public/
- │   ├─ login.html
-server.ts
-schema.prisma
-```
+Frontend
 
----
+Tela de login totalmente funcional
 
-#  Contribuição
+Integração com backend para criação de sessão
 
-Todos os membros podem:
+Armazenamento de dados no localStorage
 
-1. Criar novas rotas  
-2. Criar novas páginas HTML  
-3. Adicionar lógica no backend  
-4. Melhorar o visual do frontend  
-5. Integrar o módulo Spotify  
+Tela inicial completa seguindo o novo layout
+
+Páginas de gêneros musicais estruturadas visualmente
+
+Navegação entre páginas já configurada
+
+Identidade visual consistente com padronização definida
+
+7. O que Falta Implementar
+Backend
+
+Modelos adicionais no Prisma:
+
+Music
+
+PedidoMusica
+
+FilaReproducao
+
+ChatMensagem
+
+Endpoints necessários:
+
+Listar músicas por gênero
+
+Registrar sugestão de música
+
+Listar fila de reprodução
+
+Registrar mensagens de chat
+
+Listar mensagens do chat
+
+Painel administrativo para moderação
+
+Middlewares adicionais:
+
+Validação de sessão ativa
+
+Expiração automática de sessões
+
+Validação de acesso por IP (Wi-Fi interno)
+
+Validação de permissões de funcionário (painel admin)
+
+Frontend
+
+Carregamento dinâmico de músicas por gênero (requisição ao backend)
+
+Botão de envio de música funcional
+
+Tela de bate-papo operando em tempo real
+
+Tela de fila de reprodução totalmente integrada
+
+Página administrativa para colaboradores
+
+Otimização para telas de celular (responsividade final)
+
+8. Estrutura Final Esperada
+
+Quando completo, o sistema deverá incluir:
+
+Autenticação via sessão por mesa
+
+Listagem de músicas integradas ao backend
+
+Sistema de sugestões moderadas
+
+Fila de reprodução completa
+
+Bate-papo entre mesas
+
+Painel administrativo
+
+Restrições por Wi-Fi local
+
+Expiração automática de sessão por inatividade
+
+Histórico de músicas executadas
 
 

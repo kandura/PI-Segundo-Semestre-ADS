@@ -1,9 +1,9 @@
-# 🍔 Smash Brothers – Sistema de Música & Mesas via QR Code  
+#  Smash Brothers – Sistema de Música & Mesas via QR Code  
 Documentação oficial do backend + frontend inicial do Projeto Integrador
 
 ---
 
-## 📌 Visão Geral do Projeto
+##  Visão Geral do Projeto
 
 Este repositório contém o código do sistema da **Hamburgueria Smash Brothers**, responsável por:
 
@@ -18,7 +18,7 @@ O sistema está **funcionando** para registrar o cliente e vinculá-lo à mesa c
 
 ---
 
-# ✅ O que já está 100% pronto
+#  O que já está 100% pronto
 
 ### 🔹 1. Banco de dados (Prisma)
 Models finalizados:
@@ -36,7 +36,7 @@ Models finalizados:
 - Seed das mesas funcionando  
 - Servidor servindo a página `/login.html`
 
-### 🔹 3. Frontend inicial
+###  3. Frontend inicial
 Arquivo: `public/login.html`
 
 Funções implementadas:
@@ -57,7 +57,7 @@ Cria as mesas:
 
 ---
 
-# 🧩 O que falta fazer (Próximas Etapas)
+#  O que falta fazer (Próximas Etapas)
 
 ## ETAPA 1 — Melhorias no fluxo do cliente
 - Criar página **pós-login** do cliente
@@ -113,7 +113,7 @@ src/
 
 ---
 
-# 🚀 Como rodar o projeto
+#  Como rodar o projeto
 
 ### Instalar dependências
 ```
@@ -132,7 +132,7 @@ npx prisma studio
 
 ---
 
-# 🌐 Como acessar o site pelo QR Code
+#  Como acessar o site pelo QR Code
 
 Se o QR code apontar para:
 
@@ -144,7 +144,7 @@ O cliente será identificado automaticamente como **Mesa 3**.
 
 ---
 
-# 🧪 Testando rotas pelo request.http
+#  Testando rotas pelo request.http
 
 O arquivo `request.http` já contém:
 
@@ -155,7 +155,7 @@ O arquivo `request.http` já contém:
 
 ---
 
-# 📦 Estrutura atual do repositório
+#  Estrutura atual do repositório
 
 ```
 src/

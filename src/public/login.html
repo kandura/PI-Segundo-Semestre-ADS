@@ -229,7 +229,7 @@
           Digite seu nome para entrar na experiência musical da nossa hamburgueria.
         </p>
 
-        <!-- ⚠️ Aqui vamos colocar “Mesa X” automaticamente -->
+        <!-- Coloca "Mesa X" automaticamente -->
         <div class="info-badge">
           <span class="info-dot"></span>
           <span id="mesaInfo">Você entrou pela mesa...</span>
@@ -260,11 +260,9 @@
       </main>
     </div>
 
-    <!-- ====================== -->
-    <!--   SCRIPT ADICIONADO    -->
-    <!-- ====================== -->
+ 
     <script>
-      // 1. Captura a mesa da URL (aceita mesaId=3 ou mesa=M01)
+      // 1. Captura a mesa da URL 
       function getMesa() {
         const params = new URLSearchParams(window.location.search);
         const mesaId = params.get("mesaId");

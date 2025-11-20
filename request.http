@@ -1,29 +1,6 @@
-### Criar usuário
-POST http://localhost:3000/users
-Content-Type: application/json
 
-{
-  "name": "Leo",
-  "email": "leo@example.com"
-}
+###  CLIENTES (CRUD SIMPLES)  
 
-### Listar usuários
-GET http://localhost:3000/users
-
-### Buscar usuário por ID
-GET http://localhost:3000/users/2
-
-### Atualizar usuário
-PUT http://localhost:3000/users/2
-Content-Type: application/json
-
-{
-  "name": "Leo Atualizado",
-  "email": "leo_atualizado@example.com"
-}
-
-### Deletar usuário
-DELETE http://localhost:3000/users/1
 
 ### Criar cliente
 POST http://localhost:3000/clientes
@@ -53,11 +30,29 @@ Content-Type: application/json
 DELETE http://localhost:3000/clientes/1
 
 
-### Criar sessão do cliente
-POST http://localhost:3000/sessions/entrar
+
+###  MESAS (LISTAGEM E TESTE)  
+
+
+### Listar mesas (para ver seed funcionando)
+GET http://localhost:3000/mesas
+
+
+
+
+###  SESSÃO DO CLIENTE (TELA QR) 
+
+
+### Criar sessão ao entrar pela página (rota usada no login.html)
+POST http://localhost:3000/sessoes/entrar
 Content-Type: application/json
 
 {
   "nomeCliente": "Leonardo",
   "codigoMesa": "M01"
 }
+
+
+### Criar mesas fixas (SEED)
+POST http://localhost:3000/seed/mesas
+Content-Type: application/json

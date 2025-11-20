@@ -1,28 +1,31 @@
 import express from "express";
-import cors from "cors";
+import cors from "cors"; // 5k (gzipped: 2.1k)
+import path from "path";
+import seedRoutes from "./routes/seed.routes.js";
 
-// esses dois são default export
-import userRoutes from "./routes/user.routes.js";
+
+// rotas certas (ATUAL)
 import clienteRoutes from "./routes/cliente.routes.js";
-
-// esse é named export
-import { sessaoRoutes } from "./routes/sessao.cliente.routes.js";
+import { sessaoRoutes } from "./routes/sessao.routes.js";
 
 const app = express();
 
-// habilita CORS para tudo (simples e funcional)
+// middlewares globais
 app.use(cors());
-
-// habilita JSON
 app.use(express.json());
 
-// registra as rotas
-app.use(userRoutes);
+// serve arquivos estáticos da pasta src/public
+app.use(express.static(path.join(process.cwd(), "src", "public")));
+
+// registra as rotas da API
 app.use(clienteRoutes);
 app.use(sessaoRoutes);
+app.use(seedRoutes);
+
 
 const PORT = 3000;
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+

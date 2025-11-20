@@ -1,0 +1,60 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  name  String
+  email String @unique
+  tasks Task[]
+}
+
+model Task {
+  id        Int      @id @default(autoincrement())
+  title     String
+  completed Boolean  @default(false)
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+model Cliente {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  mesa      String   // ex: "01", "02", "A3"
+  criadoEm  DateTime @default(now())
+}
+model Mesa {
+  id         Int             @id @default(autoincrement())
+  codigo     String          @unique    // usado no QR (ex.: "M01")
+  nome       String          // ex.: "Mesa 1"
+  ativa      Boolean         @default(true)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  sessoes    SessaoCliente[]
+}
+model SessaoCliente {
+  id           Int      @id @default(autoincrement())
+  nomeCliente  String
+  mesaId       Int
+  mesa         Mesa     @relation(fields: [mesaId], references: [id])
+
+  ip           String?   // <- com interrogação
+  userAgent    String?   // <- com interrogação
+
+  status       String    @default("ATIVA")
+  createdAt    DateTime  @default(now())
+  lastActivity DateTime  @default(now())
+  endedAt      DateTime?
+}
+
+model Session {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  mesaId    Int
+  createdAt DateTime @default(now())
+}

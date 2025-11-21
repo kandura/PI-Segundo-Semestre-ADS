@@ -14,15 +14,16 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node dist/server.js",
-    "dev": "tsx watch src/server.ts"
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "migrate": "prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
-    "@types/cors": "^2.8.19",
+    "@types/cors": "^2.8.9",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cors": "^2.8.5",

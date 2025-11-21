@@ -219,7 +219,7 @@
         <header class="brand">
           <div class="brand-logo">HB</div>
           <div>
-            <div class="brand-text-main">Hamburgueria Beats</div>
+            <div class="brand-text-main">Hamburgueria Smash Bros</div>
             <div class="brand-text-sub">Som, burger e boas vibes 🍔🎵</div>
           </div>
         </header>
@@ -319,28 +319,12 @@
           localStorage.setItem("nomeCliente", nome);
 
           // A próxima página vocês vão construir depois
-          window.location.href = "/musicas.html";
+          window.location.href = "/inicio.html";
         } catch (err) {
           console.error(err);
           alert("Não foi possível entrar agora. Tente novamente daqui a pouco.");
         }
       });
-    </script>
-  </body>
-</html>
-
-<!doctype html>
-<html>
-  <body>
-    <h1>WS Test</h1>
-    <pre id="log"></pre>
-    <script>
-      const log = (t) => document.getElementById('log').textContent += t + '\n';
-      const ws = new WebSocket("ws://localhost:3000");
-      ws.onopen = () => { log('OPEN'); ws.send(JSON.stringify({ user: 'teste', text: 'olá do navegador' })); };
-      ws.onmessage = (m) => log('MSG: ' + m.data);
-      ws.onerror = (e) => log('ERROR: ' + JSON.stringify(e));
-      ws.onclose = (c) => log('CLOSE: ' + JSON.stringify(c));
     </script>
   </body>
 </html>

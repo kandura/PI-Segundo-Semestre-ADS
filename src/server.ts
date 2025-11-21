@@ -1,93 +1,133 @@
 // src/server.ts
 import express from "express";
-import cors from "cors"; // 5k (gzipped: 2.1k)
+import cors from "cors";
 import path from "path";
-import seedRoutes from "./routes/seed.routes.js";
-
-// rotas certas (ATUAL)
-import clienteRoutes from "./routes/cliente.routes.js";
-import { sessaoRoutes } from "./routes/sessao.routes.js";
-
-// --- novas imports pro WS ---
 import http from "http";
 import { WebSocketServer, type RawData } from "ws";
 
-const app = express();
+import seedRoutes from "./routes/seed.routes.js";
+import clienteRoutes from "./routes/cliente.routes.js";
+import { sessaoRoutes } from "./routes/sessao.routes.js";
 
+const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-
+// arquivos estáticos (HTML / CSS / JS do front)
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
-
+// rotas REST
 app.use(clienteRoutes);
 app.use(sessaoRoutes);
 app.use(seedRoutes);
 
-// ---------- INTEGRAÇÃO WS ----------
+// ----------------- WEBSOCKET DO CHAT -----------------
 
+// Servidor HTTP a partir do Express
 const server = http.createServer(app);
 
+// WebSocket em /chat
+const wss = new WebSocketServer({ server, path: "/chat" });
 
-const wss = new WebSocketServer({ server });
-
-
-function parseMessage(raw: RawData) {
+function parseMessage(raw: RawData): any {
   try {
     const text = raw.toString();
     const obj = JSON.parse(text);
-    if (obj && typeof obj === "object") return obj;
-    return { text };
+    if (obj && typeof obj === "object") {
+      return obj;
+    }
   } catch {
-    return { text: raw.toString() };
+   
   }
+  return { text: raw.toString() };
 }
 
+type ChatMessage = {
+  id: string;
+  user: string;
+  text: string;
+  ts: number;
+};
 
-function broadcast(obj: any) {
-  const data = JSON.stringify(obj);
-  wss.clients.forEach((client) => {
-    if (client.readyState === client.OPEN) client.send(data);
+function broadcast(msg: ChatMessage) {
+  const data = JSON.stringify(msg);
+  wss.clients.forEach((client: any) => {
+    if (client.readyState === client.OPEN) {
+      client.send(data);
+    }
   });
 }
 
-wss.on("connection", (ws) => {
-  console.log("WebSocket: cliente conectado");
+wss.on("connection", (ws, req) => {
+  try {
+    // Pega sessionId, mesaId e nome vindos da URL:
+    // ws://host:3000/chat?sessionId=...&mesaId=...&nome=...
+    const url = new URL(req.url ?? "", `http://${req.headers.host}`);
 
-  
-  broadcast({ id: `sys-${Date.now()}`, user: "Sistema", text: "Um usuário entrou no chat.", ts: Date.now() });
+    const sessionId = url.searchParams.get("sessionId") ?? "";
+    const mesaId = url.searchParams.get("mesaId") ?? "";
+    const nome = url.searchParams.get("nome") ?? "Anônimo";
 
-  ws.on("message", (raw) => {
-    const msg = parseMessage(raw);
+    const displayUser =
+      mesaId && mesaId !== "null" && mesaId !== "undefined"
+        ? `${nome} (mesa ${mesaId})`
+        : nome;
 
-    const out = {
-      id: Math.random().toString(36).slice(2),
-      user: msg.user || "Anônimo",
-      text: msg.text ?? "",
+    console.log(
+      `WebSocket: cliente conectado - ${displayUser} (sessão ${sessionId})`
+    );
+
+    const joinMsg: ChatMessage = {
+      id: `sys-${Date.now()}`,
+      user: "Sistema",
+      text: `${displayUser} entrou no chat.`,
       ts: Date.now(),
-      ...(msg.room ? { room: msg.room } : {}),
     };
+    broadcast(joinMsg);
 
-    
-    broadcast(out);
-  });
+    ws.on("message", (raw: RawData) => {
+      const msg = parseMessage(raw);
+      const texto =
+        typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "");
 
-  ws.on("close", () => {
-    console.log("WebSocket: cliente desconectado");
-    broadcast({ id: `sys-${Date.now()}`, user: "Sistema", text: "Um usuário saiu do chat.", ts: Date.now() });
-  });
+      if (!texto) return;
 
-  ws.on("error", (err) => {
-    console.error("WebSocket error:", err);
-  });
+      const out: ChatMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        user: displayUser,
+        text: texto,
+        ts: Date.now(),
+      };
+
+      broadcast(out);
+    });
+
+    ws.on("close", () => {
+      console.log("WebSocket: cliente desconectado");
+      const leaveMsg: ChatMessage = {
+        id: `sys-${Date.now()}`,
+        user: "Sistema",
+        text: `${displayUser} saiu do chat.`,
+        ts: Date.now(),
+      };
+      broadcast(leaveMsg);
+    });
+
+    ws.on("error", (err) => {
+      console.error("WebSocket error:", err);
+    });
+  } catch (err) {
+    console.error("Erro na conexão WebSocket:", err);
+    ws.close();
+  }
 });
+
+// ----------------- SUBIR SERVIDOR -----------------
 
 const PORT = Number(process.env.PORT ?? 3000);
 
 server.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`WebSocket ativo em ws://localhost:${PORT}`);
+  console.log(`Servidor HTTP/WS rodando na porta ${PORT}`);
+  console.log(`Chat WebSocket em ws://localhost:${PORT}/chat`);
 });
-

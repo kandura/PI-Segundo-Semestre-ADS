@@ -1,173 +1,112 @@
-README – Hamburgueria Beats
+# README – Hamburgueria Beats
 
 Plataforma de gerenciamento de pedidos musicais e chat em tempo real para ambientes de restaurante.
 
-1. Visão Geral
+---
+
+## 1. Visão Geral
 
-O projeto Hamburgueria Beats é uma plataforma que permite que clientes de uma hamburgueria interajam com um sistema musical interno.
+O projeto **Hamburgueria Beats** permite que clientes da hamburgueria interajam com um sistema musical interno através do QR Code da mesa.  
+Os clientes podem:
 
-Cada mesa possui um QR Code exclusivo que redireciona o cliente para o sistema, permitindo:
+- Identificar sua mesa automaticamente pelo QR Code  
+- Inserir seu nome  
+- Navegar por gêneros musicais  
+- (Futuro) Sugerir músicas e acompanhar a fila  
+- Participar de um **chat público em tempo real**
 
-informar o nome;
+O sistema foi projetado para uso **somente dentro da rede Wi-Fi** da hamburgueria, evitando acesso externo.
 
-identificar automaticamente a mesa pelo QR Code;
+### Tecnologias principais
 
-navegar por gêneros musicais;
+#### **Backend**
+- Node.js + Express  
+- TypeScript  
+- Prisma ORM  
+- SQLite  
+- WebSocket (`ws`)  
+- class-validator + class-transformer  
+- tsx (Node + TS em dev)
 
-futuramente sugerir músicas e acompanhar a fila;
+#### **Frontend**
+- HTML  
+- CSS  
+- JavaScript (vanilla)
 
-participar de um chat público em tempo real com outros clientes conectados.
+---
 
-O sistema foi pensado para funcionar apenas dentro da rede Wi-Fi local do estabelecimento, restringindo o uso ao ambiente físico da hamburgueria.
+## 2. Fluxo da Aplicação
 
-Tecnologias principais
+### **Fluxo do cliente**
 
-Backend
+1. O cliente lê o **QR Code da mesa**, que abre:  
+   `login.html?mesa=3`
 
-Node.js + Express
+2. Na tela de login:
+   - vê a mesa identificada automaticamente  
+   - insere o nome  
+   - clica em **Entrar**
 
-TypeScript
+3. O frontend envia:
+   ```json
+   POST /api/sessions
+   {
+     "nome": "...",
+     "mesaId": ...
+   }
+   ```
 
-Prisma ORM
+4. O backend cria uma sessão e retorna:
+   ```json
+   {
+     "sessionId": "..."
+   }
+   ```
 
-SQLite
+5. O frontend salva no `localStorage`:
+   - `sessionId`
+   - `mesaId`
+   - `nomeCliente`
 
-ws (WebSocket)
+6. O usuário é redirecionado para `inicio.html`
 
-class-validator e class-transformer
+7. Métodos de navegação:
+   - footer → **Home**  
+   - footer → **Chat**  
+   - footer → **Fila** (futuro)
 
-tsx (dev server)
+8. Ao abrir `chat.html`, o frontend:
+   - recupera os dados do `localStorage`
+   - conecta ao WebSocket via:
+     ```
+     ws://localhost:3000/chat?sessionId=...&mesaId=...&nome=...
+     ```
+   - entra automaticamente no chat
 
-Frontend
+---
 
-HTML
+## 3. Arquitetura Interna
 
-CSS
+O backend utiliza arquitetura em camadas:
 
-JavaScript (vanilla)
+```
+Rotas → Controllers → Services → Repositories → Prisma → SQLite
+```
 
-2. Fluxo geral da aplicação (do ponto de vista do cliente)
+### WebSocket — Chat em Tempo Real
 
-O cliente lê o QR Code da mesa, que aponta para a login.html com um parâmetro de mesa.
-Exemplo: http://localhost:3000/login.html?mesa=3
+- Cada cliente se conecta via `/chat`
+- O servidor gera nome de exibição: `"Fulano (mesa X)"`
+- Eventos:
+  - **enter** → sistema envia: “Fulano entrou no chat”
+  - **message** → broadcast para todos
+  - **disconnect** → sistema envia: “Fulano saiu do chat”
 
-Na tela de login, o cliente:
+---
 
-vê um badge do tipo “Você entrou pela mesa X”;
+## 4. Estrutura de Pastas (versão atual)
 
-informa seu nome;
-
-clica em Entrar.
-
-Ao clicar em Entrar:
-
-o frontend faz um POST para http://localhost:3000/api/sessions enviando:
-
-nome
-
-mesaId
-
-o backend cria uma sessão no banco vinculada à mesa;
-
-o frontend recebe sessionId e salva no localStorage:
-
-sessionId
-
-mesaId
-
-nomeCliente
-
-Em seguida o usuário é redirecionado para inicio.html, que:
-
-exibe um cabeçalho com avatar (iniciais), nome e mesa;
-
-mostra os gêneros musicais disponíveis;
-
-possui um footer com três botões:
-
-Home (tela inicial)
-
-Chat (abre o chat em tempo real)
-
-Fila (reservado para futuras funcionalidades de fila de músicas)
-
-Ao clicar no botão de chat do footer:
-
-o usuário é levado para chat.html;
-
-essa página recupera de localStorage:
-
-sessionId
-
-mesaId
-
-nomeCliente
-
-abre uma conexão WebSocket com o backend (ws://localhost:3000/chat?...);
-
-entra automaticamente no chat com a identificação "Nome (mesa X)".
-
-No chat:
-
-mensagens são enviadas em tempo real para todos os clientes conectados;
-
-o sistema mostra quando alguém entra ou sai do chat;
-
-cada mensagem aparece em bolhas de chat com avatar, nome, texto e horário.
-
-3. Arquitetura Interna
-
-A aplicação segue uma arquitetura em camadas, organizada assim:
-
-Rotas (routes) → recebem as URLs e métodos HTTP.
-
-Controllers → recebem a requisição, chamam os serviços e retornam respostas.
-
-Services → contêm as regras de negócio (ex.: criar cliente, criar sessão).
-
-Repositories → fazem as consultas/acessos ao banco via Prisma.
-
-Prisma → ORM que mapeia as entidades para o SQLite.
-
-Banco de Dados (SQLite) → armazena clientes, sessões e (no futuro) músicas, fila, etc.
-
-Fluxo típico de backend:
-
-Request HTTP → Route → Controller → Service → Repository → Prisma → SQLite
-                                                  ↓
-                                              Response HTTP
-
-WebSocket do Chat
-
-O WebSocket é integrado ao mesmo servidor HTTP:
-
-server.ts cria um servidor HTTP com o Express.
-
-Um WebSocketServer (ws) é pendurado nesse servidor, no path /chat.
-
-Ao conectar, o cliente envia na URL:
-
-sessionId
-
-mesaId
-
-nome
-
-O backend:
-
-monta um nome de exibição: "Nome (mesa X)";
-
-envia para todos a mensagem de sistema: Fulano (mesa X) entrou no chat;
-
-quando o cliente manda uma mensagem, o servidor:
-
-gera um objeto { id, user, text, ts };
-
-faz broadcast para todos os clientes conectados;
-
-ao desconectar, o servidor avisa: Fulano (mesa X) saiu do chat.
-
-4. Estrutura de Pastas (versão atual)
+```
 PI-Segundo-Semestre-ADS/
 ├── prisma/
 │   ├── schema.prisma
@@ -200,328 +139,138 @@ PI-Segundo-Semestre-ADS/
 ├── package.json
 ├── tsconfig.json
 └── README.md
+```
 
+---
 
-5. Como Rodar o Projeto (novo usuário)
-5.1. Pré-requisitos
+## 5. Como Rodar o Projeto (novo usuário)
 
-Node.js 18+ (recomendado)
+### 5.1. Pré-requisitos
+- Node.js 18+  
+- npm (vem junto com o Node)
 
-npm (vem junto com o Node)
+---
 
-Git
+### 5.2. Instalar dependências
 
-5.2. Clonar o repositório
-git clone https://github.com/kandura/PI-Segundo-Semestre-ADS
-cd PI-Segundo-Semestre-ADS
-
-5.3. Instalar dependências
+```bash
 npm install
+```
 
+---
 
-Isso instalará, entre outros:
+### 5.3. Criar o arquivo `.env`
 
-express
+Dentro da raiz do projeto:
 
-cors
-
-ws
-
-prisma
-
-@prisma/client
-
-tsx
-
-class-validator
-
-class-transformer
-
-5.4. Configurar o .env
-
-Na raiz do projeto, crie o arquivo .env com:
-
+```
 DATABASE_URL="file:./database.db"
+```
 
+---
 
-O SQLite ficará dentro da pasta prisma/ e será referenciado automaticamente.
+### 5.4. Executar as migrations
 
-5.5. Criar o banco e rodar migrations
-
-Gera o banco com base no schema.prisma:
-
+```bash
 npx prisma migrate dev
+```
 
+---
 
-Durante a primeira execução, você pode dar um nome curto para a migration (ex.: init).
+### 5.5. Gerar o Prisma Client
 
-5.6. Gerar o Prisma Client
+```bash
 npx prisma generate
+```
 
+---
 
-Isso gera o client utilizado pelos repositories.
+### 5.6. Rodar o servidor
 
-5.7. Rodar o servidor (HTTP + WebSocket)
+```bash
 npm run dev
-
-
-O script usa tsx para rodar src/server.ts.
-
-O servidor sobe na porta 3000 (padrão).
-
-Você deve ver algo como:
-
-Servidor HTTP/WS rodando na porta 3000
-Chat WebSocket em ws://localhost:3000/chat
-
-5.8. Seed das mesas (opcional, se estiver configurado)
-
-O projeto possui rotas de seed que podem criar mesas iniciais (ex.: 5 mesas).
-Se necessário, acesse a rota de seed via navegador ou REST Client de acordo com a configuração existente em routes/seed.routes.ts.
-
-5.9. Acessar o sistema como cliente (simulando o QR Code)
-
-Com o servidor rodando:
-
-Acesse a URL de login com o parâmetro mesa:
-
-http://localhost:3000/login.html?mesa=1
-
-http://localhost:3000/login.html?mesa=2
-
-etc.
-
-Digite um nome (ex.: “Ana”, “Jorge”).
-
-Clique em Entrar.
-
-O fluxo será:
-
-criação de sessão no backend;
-
-salvamento de sessionId, mesaId e nomeCliente no localStorage;
-
-redirecionamento para inicio.html.
-
-5.10. Testar o chat em tempo real
-
-Abra duas abas ou dois navegadores diferentes.
-
-Em cada um, acesse:
-
-http://localhost:3000/login.html?mesa=1
-
-http://localhost:3000/login.html?mesa=3
-
-Faça login com nomes diferentes.
-
-Em cada aba, clique no botão de chat (balãozinho) no footer:
-
-isso leva para /chat.html.
-
-Envie mensagens de um lado e do outro:
-
-as mensagens aparecem para todos conectados;
-
-o sistema mostra:
-
-[hh:mm] Sistema: Fulano (mesa X) entrou no chat.
-
-bolhas de conversa tipo WhatsApp:
-
-suas mensagens: à direita, laranja, com avatar das suas iniciais;
-
-mensagens dos outros: à esquerda, em cinza, com avatar das iniciais deles;
-
-mensagens do sistema: centralizadas em amarelo;
-
-toca um som de nova mensagem quando alguém envia algo para você.
-
-6. O que Já Está Implementado
-Backend
-
-Estrutura completa em camadas:
-
-controllers, services, repositories, entities, dtos, middlewares.
-
-Rotas organizadas:
-
-Clientes
-
-Sessões
-
-Seed de mesas
-
-Controllers funcionais para:
-
-criação e gerenciamento de clientes;
-
-criação de sessão por mesa.
-
-Regras básicas de negócio:
-
-uma sessão é sempre associada a uma mesa;
-
-uso de DTOs para validação de entrada.
-
-Banco SQLite funcional por trás do Prisma.
-
-Seed automático ou via rota para criar mesas iniciais.
-
-Servidor Express configurado e servindo:
-
-API REST (/api/...)
-
-arquivos estáticos (/login.html, /inicio.html, etc.).
-
-Servidor WebSocket integrado (ws):
-
-endpoint ws://localhost:3000/chat;
-
-broadcast de mensagens para todos os conectados;
-
-mensagens de entrada/saída geradas pelo sistema.
-
-Frontend
-
-Tela de login (login.html)
-
-captura do número da mesa via query string ?mesa=X;
-
-exibição da mesa (“Você entrou pela mesa X”);
-
-formulário de nome do cliente;
-
-envio dos dados para /api/sessions;
-
-salvamento de:
-
-sessionId
-
-mesaId
-
-nomeCliente
-no localStorage;
-
-redirecionamento para inicio.html.
-
-Tela inicial (inicio.html)
-
-avatar com iniciais do cliente;
-
-saudação do tipo Mesa X • Bem-vindo(a), Nome!;
-
-botões de gêneros musicais (gospel, eletrônica, rock, sertanejo, funk, rap);
-
-footer com navegação:
-
-Home (início)
-
-Chat (abre chat.html)
-
-Fila (reservado para futuras features).
-
-Páginas de gênero (genero-*.html)
-
-layout visual padronizado para cada estilo musical;
-
-prontas para receber carregamento dinâmico de músicas no futuro.
-
-Chat em tempo real (chat.html)
-
-integração com o WebSocket /chat;
-
-uso dos dados salvos no localStorage:
-
-identificação do cliente e da mesa;
-
-layout alinhado com a identidade visual da hamburgueria:
-
-card central com fundo escuro;
-
-cabeçalho com título e subtítulo;
-
-botão de voltar para inicio.html;
-
-mensagens em estilo WhatsApp:
-
-minhas mensagens → direita, laranja, com minhas iniciais;
-
-outras pessoas → esquerda, cinza, com iniciais delas;
-
-sistema → centro, cor amarela;
-
-exibição de horário da mensagem;
-
-som de nova mensagem para mensagens recebidas de outros clientes.
-
-7. O que Ainda Falta Implementar
-Backend
-
-Modelos Prisma adicionais:
-
-Music
-
-PedidoMusica
-
-FilaReproducao
-
-(opcional) ChatMensagem persistente
-
-Endpoints:
-
-listar músicas por gênero;
-
-registrar sugestão de música;
-
-listar fila de reprodução;
-
-aprovar/recusar sugestões (moderação);
-
-(opcional) salvar e listar histórico de mensagens de chat.
-
-Funcionalidades de segurança:
-
-validação de sessão ativa em cada requisição/rota;
-
-expiração automática de sessão por inatividade;
-
-validação de acesso por IP (uso apenas no Wi-Fi local);
-
-roles/permissões para colaboradores (painel admin).
-
-Frontend
-
-Carregamento dinâmico das músicas via API.
-
-Botão de sugestão de música enviando para o backend.
-
-Tela de fila de reprodução integrada com o backend.
-
-Tela administrativa para colaboradores (moderação de músicas/chat).
-
-Ajustes finais de responsividade para diferentes tamanhos de tela.
-
-Pequenos refinamentos de UX (estado de loading, mensagens de erro etc.).
-
-8. Visão da Estrutura Final Esperada
-
-Quando estiver completo, o sistema deve oferecer:
-
-Autenticação por sessão de mesa via QR Code;
-
-Listagem de músicas por gênero diretamente do backend;
-
-Sistema de sugestões moderadas (aprovação/reprovação);
-
-Fila de reprodução totalmente integrada;
-
-Chat em tempo real entre clientes da casa;
-
-Painel administrativo para funcionários;
-
-Restrições de uso a partir da rede Wi-Fi local;
-
-Expiração de sessões inativas;
-
-Histórico de músicas executadas e estatísticas do uso do sistema.
+```
+
+O servidor iniciará em:
+
+```
+http://localhost:3000
+```
+
+---
+
+### 5.7. (Opcional) Abrir Prisma Studio
+
+```bash
+npx prisma studio
+```
+
+---
+
+## 6. O que Já Está Implementado
+
+### Backend
+- Estrutura completa em camadas  
+- CRUD completo de Cliente  
+- Criação de sessão vinculada à mesa  
+- Seed automático das mesas  
+- WebSocket totalmente funcional  
+- Chat em tempo real com:
+  - entrada  
+  - envio de mensagens  
+  - saída  
+  - mensagens formatadas  
+- Integração com frontend  
+- Servidor estático para páginas HTML
+
+### Frontend
+- Tela de login funcional  
+- Captura automática da mesa via URL  
+- Armazenamento de nome/mesa/sessão no localStorage  
+- Tela inicial estilizada  
+- Botão de chat corrigido e estilizado  
+- Chat completo com:
+  - bolhas tipo WhatsApp  
+  - avatar gerado automaticamente  
+  - som de nova mensagem  
+  - rolagem automática  
+  - mensagens do sistema
+
+---
+
+## 7. O que Falta Implementar
+
+### Backend
+- Models adicionais:
+  - Music  
+  - PedidoMusica  
+  - FilaReproducao  
+  - ChatMensagem (persistência futura)
+- Endpoints musicais
+- Painel de funcionário
+- Restrições por IP (Wi-Fi local)
+- Expiração de sessão
+
+### Frontend
+- Páginas carregando músicas dinamicamente
+- Tela de fila de reprodução
+- Painel administrativo
+
+---
+
+## 8. Estrutura Final Esperada
+
+Quando concluído, o sistema incluirá:
+
+- Autenticação por sessão e mesa  
+- Sugestões de música moderadas  
+- Fila de reprodução  
+- Chat persistente  
+- Painel administrativo  
+- Políticas de segurança por Wi-Fi local  
+- Expiração automática de sessões
+
+---
+
+## 9. Créditos
+Projeto desenvolvido por estudantes da FATEC Indaiatuba – ADS.

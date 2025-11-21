@@ -169,37 +169,38 @@ ao desconectar, o servidor avisa: Fulano (mesa X) saiu do chat.
 
 4. Estrutura de Pastas (versão atual)
 PI-Segundo-Semestre-ADS/
-│
 ├── prisma/
-│   ├── schema.prisma        # Modelo do banco de dados
-│   └── database.db          # Banco SQLite
+│   ├── schema.prisma
+│   └── database.db
 │
 ├── src/
-│   ├── controllers/         # Controllers (Cliente, Sessão, etc.)
-│   ├── database/            # Configuração do Prisma Client
-│   ├── dtos/                # DTOs e validações
-│   ├── entities/            # Entidades internas
-│   ├── middlewares/         # Middlewares (ex.: validações)
-│   ├── public/              # Frontend (HTML/CSS/JS)
-│   │   ├── login.html       # Tela de entrada (nome + mesa via QR)
-│   │   ├── inicio.html      # Tela inicial pós-login
+│   ├── controllers/
+│   ├── database/
+│   ├── dtos/
+│   ├── entities/
+│   ├── middlewares/
+│   ├── public/
+│   │   ├── login.html
+│   │   ├── inicio.html
 │   │   ├── genero-gospel.html
 │   │   ├── genero-eletronica.html
 │   │   ├── genero-rock.html
 │   │   ├── genero-sertanejo.html
 │   │   ├── genero-funk.html
 │   │   ├── genero-rap.html
-│   │   ├── chat.html        # Chat público em tempo real
-│   │   └── sounds/notify.mp3 (som de nova mensagem)
+│   │   ├── chat.html
+│   │   └── sounds/
+│   │       └── notify.mp3
 │   │
-│   ├── repositories/        # Acesso ao banco (via Prisma)
-│   ├── routes/              # Rotas HTTP (cliente, sessão, seed, etc.)
-│   └── services/            # Regras de negócio
+│   ├── repositories/
+│   ├── routes/
+│   └── services/
 │
-├── src/server.ts            # Inicialização do servidor HTTP + WebSocket
+├── src/server.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
+
 
 5. Como Rodar o Projeto (novo usuário)
 5.1. Pré-requisitos

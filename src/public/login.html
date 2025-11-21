@@ -328,3 +328,19 @@
     </script>
   </body>
 </html>
+
+<!doctype html>
+<html>
+  <body>
+    <h1>WS Test</h1>
+    <pre id="log"></pre>
+    <script>
+      const log = (t) => document.getElementById('log').textContent += t + '\n';
+      const ws = new WebSocket("ws://localhost:3000");
+      ws.onopen = () => { log('OPEN'); ws.send(JSON.stringify({ user: 'teste', text: 'olá do navegador' })); };
+      ws.onmessage = (m) => log('MSG: ' + m.data);
+      ws.onerror = (e) => log('ERROR: ' + JSON.stringify(e));
+      ws.onclose = (c) => log('CLOSE: ' + JSON.stringify(c));
+    </script>
+  </body>
+</html>

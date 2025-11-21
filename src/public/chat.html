@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Público</title>
+
+  <style>
+    body { 
+      font-family: Arial;
+      background: #222;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+
+    #chat {
+      height: 400px;
+      overflow-y: auto;
+      border: 1px solid #444;
+      padding: 10px;
+      background: #333;
+      margin-bottom: 10px;
+    }
+
+    #msgInput {
+      width: 80%;
+      padding: 10px;
+    }
+
+    #sendBtn {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Chat Público</h2>
+
+  <div id="chat"></div>
+
+  <input id="msgInput" placeholder="Digite sua mensagem..." />
+  <button id="sendBtn">Enviar</button>
+
+
+  <script src="./chat.js?=1"></script>
+</body>
+
+</html>

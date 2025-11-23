@@ -260,8 +260,8 @@
     // 1. Captura a mesa da URL
     function getMesa() {
       const params = new URLSearchParams(window.location.search);
-      const mesaId = params.get("mesaId");  // ex: ?mesaId=5
-      const mesaCod = params.get("mesa");   // ex: ?mesa=M05
+      const mesaId = params.get("mesaId");   // ex: ?mesaId=2
+      const mesaCod = params.get("mesa");    // se um dia o QR usar ?mesa=M02
       return { mesaId, mesaCod };
     }
 
@@ -291,37 +291,43 @@
         return;
       }
 
+      // Se não tiver mesa em NENHUM formato → QR inválido
       if (!mesaId && !mesaCod) {
         alert("QR Code inválido — mesa não encontrada.");
         return;
       }
 
-      // Valor final da mesa (pode vir como mesaId numérico ou mesaCod)
       const mesaFinal = mesaId ?? mesaCod;
 
       try {
-        const response = await fetch("/api/sessions", {
+        const apiBase = window.location.origin; // funciona no local e no Render
+        const response = await fetch(`${apiBase}/api/sessions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             nome,
-            mesaId: Number(mesaFinal), // backend recebe sempre número
+            mesaId: Number(mesaFinal),
           }),
         });
 
-        if (!response.ok) throw new Error("Erro ao criar sessão");
+        // Log de debug pra gente ver se deu ruim
+        if (!response.ok) {
+          const txt = await response.text().catch(() => "");
+          console.error("Erro em /api/sessions:", response.status, txt);
+          throw new Error("Erro ao criar sessão");
+        }
 
-        const dados = await response.json(); // assume que vem { sessionId: "..." }
+        const dados = await response.json();
 
-        // 4. Guarda informações **na sessão** (por guia/aba)
+        // 4. Guarda informações **na sessão** (por aba)
         sessionStorage.setItem("sessionId", dados.sessionId);
-        sessionStorage.setItem("mesaId", String(mesaFinal));   // <-- ajustado aqui
+        sessionStorage.setItem("mesaId", mesaFinal);
         sessionStorage.setItem("nomeCliente", nome);
 
-        // 5. Vai para a tela de início
+        // Tela de início
         window.location.href = "/inicio.html";
       } catch (err) {
-        console.error(err);
+        console.error("Erro no login:", err);
         alert("Não foi possível entrar agora. Tente novamente daqui a pouco.");
       }
     });

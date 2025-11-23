@@ -1,6 +1,5 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
 }
 
 generator client {
@@ -38,4 +37,13 @@ model SessaoCliente {
   createdAt       DateTime @default(now())
   lastActivityAt  DateTime @default(now())
   endedAt         DateTime?
+}
+
+model SpotifyAuth {
+  id           Int      @id @default(autoincrement())
+  accessToken  String  
+  refreshToken String   @unique
+  expiresIn    DateTime
+  tokenObtainedAt DateTime @default(now())
+  createdAt    DateTime @default(now())
 }

@@ -1,276 +1,272 @@
-# README – Hamburgueria Beats
+# README -- Hamburgueria Beats
 
-Plataforma de gerenciamento de pedidos musicais e chat em tempo real para ambientes de restaurante.
+Plataforma integrada de **música + chat em tempo real** para uma
+hamburgueria moderna.
 
----
+------------------------------------------------------------------------
 
-## 1. Visão Geral
+## 1. Visão Geral do Projeto
 
-O projeto **Hamburgueria Beats** permite que clientes da hamburgueria interajam com um sistema musical interno através do QR Code da mesa.  
-Os clientes podem:
+O **Hamburgueria Beats** é um sistema web onde o cliente acessa via QR
+Code da mesa, informa seu nome e:
 
-- Identificar sua mesa automaticamente pelo QR Code  
-- Inserir seu nome  
-- Navegar por gêneros musicais  
-- (Futuro) Sugerir músicas e acompanhar a fila  
-- Participar de um **chat público em tempo real**
+-   entra automaticamente no sistema da mesa\
+-   participa de um **chat em tempo real**\
+-   navega por **gêneros musicais**\
+-   (futuro) sugere músicas\
+-   (futuro) acompanha a fila de reprodução\
+-   (futuro) painel do atendente
 
-O sistema foi projetado para uso **somente dentro da rede Wi-Fi** da hamburgueria, evitando acesso externo.
+O foco é criar uma experiência divertida dentro da hamburgueria,
+totalmente digital e responsiva.
 
-### Tecnologias principais
+------------------------------------------------------------------------
 
-#### **Backend**
-- Node.js + Express  
-- TypeScript  
-- Prisma ORM  
-- SQLite  
-- WebSocket (`ws`)  
-- class-validator + class-transformer  
-- tsx (Node + TS em dev)
+## 2. Tecnologias Utilizadas
 
-#### **Frontend**
-- HTML  
-- CSS  
-- JavaScript (vanilla)
+### Backend
 
----
+-   Node.js + Express\
+-   TypeScript\
+-   Prisma ORM\
+-   SQLite\
+-   WebSocket (ws)\
+-   class-validator / class-transformer\
+-   tsx
 
-## 2. Fluxo da Aplicação
+### Frontend
 
-### **Fluxo do cliente**
+-   HTML, CSS, JavaScript\
+-   Interface responsiva estilo aplicativo\
+-   Chat totalmente estilizado (WhatsApp-like)
 
-1. O cliente lê o **QR Code da mesa**, que abre:  
-   `login.html?mesa=3`
+### Deploy
 
-2. Na tela de login:
-   - vê a mesa identificada automaticamente  
-   - insere o nome  
-   - clica em **Entrar**
+-   Backend hospedado no **Render (Web Service)**\
+-   Frontend hospedado no **Render (Static Site)**
 
-3. O frontend envia:
-   ```json
-   POST /api/sessions
-   {
-     "nome": "...",
-     "mesaId": ...
-   }
-   ```
+------------------------------------------------------------------------
 
-4. O backend cria uma sessão e retorna:
-   ```json
-   {
-     "sessionId": "..."
-   }
-   ```
+## 3. Arquitetura do Sistema
 
-5. O frontend salva no `localStorage`:
-   - `sessionId`
-   - `mesaId`
-   - `nomeCliente`
+O backend segue uma arquitetura limpa:
 
-6. O usuário é redirecionado para `inicio.html`
+    Routes → Controllers → Services → Repositories → Prisma → SQLite
 
-7. Métodos de navegação:
-   - footer → **Home**  
-   - footer → **Chat**  
-   - footer → **Fila** (futuro)
+### Fluxo completo do cliente
 
-8. Ao abrir `chat.html`, o frontend:
-   - recupera os dados do `localStorage`
-   - conecta ao WebSocket via:
-     ```
-     ws://localhost:3000/chat?sessionId=...&mesaId=...&nome=...
-     ```
-   - entra automaticamente no chat
+1.  Cliente lê QR Code da mesa → `login.html?mesa=3`
 
----
+2.  Cliente informa nome → envia para backend via:
 
-## 3. Arquitetura Interna
+        POST /api/sessions
 
-O backend utiliza arquitetura em camadas:
+3.  Backend cria sessão vinculada à mesa.
 
-```
-Rotas → Controllers → Services → Repositories → Prisma → SQLite
-```
+4.  Front salva:
 
-### WebSocket — Chat em Tempo Real
+    -   sessionId\
+    -   mesaId\
+    -   nomeCliente\
 
-- Cada cliente se conecta via `/chat`
-- O servidor gera nome de exibição: `"Fulano (mesa X)"`
-- Eventos:
-  - **enter** → sistema envia: “Fulano entrou no chat”
-  - **message** → broadcast para todos
-  - **disconnect** → sistema envia: “Fulano saiu do chat”
+5.  Redireciona para `inicio.html`
 
----
+6.  Navegação:
 
-## 4. Estrutura de Pastas (versão atual)
+    -   Home\
+    -   Gêneros musicais\
+    -   Chat\
 
-```
-PI-Segundo-Semestre-ADS/
-├── prisma/
-│   ├── schema.prisma
-│   └── database.db
-│
-├── src/
-│   ├── controllers/
-│   ├── database/
-│   ├── dtos/
-│   ├── entities/
-│   ├── middlewares/
-│   ├── public/
-│   │   ├── login.html
-│   │   ├── inicio.html
-│   │   ├── genero-gospel.html
-│   │   ├── genero-eletronica.html
-│   │   ├── genero-rock.html
-│   │   ├── genero-sertanejo.html
-│   │   ├── genero-funk.html
-│   │   ├── genero-rap.html
-│   │   ├── chat.html
-│   │   └── sounds/
-│   │       └── notify.mp3
-│   │
-│   ├── repositories/
-│   ├── routes/
-│   └── services/
-│
-├── src/server.ts
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+7.  No chat, o frontend abre um WebSocket:
 
----
+        wss://backend.onrender.com/chat?sessionId=...&mesaId=...&nome=...
 
-## 5. Como Rodar o Projeto (novo usuário)
+8.  Eventos:
 
-### 5.1. Pré-requisitos
-- Node.js 18+  
-- npm (vem junto com o Node)
+    -   entrar no chat\
+    -   enviar mensagem\
+    -   receber mensagens\
+    -   sair do chat
 
----
+------------------------------------------------------------------------
 
-### 5.2. Instalar dependências
+## 4. Comunicação com a Nuvem (Render)
 
-```bash
+### Como funciona o Render
+
+-   Hospeda o backend como **Web Service**\
+-   Hospeda o frontend como **Static Site**\
+-   Cada push no GitHub → Render faz novo deploy
+
+### Sobre o backend gratuito
+
+-   Fica "adormecido" após \~15 min sem acesso\
+-   Acorda automaticamente ao ser acessado\
+-   Durante a apresentação, basta: **acessar qualquer rota 10 min antes
+    OU apertar Deploy Latest Commit**
+
+### Banco SQLite
+
+-   Armazenado dentro do container\
+-   Reinicia a cada deploy\
+-   Ideal para PI porque não precisa guardar dados permanentes
+
+------------------------------------------------------------------------
+
+## 5. Estrutura de Pastas Atual
+
+    PI-Segundo-Semestre-ADS/
+    ├── prisma/
+    │   ├── schema.prisma
+    │   └── database.db
+    │
+    ├── src/
+    │   ├── controllers/
+    │   ├── database/
+    │   ├── dtos/
+    │   ├── entities/
+    │   ├── middlewares/
+    │   ├── public/
+    │   │   ├── login.html
+    │   │   ├── inicio.html
+    │   │   ├── genero-*.html
+    │   │   ├── chat.html
+    │   │   └── sons/
+    │   ├── repositories/
+    │   ├── routes/
+    │   └── services/
+    │
+    ├── src/server.ts
+    ├── package.json
+    ├── tsconfig.json
+    └── README.md
+
+------------------------------------------------------------------------
+
+## 6. Como Rodar o Projeto
+
+### Pré-requisitos
+
+-   Node.js 18+
+-   npm
+
+### Instalar dependências
+
+``` bash
 npm install
 ```
 
----
+### Criar `.env`
 
-### 5.3. Criar o arquivo `.env`
+    DATABASE_URL="file:./database.db"
 
-Dentro da raiz do projeto:
+### Rodar migrations
 
-```
-DATABASE_URL="file:./database.db"
-```
-
----
-
-### 5.4. Executar as migrations
-
-```bash
+``` bash
 npx prisma migrate dev
 ```
 
----
+### Gerar Prisma Client
 
-### 5.5. Gerar o Prisma Client
-
-```bash
+``` bash
 npx prisma generate
 ```
 
----
+### Iniciar o servidor
 
-### 5.6. Rodar o servidor
-
-```bash
+``` bash
 npm run dev
 ```
 
-O servidor iniciará em:
+Servidor local em:
 
-```
-http://localhost:3000
-```
+    http://localhost:3000
 
----
+------------------------------------------------------------------------
 
-### 5.7. (Opcional) Abrir Prisma Studio
-
-```bash
-npx prisma studio
-```
-
----
-
-## 6. O que Já Está Implementado
+## 7. O que Já Está Implementado
 
 ### Backend
-- Estrutura completa em camadas  
-- CRUD completo de Cliente  
-- Criação de sessão vinculada à mesa  
-- Seed automático das mesas  
-- WebSocket totalmente funcional  
-- Chat em tempo real com:
-  - entrada  
-  - envio de mensagens  
-  - saída  
-  - mensagens formatadas  
-- Integração com frontend  
-- Servidor estático para páginas HTML
+
+-   Estrutura completa em camadas\
+-   CRUD de Cliente\
+-   Seed de mesas\
+-   Criação de sessão\
+-   Validação de dados (DTOs)\
+-   WebSocket funcional\
+-   Chat em tempo real completo\
+-   Servidor estático para o frontend
 
 ### Frontend
-- Tela de login funcional  
-- Captura automática da mesa via URL  
-- Armazenamento de nome/mesa/sessão no localStorage  
-- Tela inicial estilizada  
-- Botão de chat corrigido e estilizado  
-- Chat completo com:
-  - bolhas tipo WhatsApp  
-  - avatar gerado automaticamente  
-  - som de nova mensagem  
-  - rolagem automática  
-  - mensagens do sistema
 
----
+-   Telas de login, início e gêneros\
+-   Captura automática da mesa\
+-   Armazenamento local da sessão\
+-   Chat responsivo estilo aplicativo\
+-   Som de mensagem\
+-   Avatares automáticos\
+-   Scroll automático\
+-   Interface refinada para desktop e celular
 
-## 7. O que Falta Implementar
+------------------------------------------------------------------------
 
-### Backend
-- Models adicionais:
-  - Music  
-  - PedidoMusica  
-  - FilaReproducao  
-  - ChatMensagem (persistência futura)
-- Endpoints musicais
-- Painel de funcionário
-- Restrições por IP (Wi-Fi local)
-- Expiração de sessão
+## 8. O que Falta Implementar (Roadmap Oficial)
 
-### Frontend
-- Páginas carregando músicas dinamicamente
-- Tela de fila de reprodução
-- Painel administrativo
+### 1. Sistema de Músicas
 
----
+-   [ ] Modelos Music e PedidoMusica\
+-   [ ] CRUD de músicas\
+-   [ ] Sugestão de faixas pelo cliente\
+-   [ ] Moderação de solicitações
 
-## 8. Estrutura Final Esperada
+### 2. Fila de Reprodução
 
-Quando concluído, o sistema incluirá:
+-   [ ] Model FilaReproducao\
+-   [ ] Endpoint GET/POST da fila\
+-   [ ] Tela da fila no frontend
 
-- Autenticação por sessão e mesa  
-- Sugestões de música moderadas  
-- Fila de reprodução  
-- Chat persistente  
-- Painel administrativo  
-- Políticas de segurança por Wi-Fi local  
-- Expiração automática de sessões
+### 3. Painel Administrativo
 
----
+-   [ ] Login de atendente\
+-   [ ] Moderação do chat\
+-   [ ] Aprovar / rejeitar músicas\
+-   [ ] Visualização de sessões ativas
 
-## 9. Créditos
-Projeto desenvolvido por estudantes da FATEC Indaiatuba – ADS.
+### 4. Segurança e Restrições
+
+-   [ ] Restringir acesso ao Wi-Fi local\
+-   [ ] Verificar IP do cliente\
+-   [ ] Sessões com expiração automática
+
+### 5. Persistência de Chat (upgrade futuro)
+
+-   [ ] Salvar histórico\
+-   [ ] Buscar mensagens anteriores
+
+### 6. Spotify Integration (extra)
+
+-   [ ] Callback estático\
+-   [ ] Autenticação Spotify\
+-   [ ] Link com fila de reprodução
+
+------------------------------------------------------------------------
+
+## 9. Estrutura Final Esperada
+
+Quando completo, o sistema terá:
+
+-   Acesso por QR Code autenticado\
+-   Sessões por mesa\
+-   Chat em tempo real estável\
+-   Fila de músicas moderada\
+-   Integração com Spotify\
+-   Painel administrativo completo\
+-   Segurança via rede Wi-Fi\
+-   Deploy contínuo na nuvem
+
+------------------------------------------------------------------------
+
+## 10. Créditos
+
+Projeto desenvolvido por estudantes da **FATEC Indaiatuba -- ADS**,
+Segundo Semestre.

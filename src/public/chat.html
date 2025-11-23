@@ -3,98 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <title>Chat da Hamburgueria</title>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
 
+    <style>
       body {
+        margin: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
-        background: radial-gradient(circle at top, #1f2937, #020617);
-        color: #f9fafb;
-        margin: 0;
-        padding: 24px;
-        display: flex;
-        justify-content: center;
-      }
-
-      .chat-wrapper {
-        width: 100%;
-        max-width: 420px;
-        background: rgba(15, 23, 42, 0.95);
-        border-radius: 24px;
-        padding: 16px 16px 12px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        background: #111827;
+        color: #e5e7eb;
         display: flex;
         flex-direction: column;
-        height: calc(100vh - 48px);
+        height: 100vh;
       }
 
-      /* HEADER */
-
-      .chat-header {
+      header {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 12px;
+        padding: 12px 16px;
+        background: #111827;
+        border-bottom: 1px solid #1f2937;
       }
 
-      .back-btn {
-        width: 36px;
-        height: 36px;
+      #backButton {
+        padding: 6px 10px;
         border-radius: 999px;
         border: none;
-        background: #020617;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
+        background: #374151;
         color: #e5e7eb;
-        font-size: 18px;
+        cursor: pointer;
+        font-size: 14px;
       }
 
-      .chat-title-area {
-        display: flex;
-        flex-direction: column;
+      #backButton:hover {
+        background: #4b5563;
       }
 
-      .chat-title {
-        font-weight: 600;
+      header h1 {
         font-size: 16px;
+        margin: 0;
       }
 
-      .chat-subtitle {
+      header small {
+        display: block;
         font-size: 12px;
         color: #9ca3af;
       }
-
-      /* INFO */
 
       #info {
         font-size: 12px;
         color: #9ca3af;
-        margin-bottom: 8px;
       }
 
-      /* LISTA DE MENSAGENS */
+      #status {
+        font-size: 12px;
+        margin-top: 2px;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 8px 16px 12px;
+        gap: 8px;
+      }
 
       #chat {
         flex: 1;
         overflow-y: auto;
-        padding: 8px 4px;
-        border-radius: 16px;
+        padding: 8px;
+        border-radius: 12px;
         background: #020617;
-        border: 1px solid #111827;
+        border: 1px solid #1f2937;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
 
+      /* Linha de mensagem */
       .msg-row {
         display: flex;
-        margin: 4px 0;
+        align-items: flex-end;
+        gap: 6px;
       }
 
       .msg-row.me {
         justify-content: flex-end;
+      }
+
+      .msg-row.other {
+        justify-content: flex-start;
       }
 
       .msg-row.system {
@@ -104,34 +102,40 @@
       .msg-avatar {
         width: 32px;
         height: 32px;
-        border-radius: 50%;
-        background: #fec89a;
-        color: #111827;
-        font-size: 14px;
-        font-weight: 700;
+        border-radius: 999px;
+        background: #4b5563;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #e5e7eb;
         flex-shrink: 0;
-      }
-
-      .msg-row.me .msg-avatar {
-        margin-right: 0;
-        margin-left: 8px;
-        background: #f97316;
-        color: #111827;
       }
 
       .msg-bubble {
         max-width: 70%;
-        padding: 6px 10px;
         border-radius: 16px;
-        font-size: 13px;
-        line-height: 1.35;
+        padding: 6px 10px;
         display: flex;
         flex-direction: column;
         gap: 2px;
+        font-size: 14px;
+      }
+
+      .msg-row.me .msg-bubble {
+        background: #22c55e;
+        color: #022c22;
+      }
+
+      .msg-row.other .msg-bubble {
+        background: #1f2937;
+      }
+
+      .msg-row.system .msg-bubble {
+        background: transparent;
+        color: #9ca3af;
+        font-size: 12px;
       }
 
       .msg-user {
@@ -141,6 +145,7 @@
       }
 
       .msg-text {
+        white-space: pre-wrap;
         word-wrap: break-word;
       }
 
@@ -150,128 +155,83 @@
         align-self: flex-end;
       }
 
-      .msg-row.other .msg-bubble {
-        background: #111827;
-        border-bottom-left-radius: 4px;
-      }
-
-      .msg-row.me .msg-bubble {
-        background: linear-gradient(to right, #fb923c, #f97316);
-        color: #111827;
-        border-bottom-right-radius: 4px;
-      }
-
-      .msg-row.me .msg-user,
-      .msg-row.me .msg-time {
-        color: #111827cc;
-      }
-
-      .msg-row.system .msg-bubble {
-        background: transparent;
-        color: #facc15;
-        font-size: 11px;
-        padding: 2px 8px;
-      }
-
-      .msg-row.system .msg-time {
-        display: none;
-      }
-
-      .msg-row.system .msg-user {
-        display: none;
-      }
-
-      .msg-row.system .msg-text {
-        text-align: center;
-      }
-
-      /* INPUT */
-
       .input-row {
         display: flex;
         gap: 8px;
-        align-items: center;
-        margin-top: 8px;
+        margin-top: 4px;
       }
 
       #msgInput {
         flex: 1;
-        padding: 10px 14px;
+        padding: 8px 10px;
         border-radius: 999px;
-        border: 1px solid #111827;
+        border: 1px solid #374151;
         background: #020617;
-        color: #f9fafb;
-        outline: none;
-        font-size: 14px;
+        color: #e5e7eb;
       }
 
-      #msgInput::placeholder {
-        color: #6b7280;
+      #msgInput:focus {
+        outline: none;
+        border-color: #22c55e;
       }
 
       #sendBtn {
-        padding: 10px 16px;
+        padding: 8px 16px;
         border-radius: 999px;
         border: none;
+        background: #22c55e;
+        color: #022c22;
         cursor: pointer;
-        background: linear-gradient(to right, #fb923c, #f97316);
-        color: #111827;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 14px;
       }
 
-      #sendBtn span {
-        font-size: 16px;
+      #sendBtn:disabled {
+        opacity: 0.6;
+        cursor: default;
       }
 
-      #status {
-        font-size: 11px;
-        margin-top: 4px;
-        color: #9ca3af;
-        text-align: right;
+      #sendBtn:hover:not(:disabled) {
+        background: #16a34a;
       }
     </style>
   </head>
+
   <body>
-    <div class="chat-wrapper">
-      <div class="chat-header">
-        <button class="back-btn" id="backButton" title="Voltar">
-          ←
-        </button>
-        <div class="chat-title-area">
-          <div class="chat-title">Chat com a galera</div>
-          <div class="chat-subtitle">Converse com quem está na hamburgueria</div>
-        </div>
+    <header>
+      <button id="backButton">Voltar</button>
+      <div>
+        <h1>Chat com o Atendente</h1>
+        <small id="info"></small>
+        <small id="status"></small>
       </div>
+    </header>
 
-      <div id="info"></div>
-
+    <main>
+      <!-- Janela de mensagens -->
       <div id="chat"></div>
 
+      <!-- Campo de envio -->
       <div class="input-row">
         <input
           id="msgInput"
-          placeholder="Digite sua mensagem e pressione Enter..."
+          type="text"
+          placeholder="Digite sua mensagem e aperte Enter..."
           autocomplete="off"
         />
-        <button id="sendBtn">
-          <span>💬</span>
-          <strong>Enviar</strong>
-        </button>
+        <button id="sendBtn">Enviar</button>
       </div>
+    </main>
 
-      <div id="status">Conectando ao chat...</div>
+    <!-- Som de nova mensagem -->
+    <audio
+      id="msgSound"
+      src="/sons/notificacao.mp3"
+      preload="auto"
+    ></audio>
 
-      <!-- Som de nova mensagem  -->
-      <audio id="msgSound" preload="auto">
-        <source src="/sons/notificacao.mp3" type="audio/mpeg" />
-      </audio>
-    </div>
-
+    <!-- SCRIPT DO CHAT  -->
     <script>
+      // Referências aos elementos da página
       const chat = document.getElementById("chat");
       const msgInput = document.getElementById("msgInput");
       const sendBtn = document.getElementById("sendBtn");
@@ -280,38 +240,45 @@
       const backButton = document.getElementById("backButton");
       const msgSound = document.getElementById("msgSound");
 
-      // 1) Voltar para o início
+      //  Botão "Voltar": retorna para a tela de início
       backButton.addEventListener("click", () => {
         window.location.href = "/inicio.html";
       });
 
-      // 2) Recupera dados da sessão salvos no login
-      const sessionId = localStorage.getItem("sessionId");
-      const mesaId = localStorage.getItem("mesaId");
-      const nomeCliente = localStorage.getItem("nomeCliente");
+      //  Recupera dados da sessão armazenados no sessionStorage
+      const sessionId = sessionStorage.getItem("sessionId");
+      const mesaId = sessionStorage.getItem("mesaId");
+      const nomeCliente = sessionStorage.getItem("nomeCliente");
 
+      // Se não houver sessão, manda voltar para o login
       if (!sessionId || !mesaId || !nomeCliente) {
         alert("Sessão não encontrada. Faça login novamente.");
         window.location.href = "/login.html";
       }
 
-      // Nome exibido no chat 
+      // Nome exibido para o usuário.
       const myDisplayName =
         mesaId && mesaId !== "null" && mesaId !== "undefined"
           ? `${nomeCliente} (mesa ${mesaId})`
           : nomeCliente;
 
+      // Mostra info abaixo do título
       infoEl.textContent = `Você é "${nomeCliente}", mesa ${mesaId}.`;
 
-      // 3) Abre conexão WebSocket já identificado
+      //  Monta a URL do WebSocket
+      const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const wsHost = window.location.host; // host:porta (ex.: localhost:3000)
+
       const wsUrl =
-        `ws://${location.hostname}:3000/chat` +
+        `${wsProtocol}://${wsHost}/chat` +
         `?sessionId=${encodeURIComponent(sessionId ?? "")}` +
         `&mesaId=${encodeURIComponent(mesaId ?? "")}` +
         `&nome=${encodeURIComponent(nomeCliente ?? "")}`;
 
+      // Abre a conexão WebSocket
       const socket = new WebSocket(wsUrl);
 
+      // Eventos de conexão / erro / fechamento
       socket.onopen = () => {
         statusEl.textContent = "Conectado ao chat.";
       };
@@ -327,13 +294,16 @@
         msgInput.disabled = true;
       };
 
-      function extractNameFromUserField(userField) {
+      //  FUNÇÕES DE APOIO 
 
+      // Extrai o nome 
+      function extractNameFromUserField(userField) {
         const idx = userField.indexOf(" (mesa");
         if (idx === -1) return userField;
         return userField.slice(0, idx);
       }
 
+      // Gera iniciais para o avatar
       function getInitials(name) {
         const parts = name
           .trim()
@@ -347,6 +317,7 @@
         );
       }
 
+      // Adiciona uma mensagem visualmente no chat
       function addMessageToChat(data) {
         const isSystem = data.user === "Sistema";
         const isMe = data.user === myDisplayName;
@@ -377,6 +348,7 @@
         timeEl.textContent = dataHora;
 
         if (isSystem) {
+          // Mensagem de sistema (sem avatar)
           bubble.appendChild(textEl);
           row.appendChild(bubble);
         } else {
@@ -395,9 +367,11 @@
           avatar.textContent = getInitials(nomePuro);
 
           if (isMe) {
+            // Minhas mensagens: balão à direita, avatar depois
             row.appendChild(bubble);
             row.appendChild(avatar);
           } else {
+            // Mensagens dos outros: avatar à esquerda, balão depois
             row.appendChild(avatar);
             row.appendChild(bubble);
           }
@@ -406,7 +380,7 @@
         chat.appendChild(row);
         chat.scrollTop = chat.scrollHeight;
 
-        // Som de nova mensagem 
+        // Toca som apenas quando NÃO for mensagem do sistema e NÃO for do próprio
         if (!isSystem && !isMe && msgSound) {
           try {
             msgSound.currentTime = 0;
@@ -415,6 +389,7 @@
         }
       }
 
+      // Quando chega uma mensagem do servidor
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -424,6 +399,7 @@
         }
       };
 
+      // Envia a mensagem digitada para o servidor
       function enviarMensagem() {
         const texto = msgInput.value.trim();
         if (!texto) return;
@@ -433,12 +409,15 @@
           return;
         }
 
+        // O servidor espera um objeto com "text"
         socket.send(JSON.stringify({ text: texto }));
         msgInput.value = "";
       }
 
+      // Clique do botão "Enviar"
       sendBtn.onclick = enviarMensagem;
 
+      // Enviar com Enter
       msgInput.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           event.preventDefault();

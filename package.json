@@ -19,7 +19,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "migrate": "prisma migrate deploy"
+    "migrate": "prisma migrate deploy",
+    "seed": "tsx src/script/seed.ts"
+    
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",

@@ -205,57 +205,83 @@
         overflow: hidden;
       }
 
-      header {
-        padding: 10px 12px;
-      }
-
-      main {
-        padding: 8px 8px 12px;
-        gap: 6px;
-        height: calc(100vh - 70px);
-      }
-
-      #chat {
-        padding: 6px;
-        border-radius: 8px;
-        height: 100%;
-        max-height: 100%;
-      }
-
       .msg-bubble {
-        max-width: 85%;
-        /* aumenta largura no celular */
-        font-size: 13px;
-        padding: 6px 9px;
+        max-width: 95% !important;
+        /* Agora ocupa quase toda a tela */
+        font-size: 15px;
+        line-height: 1.35;
+        padding: 8px 12px;
       }
 
-      .msg-avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
+      .msg-row.me .msg-bubble {
+        margin-left: 30px;
+        /* deixa espaço pro avatar, sem empurrar pra fora */
+      }
+
+      .msg-row.other .msg-bubble {
+        margin-right: 30px;
       }
 
       .msg-user {
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .msg-time {
-        font-size: 9px;
+        font-size: 10px;
       }
+    }
 
-      .input-row {
-        padding: 0 2px;
-      }
+    header {
+      padding: 10px 12px;
+    }
 
-      #msgInput {
-        padding: 10px 12px;
-        font-size: 14px;
-      }
+    main {
+      padding: 8px 8px 12px;
+      gap: 6px;
+      height: calc(100vh - 70px);
+    }
 
-      #sendBtn {
-        padding: 10px 14px;
-        font-size: 14px;
-      }
+    #chat {
+      padding: 6px;
+      border-radius: 8px;
+      height: 100%;
+      max-height: 100%;
+    }
+
+    .msg-bubble {
+      max-width: 85%;
+      /* aumenta largura no celular */
+      font-size: 13px;
+      padding: 6px 9px;
+    }
+
+    .msg-avatar {
+      width: 28px;
+      height: 28px;
+      font-size: 12px;
+    }
+
+    .msg-user {
+      font-size: 10px;
+    }
+
+    .msg-time {
+      font-size: 9px;
+    }
+
+    .input-row {
+      padding: 0 2px;
+    }
+
+    #msgInput {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    #sendBtn {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
     }
 
     /* iPhone “safe area” (evita cortar parte de baixo no iOS) */

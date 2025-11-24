@@ -1,24 +1,21 @@
 import { Request, Response } from "express";
+import { FilaRepository } from "../repositories/fila.repository";
 
+export const ModeradorController = {
+  listarFila(req: Request, res: Response) {
+    res.json(FilaRepository.getFila());
+  },
 
+  colocarNaFrente(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    FilaRepository.colocarNaFrente(id);
+    res.json({ ok: true });
+  },
 
-export class ModeradorController {
-  // Remove uma música da fila pelo id
-  async removerMusica(req: Request, res: Response) {
-    const { id } = req.params;
-
-    // Aqui depois dá pra plugar na tabela de fila de músicas.
-    
-    return res.status(501).json({
-      message: `Rota de moderador ainda não implementada. (removerMusica id=${id})`,
-    });
+  removerMusica(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    FilaRepository.remover(id);
+    res.json({ ok: true });
   }
+};
 
-  // Mostra o histórico do chat
-  async verHistorico(req: Request, res: Response) {
-    // Futuro: buscar histórico no banco.
-    return res.status(501).json({
-      message: "Rota de moderador ainda não implementada. (verHistorico)",
-    });
-  }
-}

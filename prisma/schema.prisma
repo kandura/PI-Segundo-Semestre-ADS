@@ -12,7 +12,7 @@ model Cliente {
   id        Int      @id @default(autoincrement())
   nome      String
   criadoEm  DateTime @default(now())
-  musicRequests PedidoMusica[]
+  // musicRequests PedidoMusica[] // deixar pra quando o modelo estiver pronto
 }
 
 model Mesa {

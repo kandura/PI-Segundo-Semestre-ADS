@@ -9,6 +9,8 @@ import seedRoutes from "./routes/seed.routes.js";
 import clienteRoutes from "./routes/cliente.routes.js";
 import { sessaoRoutes } from "./routes/sessao.routes.js";
 import musicaRouter from "./routes/musica.routes.js";
+import prisma from "./database/prismaClient.js";
+
 
 // ----------------- APP EXPRESS -----------------
 
@@ -111,22 +113,31 @@ wss.on("connection", (ws, req) => {
 
     // Quando o cliente envia uma mensagem
     ws.on("message", (raw: RawData) => {
-      const msg = parseMessage(raw);
-      const texto =
-        typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "");
+      try{
 
-      // Ignora mensagens vazias
-      if (!texto) return;
+      const msg = parseMessage(raw);
+
+      const texto =
+        typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "").trim();
+
+      // bloqueia mensagens vazias
+      if (texto.length === 0 ){ 
+        return;
+      }
 
       const out: ChatMessage = {
         id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user: displayUser,
+        user: msg.user?.toString().trim() || displayUser,
         text: texto,
         ts: Date.now(),
+
       };
 
       // Repassa a mensagem para todos os clientes conectados
       broadcast(out);
+    } catch(err) {
+      console.error("Erro ao processar mensagem do Websocket", err);
+    }
     });
 
     // Quando o cliente desconecta
@@ -151,6 +162,40 @@ wss.on("connection", (ws, req) => {
   }
 });
 
+// -------- PRA NÃO TER QUE SUBIR AS MESAS TODA VEZ ------//
+
+async function ensureMesasSeeded() {
+  try {
+    const count = await prisma.mesa.count();
+
+    // Se não tiver nenhuma mesa, cria as mesas padrão
+    if (count === 0) {
+      await prisma.mesa.createMany({
+        data: [
+          { codigo: "M01" },
+          { codigo: "M02" },
+          { codigo: "M03" },
+          { codigo: "M04" },
+          { codigo: "M05" },
+          { codigo: "M06" },
+          { codigo: "M07" },
+          { codigo: "M08" },
+          { codigo: "M09" },
+          { codigo: "M10" },
+        ],
+      });
+
+      console.log("[seed] Mesas criadas automaticamente.");
+    } else {
+      console.log(`[seed] Mesas já existem (${count}) – nada a fazer.`);
+    }
+  } catch (err) {
+    console.error("[seed] Erro ao garantir mesas:", err);
+  }
+}
+
+
+
 // ----------------- SUBIR SERVIDOR -----------------
 
 // No Render, a porta vem de process.env.PORT
@@ -160,4 +205,6 @@ const PORT = Number(process.env.PORT ?? 3000);
 server.listen(PORT, () => {
   console.log(`Servidor HTTP/WS rodando na porta ${PORT}`);
   console.log(`Chat WebSocket em ws://localhost:${PORT}/chat (dev)`);
+
+  ensureMesasSeeded();
 });

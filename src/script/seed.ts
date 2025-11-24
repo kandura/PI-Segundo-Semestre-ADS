@@ -19,7 +19,6 @@ async function main() {
       { codigo: "M09"},
       { codigo: "M10"},
     ],
-    skipDuplicates: true, 
   });
 
   console.log("Mesas garantidas com sucesso!");

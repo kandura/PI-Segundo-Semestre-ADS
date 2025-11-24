@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ModeradorController } from "../controllers/moderador.controller";
+import { ModeradorController } from "../controllers/moderador.controller.js";
 
 const router = Router();
 const controller = new ModeradorController();

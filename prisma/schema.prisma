@@ -1,6 +1,6 @@
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+
 }
 
 generator client {
@@ -8,16 +8,15 @@ generator client {
 }
 
 model Cliente {
-  id       Int      @id @default(autoincrement())
-  nome     String
-  mesa     String
-  criadoEm DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  nome      String
+  criadoEm  DateTime @default(now())
+  musicRequests PedidoMusica[]
 }
 
 model Mesa {
   id        Int      @id @default(autoincrement())
   codigo    String   @unique
-  nome      String
   ativa     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -26,25 +25,25 @@ model Mesa {
 }
 
 model SessaoCliente {
-  id          Int      @id @default(autoincrement())
-  nomeCliente String
-  mesaId      Int
-  mesa        Mesa     @relation(fields: [mesaId], references: [id])
+  id              Int      @id @default(autoincrement())
+  nomeCliente     String
+  mesaId          Int
+  mesa            Mesa     @relation(fields: [mesaId], references: [id])
 
-  ip          String?
-  userAgent   String?
+  ip              String?
+  userAgent       String?
 
-  status      String   @default("ATIVA")
-  createdAt   DateTime @default(now())
-  lastActivity DateTime @default(now())
-  endedAt     DateTime?
+  status          String   @default("ATIVA")
+  createdAt       DateTime @default(now())
+  lastActivityAt  DateTime @default(now())
+  endedAt         DateTime?
 }
 
 model SpotifyAuth {
   id           Int      @id @default(autoincrement())
   accessToken  String  
   refreshToken String   @unique
-  expiresIn    DateTime
+  expiresAt    DateTime
   tokenObtainedAt DateTime @default(now())
   createdAt    DateTime @default(now())
 }

@@ -1,330 +1,338 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Bem-vindo à Hamburgueria</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      :root {
-        --bg: #0b0b0f;
-        --card-bg: #15151d;
-        --accent: #ffb342;
-        --accent-soft: rgba(255, 179, 66, 0.15);
-        --text: #f5f5f5;
-        --text-muted: #a1a1b3;
-        --error: #ff6b6b;
-        --radius-lg: 18px;
-      }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Bem-vindo à Hamburgueria</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --card-bg: #15151d;
+      --accent: #ffb342;
+      --accent-soft: rgba(255, 179, 66, 0.15);
+      --text: #f5f5f5;
+      --text-muted: #a1a1b3;
+      --error: #ff6b6b;
+      --radius-lg: 18px;
+    }
 
-      body {
-        min-height: 100vh;
-        background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 16px;
-        color: var(--text);
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
 
-      .container {
-        width: 100%;
-        max-width: 420px;
-      }
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text);
+    }
 
+    .container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 28px 22px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(10px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .brand-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 20%, #ffdd99, #ff9f1c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #2b1903;
+    }
+
+    .brand-text-main {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .brand-text-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .info-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    input[type="text"] {
+      background: #0f0f17;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      color: var(--text);
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input[type="text"]::placeholder {
+      color: #5a5a6a;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 179, 66, 0.3);
+      background: #11111a;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ffb342, #ff8a3c);
+      color: #2b1903;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
+      filter: brightness(1.05);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+      filter: brightness(0.98);
+    }
+
+    .footer-text {
+      margin-top: 14px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .footer-text span {
+      opacity: 0.85;
+    }
+
+    .footer-text strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 400px) {
       .card {
-        background: var(--card-bg);
-        border-radius: var(--radius-lg);
-        padding: 28px 22px;
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        backdrop-filter: blur(10px);
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 18px;
-      }
-
-      .brand-logo {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: radial-gradient(circle at 30% 20%, #ffdd99, #ff9f1c);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 800;
-        font-size: 1.2rem;
-        color: #2b1903;
-      }
-
-      .brand-text-main {
-        font-weight: 700;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-        font-size: 0.9rem;
-      }
-
-      .brand-text-sub {
-        font-size: 0.75rem;
-        color: var(--text-muted);
+        padding: 24px 18px;
       }
 
       .title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        margin-bottom: 6px;
+        font-size: 1.2rem;
       }
+    }
+  </style>
+</head>
 
-      .subtitle {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        margin-bottom: 20px;
-      }
+<body>
+  <div class="container">
+    <main class="card">
+      <header class="brand">
+        <div class="brand-logo">HB</div>
+        <div>
+          <div class="brand-text-main">Hamburgueria Smash Bros</div>
+          <div class="brand-text-sub">Som, burger e boas vibes 🍔🎵</div>
+        </div>
+      </header>
 
-      .info-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 0.75rem;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        margin-bottom: 20px;
-      }
+      <h1 class="title">Antes de começar…</h1>
+      <p class="subtitle">
+        Digite seu nome para entrar na experiência musical da nossa hamburgueria.
+      </p>
 
-      .info-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: var(--accent);
-      }
+      <!-- Coloca "Mesa X" automaticamente -->
+      <div class="info-badge">
+        <span class="info-dot"></span>
+        <span id="mesaInfo">Você entrou pela mesa...</span>
+      </div>
 
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 18px;
-      }
-
-      label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-      }
-
-      input[type="text"] {
-        background: #0f0f17;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 10px 14px;
-        font-size: 0.95rem;
-        color: var(--text);
-        outline: none;
-        transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-      }
-
-      input[type="text"]::placeholder {
-        color: #5a5a6a;
-      }
-
-      input[type="text"]:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 1px rgba(255, 179, 66, 0.3);
-        background: #11111a;
-      }
-
-      .hint {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-      }
-
-      .actions {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 4px;
-      }
-
-      button {
-        width: 100%;
-        border: none;
-        border-radius: 999px;
-        padding: 11px 16px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        background: linear-gradient(135deg, #ffb342, #ff8a3c);
-        color: #2b1903;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
-      }
-
-      button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.45);
-        filter: brightness(1.05);
-      }
-
-      button:active {
-        transform: translateY(0);
-        box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
-        filter: brightness(0.98);
-      }
-
-      .footer-text {
-        margin-top: 14px;
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      .footer-text span {
-        opacity: 0.85;
-      }
-
-      .footer-text strong {
-        color: var(--accent);
-        font-weight: 600;
-      }
-
-      @media (max-width: 400px) {
-        .card {
-          padding: 24px 18px;
-        }
-
-        .title {
-          font-size: 1.2rem;
-        }
-      }
-    </style>
-   </head>
-
-  <body>
-    <div class="container">
-      <main class="card">
-        <header class="brand">
-          <div class="brand-logo">HB</div>
-          <div>
-            <div class="brand-text-main">Hamburgueria Smash Bros</div>
-            <div class="brand-text-sub">Som, burger e boas vibes 🍔🎵</div>
-          </div>
-        </header>
-
-        <h1 class="title">Antes de começar…</h1>
-        <p class="subtitle">
-          Digite seu nome para entrar na experiência musical da nossa hamburgueria.
-        </p>
-
-        <!-- Coloca "Mesa X" automaticamente -->
-        <div class="info-badge">
-          <span class="info-dot"></span>
-          <span id="mesaInfo">Você entrou pela mesa...</span>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="nome">Seu nome</label>
+          <input type="text" id="nome" name="nome" placeholder="Ex.: Ana, João, Leo…" required />
+          <p class="hint">Esse nome aparecerá na fila de músicas.</p>
         </div>
 
-        <form id="loginForm">
-          <div class="form-group">
-            <label for="nome">Seu nome</label>
-            <input
-              type="text"
-              id="nome"
-              name="nome"
-              placeholder="Ex.: Ana, João, Leo…"
-              required
-            />
-            <p class="hint">Esse nome aparecerá na fila de músicas.</p>
-          </div>
-
-          <div class="actions">
-            <button type="submit">Entrar</button>
-          </div>
-        </form>
-
-        <div class="footer-text">
-          <span><strong>Wi-Fi</strong> obrigatório para usar o sistema</span>
-          <span>Respeite a fila de músicas 🎧</span>
+        <div class="actions">
+          <button type="submit">Entrar</button>
         </div>
-      </main>
-    </div>
+      </form>
 
- 
-    <script>
-      // 1. Captura a mesa da URL 
-      function getMesa() {
-        const params = new URLSearchParams(window.location.search);
-        const mesaId = params.get("mesaId");
-        const mesaCod = params.get("mesa");
-        return { mesaId, mesaCod };
+      <div class="footer-text">
+        <span><strong>Wi-Fi</strong> obrigatório para usar o sistema</span>
+        <span>Respeite a fila de músicas 🎧</span>
+      </div>
+    </main>
+  </div>
+
+
+  <script>
+    // 1. Captura a mesa da URL
+    function getMesa() {
+      const params = new URLSearchParams(window.location.search);
+      const mesaId = params.get("mesaId");   // ex: ?mesaId=2
+      const mesaCod = params.get("mesa");    // se um dia o QR usar ?mesa=M02
+      return { mesaId, mesaCod };
+    }
+
+    const { mesaId, mesaCod } = getMesa();
+
+    // 2. Exibe a mesa na badge
+    const mesaInfo = document.getElementById("mesaInfo");
+
+    if (mesaCod) {
+      mesaInfo.textContent = "Você entrou pela mesa " + mesaCod;
+    } else if (mesaId) {
+      mesaInfo.textContent = "Você entrou pela mesa " + mesaId;
+    } else {
+      mesaInfo.textContent = "Mesa não identificada";
+    }
+
+    // 3. Envio para o backend ao clicar em Entrar
+    const form = document.getElementById("loginForm");
+    const inputNome = document.getElementById("nome");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nome = inputNome.value.trim();
+      if (!nome) {
+        alert("Digite seu nome antes de prosseguir 🙂");
+        return;
       }
 
-      const { mesaId, mesaCod } = getMesa();
-
-      // 2. Exibe a mesa na badge
-      const mesaInfo = document.getElementById("mesaInfo");
-
-      if (mesaCod) {
-        mesaInfo.textContent = "Você entrou pela mesa " + mesaCod;
-      } else if (mesaId) {
-        mesaInfo.textContent = "Você entrou pela mesa " + mesaId;
-      } else {
-        mesaInfo.textContent = "Mesa não identificada";
+      // Se não tiver mesa em NENHUM formato → QR inválido
+      if (!mesaId && !mesaCod) {
+        alert("QR Code inválido — mesa não encontrada.");
+        return;
       }
 
-      // 3. Envio para o backend ao clicar em Entrar
-      const form = document.getElementById("loginForm");
-      const inputNome = document.getElementById("nome");
+      const mesaFinal = mesaId ?? mesaCod;
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+      try {
+        const apiBase = window.location.origin; // funciona no local e no Render
+        const response = await fetch(`${apiBase}/api/sessions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nome,
+            mesaId: Number(mesaFinal),
+          }),
+        });
 
-        const nome = inputNome.value.trim();
-        if (!nome) return alert("Digite seu nome antes de prosseguir 🙂");
-
-        if (!mesaId && !mesaCod) {
-          return alert("QR Code inválido — mesa não encontrada.");
+        // Log de debug pra gente ver se deu ruim
+        if (!response.ok) {
+          const txt = await response.text().catch(() => "");
+          console.error("Erro em /api/sessions:", response.status, txt);
+          throw new Error("Erro ao criar sessão");
         }
 
-        const mesaFinal = mesaId ?? mesaCod;
+        const dados = await response.json();
 
-        try {
-          const response = await fetch("http://localhost:3000/api/sessions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              nome,
-              mesaId: Number(mesaFinal),
-            }),
-          });
+        // 4. Guarda informações **na sessão** (por aba)
+        sessionStorage.setItem("sessionId", dados.sessionId);
+        sessionStorage.setItem("mesaId", mesaFinal);
+        sessionStorage.setItem("nomeCliente", nome);
 
-          if (!response.ok) throw new Error("Erro ao criar sessão");
+        // Tela de início
+        window.location.href = "/inicio.html";
+      } catch (err) {
+        console.error("Erro no login:", err);
+        alert("Não foi possível entrar agora. Tente novamente daqui a pouco.");
+      }
+    });
+  </script>
 
-          const data = await response.json();
+</body>
 
-          // 4. Guarda informações e redireciona
-          localStorage.setItem("sessionId", data.sessionId);
-          localStorage.setItem("mesaId", mesaFinal);
-          localStorage.setItem("nomeCliente", nome);
-
-          // A próxima página vocês vão construir depois
-          window.location.href = "/inicio.html";
-        } catch (err) {
-          console.error(err);
-          alert("Não foi possível entrar agora. Tente novamente daqui a pouco.");
-        }
-      });
-    </script>
-  </body>
 </html>

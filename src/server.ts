@@ -8,6 +8,7 @@ import { WebSocketServer, type RawData } from "ws";
 import seedRoutes from "./routes/seed.routes.js";
 import clienteRoutes from "./routes/cliente.routes.js";
 import { sessaoRoutes } from "./routes/sessao.routes.js";
+import musicaRouter from "./routes/musica.routes.js";
 
 // ----------------- APP EXPRESS -----------------
 
@@ -22,6 +23,8 @@ app.use(express.json());
 
 // Servir arquivos estáticos do front (HTML / CSS / JS / sons)
 app.use(express.static(path.join(process.cwd(), "src", "public")));
+
+app.use("/api", musicaRouter);
 
 // Rota raiz ("/") -> envia o login.html
 app.get("/", (req, res) => {

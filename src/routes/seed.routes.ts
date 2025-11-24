@@ -20,7 +20,7 @@ router.post("/seed/mesas", async (req, res) => {
     { codigo: "M07"},
     { codigo: "M08"},
     { codigo: "M09"},
-    { codigo: "M10"" },
+    { codigo: "M10" }
   ],
 });
 

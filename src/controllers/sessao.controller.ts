@@ -19,7 +19,11 @@ export class SessaoController {
         sessionId: sessao.id,
       });
     } catch (err: any) {
-      return res.status(500).json({ error: err.message });
+      console.error("Erro ao criar sessão:", err);
+
+      return res.status(500).json({
+        error: "Erro ao criar sessão no servidor.",
+      });
     }
   }
 }

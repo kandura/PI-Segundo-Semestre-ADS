@@ -1,7 +1,6 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-
 }
 
 generator client {
@@ -9,42 +8,75 @@ generator client {
 }
 
 model Cliente {
-  id        Int      @id @default(autoincrement())
-  nome      String
-  criadoEm  DateTime @default(now())
-  // musicRequests PedidoMusica[] // deixar pra quando o modelo estiver pronto
+  id            Int            @id @default(autoincrement())
+  nome          String
+  criadoEm      DateTime       @default(now())
+  musicRequests PedidoMusica[] // deixar pra quando o modelo estiver pronto //descomentei pq o modelo foi feito
 }
 
 model Mesa {
   id        Int      @id @default(autoincrement())
   codigo    String   @unique
+  nome      String?
   ativa     Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sessoes   SessaoCliente[]
+  sessoes SessaoCliente[]
 }
 
 model SessaoCliente {
-  id              Int      @id @default(autoincrement())
-  nomeCliente     String
-  mesaId          Int
-  mesa            Mesa     @relation(fields: [mesaId], references: [id])
+  id          Int    @id @default(autoincrement())
+  nomeCliente String
+  mesaId      Int
+  mesa        Mesa   @relation(fields: [mesaId], references: [id])
 
-  ip              String?
-  userAgent       String?
+  ip        String?
+  userAgent String?
 
-  status          String   @default("ATIVA")
-  createdAt       DateTime @default(now())
-  lastActivityAt  DateTime @default(now())
-  endedAt         DateTime?
+  status         String    @default("ATIVA")
+  createdAt      DateTime  @default(now())
+  lastActivityAt DateTime  @default(now())
+  endedAt        DateTime?
 }
 
 model SpotifyAuth {
-  id           Int      @id @default(autoincrement())
-  accessToken  String  
-  refreshToken String   @unique
-  expiresAt    DateTime
+  id              Int      @id @default(autoincrement())
+  accessToken     String
+  refreshToken    String   @unique
+  expiresAt       DateTime
   tokenObtainedAt DateTime @default(now())
-  createdAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+}
+
+enum PedidoStatus {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+model Music {
+  id        Int      @id @default(autoincrement())
+  titulo    String
+  artista   String
+  genero    String
+  createdAt DateTime @default(now())
+
+  pedidos PedidoMusica[]
+}
+
+model PedidoMusica {
+  id Int @id @default(autoincrement())
+
+  //sobre quem pediu 
+  clienteId Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  //sobre qual a musica 
+  musicId Int
+  music   Music @relation(fields: [musicId], references: [id])
+
+  mesaId    Int
+  status    PedidoStatus @default(PENDENTE)
+  createdAt DateTime     @default(now())
 }

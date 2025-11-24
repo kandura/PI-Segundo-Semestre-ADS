@@ -2,13 +2,9 @@ import { Router } from "express";
 import { ModeradorController } from "../controllers/moderador.controller.js";
 
 const router = Router();
-const controller = new ModeradorController();
 
-// remover música da fila
-router.delete("/fila/:id", controller.removerMusica);
+router.get("/fila", ModeradorController.listarFila);
+router.put("/fila/:id/frente", ModeradorController.colocarNaFrente);
+router.delete("/fila/:id", ModeradorController.removerMusica);
 
-// histórico do chat
-router.get("/chat/historico", controller.verHistorico);
-
-export { router as moderadorRoutes };
-
+export default router;

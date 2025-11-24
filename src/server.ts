@@ -1,4 +1,5 @@
 // src/server.ts
+
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -10,6 +11,8 @@ import clienteRoutes from "./routes/cliente.routes.js";
 import { sessaoRoutes } from "./routes/sessao.routes.js";
 import musicaRouter from "./routes/musica.routes.js";
 import prisma from "./database/prismaClient.js";
+
+import moderadorRoutes from "./routes/moderador.routes.js";
 
 
 // ----------------- APP EXPRESS -----------------
@@ -38,6 +41,9 @@ app.get("/", (req, res) => {
 app.use(clienteRoutes);
 app.use(sessaoRoutes);
 app.use(seedRoutes);
+
+// ROTA DO MODERADOR (PAINEL)
+app.use("/moderador", moderadorRoutes);
 
 // ----------------- WEBSOCKET DO CHAT -----------------
 
@@ -208,3 +214,5 @@ server.listen(PORT, () => {
 
   ensureMesasSeeded();
 });
+
+

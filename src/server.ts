@@ -108,22 +108,33 @@ wss.on("connection", (ws, req) => {
 
     // Quando o cliente envia uma mensagem
     ws.on("message", (raw: RawData) => {
+      try {
       const msg = parseMessage(raw);
-      const texto =
-        typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "");
 
-      // Ignora mensagens vazias
-      if (!texto) return;
+      if (!msg || typeof msg !== "object"){
+        return;
+      }
+
+      const texto =
+        typeof (msg as any).text === "string" 
+        ? (msg as any).text.trim() : String((msg as any).text ?? "").trim();
+
+      // Bloqueia mensagens vazias
+      if (texto.length === 0) 
+        { return; }
 
       const out: ChatMessage = {
         id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user: displayUser,
+        user: (msg as any).user?.toString().trim() || displayUser,
         text: texto,
         ts: Date.now(),
       };
 
       // Repassa a mensagem para todos os clientes conectados
       broadcast(out);
+    } catch(err) {
+      console.error("Erro ao processar mensagem do WebSocket:", err);
+    }
     });
 
     // Quando o cliente desconecta

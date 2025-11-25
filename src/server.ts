@@ -11,6 +11,8 @@ import clienteRoutes from "./routes/cliente.routes.js";
 import { sessaoRoutes } from "./routes/sessao.routes.js";
 import musicaRouter from "./routes/musica.routes.js";
 import prisma from "./database/prismaClient.js";
+import pedidoMusicaRouter from "./routes/pedidoMusica.routes.js";
+
 
 import moderadorRoutes from "./routes/moderador.routes.js";
 
@@ -30,6 +32,7 @@ app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
 app.use("/api", musicaRouter);
+app.use("/api", pedidoMusicaRouter);
 
 // Rota raiz ("/") -> envia o login.html
 app.get("/", (req, res) => {

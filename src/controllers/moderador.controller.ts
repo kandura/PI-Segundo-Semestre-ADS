@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma  from "../database/prismaClient";
+import prisma  from "../database/prismaClient.js";
 import bcrypt from "bcryptjs";
 
 export const ModeradorController = {

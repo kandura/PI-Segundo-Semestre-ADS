@@ -1,16 +1,19 @@
 import prisma from "../database/prismaClient.js";
 
-
 export const MusicRepository = {
-    findAll(genero?: string){
-        return prisma.music.findMany({
-            where: genero ? { genero } : undefined,
-            orderBy: { titul: "asc"},
-        });
-    },
+  findAll(genero?: string) {
+    const query: any = {
+      orderBy: { titulo: "asc" }
+    };
 
+    if (genero) {
+      query.where = { genero };
+    }
 
-    create(data: { titulo:string ; artista:string; genero:string }) {
-        return prisma.music.create({ data });
-    },
+    return prisma.music.findMany(query);
+  },
+
+  create(data: { titulo: string; artista: string; genero: string }) {
+    return prisma.music.create({ data });
+  },
 };

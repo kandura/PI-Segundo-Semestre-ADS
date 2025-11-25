@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { FilaRepository } from "../repositories/fila.repository";
+import { FilaRepository } from "../repositories/fila.repository.js";
 
 export const ModeradorController = {
   listarFila(req: Request, res: Response) {

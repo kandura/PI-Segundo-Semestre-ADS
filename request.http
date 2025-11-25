@@ -56,3 +56,30 @@ Content-Type: application/json
 ### Criar mesas fixas (SEED)
 POST http://localhost:3000/seed/mesas
 Content-Type: application/json
+
+
+### MÚSICAS (CATÁLOGO / API)
+
+### Listar músicas
+GET http://localhost:3000/api/musics
+
+### Criar música
+POST http://localhost:3000/api/musics
+Content-Type: application/json
+
+{
+  "titulo": "Minha música de teste",
+  "artista": "Artista Teste",
+  "genero": "rock"
+}
+
+### MODERADOR (FILA DE PEDIDOS)
+
+### Listar fila de pedidos de música
+GET http://localhost:3000/moderador/fila
+
+### Colocar um pedido na frente da fila
+PUT http://localhost:3000/moderador/fila/1/frente
+
+### Remover pedido da fila
+DELETE http://localhost:3000/moderador/fila/1

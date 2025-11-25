@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { ModeradorController } from "../controllers/moderador.controller.js";
+import { ModeradorController } from "../controllers/moderador.controller";
 
 const router = Router();
 
-router.get("/fila", ModeradorController.listarFila);
-router.put("/fila/:id/frente", ModeradorController.colocarNaFrente);
-router.delete("/fila/:id", ModeradorController.removerMusica);
+router.post("/register", ModeradorController.register);
+router.post("/login", ModeradorController.login);
 
 export default router;
+

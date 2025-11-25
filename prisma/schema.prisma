@@ -1,43 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model Cliente {
   id            Int            @id @default(autoincrement())
   nome          String
   criadoEm      DateTime       @default(now())
-  musicRequests PedidoMusica[] // deixar pra quando o modelo estiver pronto //descomentei pq o modelo foi feito
+  musicRequests PedidoMusica[]
 }
 
 model Mesa {
-  id        Int      @id @default(autoincrement())
-  codigo    String   @unique
+  id        Int             @id @default(autoincrement())
+  codigo    String          @unique
   nome      String?
-  ativa     Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  sessoes SessaoCliente[]
+  ativa     Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  sessoes   SessaoCliente[]
 }
 
 model SessaoCliente {
-  id          Int    @id @default(autoincrement())
-  nomeCliente String
-  mesaId      Int
-  mesa        Mesa   @relation(fields: [mesaId], references: [id])
-
-  ip        String?
-  userAgent String?
-
+  id             Int       @id @default(autoincrement())
+  nomeCliente    String
+  mesaId         Int
+  ip             String?
+  userAgent      String?
   status         String    @default("ATIVA")
   createdAt      DateTime  @default(now())
   lastActivityAt DateTime  @default(now())
   endedAt        DateTime?
+  mesa           Mesa      @relation(fields: [mesaId], references: [id])
 }
 
 model SpotifyAuth {
@@ -49,34 +46,36 @@ model SpotifyAuth {
   createdAt       DateTime @default(now())
 }
 
+model Music {
+  id        Int            @id @default(autoincrement())
+  titulo    String
+  artista   String
+  genero    String
+  createdAt DateTime       @default(now())
+  pedidos   PedidoMusica[]
+}
+
+model PedidoMusica {
+  id        Int          @id @default(autoincrement())
+  clienteId Int
+  musicId   Int
+  mesaId    Int
+  status    PedidoStatus @default(PENDENTE)
+  createdAt DateTime     @default(now())
+  cliente   Cliente      @relation(fields: [clienteId], references: [id])
+  music     Music        @relation(fields: [musicId], references: [id])
+}
+
 enum PedidoStatus {
   PENDENTE
   APROVADO
   REJEITADO
 }
 
-model Music {
-  id        Int      @id @default(autoincrement())
-  titulo    String
-  artista   String
-  genero    String
-  createdAt DateTime @default(now())
-
-  pedidos PedidoMusica[]
-}
-
-model PedidoMusica {
-  id Int @id @default(autoincrement())
-
-  //sobre quem pediu 
-  clienteId Int
-  cliente   Cliente @relation(fields: [clienteId], references: [id])
-
-  //sobre qual a musica 
-  musicId Int
-  music   Music @relation(fields: [musicId], references: [id])
-
-  mesaId    Int
-  status    PedidoStatus @default(PENDENTE)
-  createdAt DateTime     @default(now())
+model Moderador {
+  id       Int      @id @default(autoincrement())
+  nome     String
+  email    String   @unique
+  senha    String
+  criadoEm DateTime @default(now())
 }

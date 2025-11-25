@@ -43,7 +43,7 @@ app.use(sessaoRoutes);
 app.use(seedRoutes);
 
 // ROTA DO MODERADOR (PAINEL)
-app.use("/moderador", moderadorRoutes);
+app.use("/api/moderador", moderadorRoutes);
 
 // ----------------- WEBSOCKET DO CHAT -----------------
 

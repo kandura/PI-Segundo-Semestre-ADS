@@ -196,59 +196,76 @@
 </script>
 
 <script>
-    /* ============ DADOS DA SESSÃO ============ */
-    const nome = sessionStorage.getItem("nomeCliente");
+  /* ============ DADOS DA SESSÃO ============ */
+  const nome = sessionStorage.getItem("nomeCliente");
 
-// se não fez login, volta
-if (!nome) {
+  if (!nome) {
     window.location.href = "/login.html";
-}
+  }
 
-const mesa = sessionStorage.getItem("mesaId") || "—";
+  const mesa = sessionStorage.getItem("mesaId") || "—";
 
-document.getElementById("avatar").textContent = nome[0].toUpperCase();
-document.getElementById("subtitle").textContent =
+  document.getElementById("avatar").textContent = nome[0].toUpperCase();
+  document.getElementById("subtitle").textContent =
     `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
-    /* ============ MOCK DA FILA ============ */
-    const mockFila = [
-        { id: 1, titulo: "Oceans", artista: "Hillsong", status: "playing" },
-        { id: 2, titulo: "In the End", artista: "Linkin Park", status: "next" },
-        { id: 3, titulo: "Blinding Lights", artista: "The Weeknd", status: "waiting" },
-        { id: 4, titulo: "See You Again", artista: "Wiz Khalifa", status: "waiting" }
-    ];
+  /* ============ RENDERIZAÇÃO DA FILA ============ */
+  function renderFila(pedidos) {
+    const lista = document.getElementById("fila");
+    lista.innerHTML = "";
 
-    /* ============ RENDERIZAÇÃO DA FILA ============ */
-    function renderFila() {
-        const lista = document.getElementById("fila");
-        lista.innerHTML = "";
+    pedidos.forEach((p, index) => {
+      // Decide visual: tocando / próxima / esperando
+      const statusClass =
+        index === 0 ? "playing" :
+        index === 1 ? "next" :
+        "waiting";
 
-        mockFila.forEach(m => {
-            const card = document.createElement("div");
-            card.className = "music-card";
+      const statusLabel =
+        index === 0 ? "Tocando 🎶" :
+        index === 1 ? "Próxima ⏳" :
+        "Na fila";
 
-            card.innerHTML = `
-                <div class="music-info">
-                    <span class="music-title">${m.titulo}</span>
-                    <span class="music-artist">${m.artista}</span>
-                </div>
-                <div class="status ${m.status}">
-                    ${
-                        m.status === "playing" ? "Tocando 🎶" :
-                        m.status === "next" ? "Próxima ⏳" :
-                        "Na fila"
-                    }
-                </div>
-            `;
+      const card = document.createElement("div");
+      card.className = "music-card";
 
-            lista.appendChild(card);
-        });
+      card.innerHTML = `
+        <div class="music-info">
+          <span class="music-title">${p.music.titulo}</span>
+          <span class="music-artist">
+            ${p.music.artista} • Pedido por ${p.cliente.nome}
+          </span>
+        </div>
+        <div class="status ${statusClass}">
+          ${statusLabel}
+        </div>
+      `;
+
+      lista.appendChild(card);
+    });
+  }
+
+  async function carregarFila() {
+    try {
+      const res = await fetch("/api/pedidos/fila");
+      if (!res.ok) throw new Error("Erro ao buscar fila");
+
+      const pedidos = await res.json();
+      renderFila(pedidos);
+    } catch (err) {
+      console.error("Erro ao carregar fila:", err);
+      const lista = document.getElementById("fila");
+      lista.innerHTML =
+        "<p>Não foi possível carregar a fila agora. Tente novamente em instantes.</p>";
     }
+  }
 
-    /** CHAMA A FUNÇÃO CORRETA **/
-    renderFila();
-
+  // Carrega ao entrar na página
+  carregarFila();
+  // Opcional: atualizar a cada X segundos
+  // setInterval(carregarFila, 5000);
 </script>
+
 
 </body>
 </html>

@@ -4,15 +4,15 @@
     <meta charset="utf-8" />
     <meta name=""viewport" content="width=device-width, initial-scale=1" />
     <title>Fila de Músicas - Smash Brothers Burger</title>
+
     <style>
         :root {
-            --bg:#0b0b0f    ;
+            --bg:#0b0b0f;
             --card-bg: #15151d;
             --text:#f5f5f5;
             --text-muted:#a1a1b3;
             --accent:#ffb342;
             --radius-lg: 20px;
-        
         }
 
         * {
@@ -24,226 +24,229 @@
 
         body {
             background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000);
-      min-height: 100vh;
-      padding: 16px;
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-    }
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 420px;
-      padding-bottom: 90px;
-    }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding-bottom: 90px;
+        }
 
-    /* HEADER */
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-    .avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 20%, #99d0ff, #1c7aff);
-      color: #00152a;
-      font-weight: bold;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 20%, #99d0ff, #1c7aff);
+            color: #00152a;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    .header-title {
-      font-size: 1.4rem;
-      font-weight: 700;
-    }
+        .header-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
 
-    .header-sub {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
+        .header-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
 
-    /* MUSIC LIST */
-    .music-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+        /* MUSIC LIST */
+        .music-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
 
-    .music-card {
-      background: var(--card-bg);
-      padding: 16px;
-      border-radius: var(--radius-lg);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(6px);
-    }
+        .music-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(6px);
+        }
 
-    .music-info {
-      display: flex;
-      flex-direction: column;
-    }
+        .music-info {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .music-title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
+        .music-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
 
-    .music-artist {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
+        .music-artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
 
-    /* STATUS */
-    .status {
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
+        /* STATUS */
+        .status {
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
 
-    .status.playing {
-      background: rgba(0, 255, 120, 0.18);
-      color: #61ff9b;
-      border: 1px solid #61ff9b55;
-    }
+        .status.playing {
+            background: rgba(0,255,120,0.18);
+            color: #61ff9b;
+            border: 1px solid #61ff9b55;
+        }
 
-    .status.next {
-      background: rgba(255, 209, 48, 0.18);
-      color: #ffce5c;
-      border: 1px solid #ffce5c55;
-    }
+        .status.next {
+            background: rgba(255,209,48,0.18);
+            color: #ffce5c;
+            border: 1px solid #ffce5c55;
+        }
 
-    .status.waiting {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-muted);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
+        .status.waiting {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
 
-    /* FOOTER */
-    .footer-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0e0e14cc;
-      padding: 14px 24px;
-      display: flex;
-      justify-content: space-between;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-    }
+        /* FOOTER */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0e0e14cc;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+        }
 
-    .footer-btn {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: rgba(255, 255, 255, 0.06);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      color: var(--text);
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: 0.15s;
-    }
+        .footer-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            color: var(--text);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: .15s;
+        }
 
-    .footer-btn.active {
-      border-color: var(--accent);
-    }
-  </style>
+        .footer-btn.active {
+            border-color: var(--accent);
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container">
+<div class="container">
 
     <!-- HEADER -->
     <header class="header">
-      <div class="avatar" id="avatar">C</div>
-      <div>
-        <div class="header-title">Fila de Músicas</div>
-        <div class="header-sub" id="subtitle">Carregando…</div>
-      </div>
+        <div class="avatar" id="avatar">C</div>
+        <div>
+            <div class="header-title">Fila de Músicas</div>
+            <div class="header-sub" id="subtitle">Carregando…</div>
+        </div>
     </header>
 
     <!-- MUSIC LIST -->
-    <section class="music-list" id="fila">
-      <!-- elementos são inseridos via JS -->
-    </section>
+    <section class="music-list" id="fila"></section>
 
-  </div>
+</div>
 
-  <!-- FOOTER -->
-  <footer class="footer-nav">
+<!-- FOOTER -->
+<footer class="footer-nav">
     <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
     <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
-    <div class="footer-btn active">📁</div>
-  </footer>
+    <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
+</footer>
 
-  <script>
-    /* ============
-       DADOS DA SESSÃO
-    =============*/
+<script>
+    /* Ativa o botão correto no footer */
+    const path = window.location.pathname;
+    const btns = document.querySelectorAll(".footer-btn");
+
+    if (path.includes("inicio")) btns[0].classList.add("active");
+    if (path.includes("chat")) btns[1].classList.add("active");
+    if (path.includes("fila")) btns[2].classList.add("active");
+</script>
+
+<script>
+    /* ============ DADOS DA SESSÃO ============ */
     const nome = sessionStorage.getItem("nomeCliente");
     const mesa = sessionStorage.getItem("mesaId");
 
     if (!nome || !mesa) {
-      window.location.href = "/login.html";
+        window.location.href = "/login.html";
     }
 
     document.getElementById("avatar").textContent = nome[0].toUpperCase();
     document.getElementById("subtitle").textContent =
-      `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
+        `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
-    /* ============
-       MOCK DA FILA
-    =============*/
+    /* ============ MOCK DA FILA ============ */
     const mockFila = [
-      { id: 1, titulo: "Oceans", artista: "Hillsong", status: "playing" },
-      { id: 2, titulo: "In the End", artista: "Linkin Park", status: "next" },
-      { id: 3, titulo: "Blinding Lights", artista: "The Weeknd", status: "waiting" },
-      { id: 4, titulo: "See You Again", artista: "Wiz Khalifa", status: "waiting" }
+        { id: 1, titulo: "Oceans", artista: "Hillsong", status: "playing" },
+        { id: 2, titulo: "In the End", artista: "Linkin Park", status: "next" },
+        { id: 3, titulo: "Blinding Lights", artista: "The Weeknd", status: "waiting" },
+        { id: 4, titulo: "See You Again", artista: "Wiz Khalifa", status: "waiting" }
     ];
 
-    /* ============
-       RENDERIZAÇÃO
-    =============*/
+    /* ============ RENDERIZAÇÃO DA FILA ============ */
     function renderFila() {
-      const lista = document.getElementById("fila");
-      lista.innerHTML = "";
+        const lista = document.getElementById("fila");
+        lista.innerHTML = "";
 
-      mockFila.forEach(m => {
-        const card = document.createElement("div");
-        card.className = "music-card";
+        mockFila.forEach(m => {
+            const card = document.createElement("div");
+            card.className = "music-card";
 
-        card.innerHTML = `
-          <div class="music-info">
-            <span class="music-title">${m.titulo}</span>
-            <span class="music-artist">${m.artista}</span>
-          </div>
+            card.innerHTML = `
+                <div class="music-info">
+                    <span class="music-title">${m.titulo}</span>
+                    <span class="music-artist">${m.artista}</span>
+                </div>
+                <div class="status ${m.status}">
+                    ${
+                        m.status === "playing" ? "Tocando 🎶" :
+                        m.status === "next" ? "Próxima ⏳" :
+                        "Na fila"
+                    }
+                </div>
+            `;
 
-          <div class="status ${m.status}">
-            ${ 
-              m.status === "playing" ? "Tocando 🎶" :
-              m.status === "next" ? "Próxima ⏳" :
-              "Na fila"
-            }
-          </div>
-        `;
-
-        lista.appendChild(card);
-      });
+            lista.appendChild(card);
+        });
     }
 
+    /** CHAMA A FUNÇÃO CORRETA **/
     renderFila();
-  </script>
+
+</script>
 
 </body>
 </html>

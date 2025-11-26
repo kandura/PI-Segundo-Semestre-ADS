@@ -14,7 +14,6 @@ export const PedidoMusicaRepository = {
     return prisma.pedidoMusica.create({
       data: {
         ...rest,
-        // se vier status, converte para enum do Prisma
         ...(status ? { status: status as PedidoStatus } : {}),
       },
     });
@@ -25,7 +24,6 @@ export const PedidoMusicaRepository = {
     const where: Prisma.PedidoMusicaWhereInput = {};
 
     if (status) {
-      // converte de string para enum PedidoStatus
       where.status = status as PedidoStatus;
     }
 
@@ -35,6 +33,20 @@ export const PedidoMusicaRepository = {
 
     return prisma.pedidoMusica.findMany({
       where,
+      include: {
+        music: true,
+        cliente: true,
+      },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
+  // 🔥 LISTAR FILA (somente pendentes)
+  findFila() {
+    return prisma.pedidoMusica.findMany({
+      where: {
+        status: "PENDENTE" as PedidoStatus,
+      },
       include: {
         music: true,
         cliente: true,

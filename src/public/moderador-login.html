@@ -89,7 +89,7 @@
       const errorBox = document.getElementById('errorBox');
 
       btnRegister.addEventListener('click', () => {
-        window.location.href = '/moderador-register.html';
+        window.location.href = 'moderador-register.html';
       });
 
       function showError(msg) {
@@ -136,13 +136,17 @@
           localStorage.setItem('moderadorId', data.moderadorId);
           localStorage.setItem('moderadorEmail', email);
 
-          window.location.href = '/moderador-dashboard.html';
+          window.location.href = 'moderador-dashboard.html';
 
         } catch (err) {
           console.error('Erro no login moderador:', err);
           showError('Erro de conexão. Tente novamente.');
           btnSubmit.disabled = false;
           btnSubmit.textContent = 'Entrar';
-        }
-      });
-    })
+            }
+  });
+})();
+</script>
+          
+
+

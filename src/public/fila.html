@@ -198,15 +198,17 @@
 <script>
     /* ============ DADOS DA SESSÃO ============ */
     const nome = sessionStorage.getItem("nomeCliente");
-    const mesa = sessionStorage.getItem("mesaId");
 
-    if (!nome || !mesa) {
-        window.location.href = "/login.html";
-    }
+// se não fez login, volta
+if (!nome) {
+    window.location.href = "/login.html";
+}
 
-    document.getElementById("avatar").textContent = nome[0].toUpperCase();
-    document.getElementById("subtitle").textContent =
-        `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
+const mesa = sessionStorage.getItem("mesaId") || "—";
+
+document.getElementById("avatar").textContent = nome[0].toUpperCase();
+document.getElementById("subtitle").textContent =
+    `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
     /* ============ MOCK DA FILA ============ */
     const mockFila = [

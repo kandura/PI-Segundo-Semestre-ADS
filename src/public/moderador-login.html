@@ -1,67 +1,148 @@
-<script>
-(function () {
-  const form = document.getElementById('loginForm');
-  const btnSubmit = document.getElementById('btnSubmit');
-  const btnRegister = document.getElementById('btnRegister');
-  const errorBox = document.getElementById('errorBox');
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login do Moderador</title>
 
-  btnRegister.addEventListener('click', () => {
-    window.location.href = '/moderador-register.html';
-  });
-
-  function showError(msg) {
-    errorBox.style.display = 'block';
-    errorBox.textContent = msg;
-  }
-  function hideError() {
-    errorBox.style.display = 'none';
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideError();
-
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value;
-
-    if (!email || !senha) {
-      showError('Preencha e-mail e senha.');
-      return;
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0b0b0f;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = 'Entrando...';
+    .card {
+      background: #15151d;
+      padding: 30px;
+      border-radius: 16px;
+      width: 350px;
+      box-shadow: 0 0 10px #000;
+    }
 
-    try {
-      const apiBase = window.location.origin;
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: none;
+    }
 
-      const res = await fetch(`${apiBase}/api/moderador/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha })
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #btnSubmit {
+      background: #ffb342;
+      font-weight: bold;
+    }
+
+    #btnRegister {
+      background: transparent;
+      color: #ffb342;
+      margin-top: 10px;
+    }
+
+    #errorBox {
+      display: none;
+      color: #ff6d6d;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h2 style="text-align:center; margin-bottom:20px;">Login Moderador</h2>
+
+    <form id="loginForm">
+
+      <div id="errorBox"></div>
+
+      <input type="email" id="email" placeholder="Seu e-mail" />
+      <input type="password" id="senha" placeholder="Sua senha" />
+
+      <button type="submit" id="btnSubmit">Entrar</button>
+      <button type="button" id="btnRegister">Criar conta</button>
+
+    </form>
+  </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById('loginForm');
+      const btnSubmit = document.getElementById('btnSubmit');
+      const btnRegister = document.getElementById('btnRegister');
+      const errorBox = document.getElementById('errorBox');
+
+      btnRegister.addEventListener('click', () => {
+        window.location.href = '/moderador-register.html';
       });
 
-      const data = await res.json().catch(() => null);
-
-      if (!res.ok || !data || !data.ok) {
-        showError(data?.error || 'Credenciais inválidas.');
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = 'Entrar';
-        return;
+      function showError(msg) {
+        errorBox.style.display = 'block';
+        errorBox.textContent = msg;
+      }
+      function hideError() {
+        errorBox.style.display = 'none';
       }
 
-      // salva ID para o dashboard saber quem está logado
-      localStorage.setItem('moderadorId', data.moderadorId);
-      localStorage.setItem('moderadorEmail', email);
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideError();
 
-      window.location.href = '/moderador-dashboard.html';
+        const email = document.getElementById('email').value.trim();
+        const senha = document.getElementById('senha').value;
 
-    } catch (err) {
-      console.error('Erro no login moderador:', err);
-      showError('Erro de conexão. Tente novamente.');
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = 'Entrar';
-    }
-  });
-})();
-</script>
+        if (!email || !senha) {
+          showError('Preencha e-mail e senha.');
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Entrando...';
+
+        try {
+          const apiBase = window.location.origin;
+
+          const res = await fetch(`${apiBase}/api/moderador/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+          });
+
+          const data = await res.json().catch(() => null);
+
+          if (!res.ok || !data || !data.ok) {
+            showError(data?.error || 'Credenciais inválidas.');
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = 'Entrar';
+            return;
+          }
+
+          localStorage.setItem('moderadorId', data.moderadorId);
+          localStorage.setItem('moderadorEmail', email);
+
+          window.location.href = '/moderador-dashboard.html';
+
+        } catch (err) {
+          console.error('Erro no login moderador:', err);
+          showError('Erro de conexão. Tente novamente.');
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = 'Entrar';
+        }
+      });
+    })

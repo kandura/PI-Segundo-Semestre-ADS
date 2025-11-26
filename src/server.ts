@@ -79,7 +79,7 @@ type ChatMessage = {
 };
 
 // Envia uma mensagem de chat para TODOS os clientes conectados
-function broadcast(msg: ChatMessage) {
+function broadcast(msg: any) {
   const data = JSON.stringify(msg);
   wss.clients.forEach((client: any) => {
     if (client.readyState === client.OPEN) {
@@ -97,15 +97,23 @@ wss.on("connection", (ws, req) => {
     const baseUrl = `http://${req.headers.host ?? "localhost"}`;
     const url = new URL(req.url ?? "", baseUrl);
 
-    const sessionId = url.searchParams.get("sessionId") ?? "";
-    const mesaId = url.searchParams.get("mesaId") ?? "";
-    const nome = url.searchParams.get("nome") ?? "Anônimo";
+const moderador = url.searchParams.get("moderador") === "1";
+const nomeParam = url.searchParams.get("nome") ?? "Anônimo";
+const sessionId = url.searchParams.get("sessionId") ?? "";
+const mesaId = url.searchParams.get("mesaId") ?? "";
 
-    // Monta o nome exibido no chat
-    const displayUser =
-      mesaId && mesaId !== "null" && mesaId !== "undefined"
-        ? `${nome} (mesa ${mesaId})`
-        : nome;
+// Nome exibido
+let displayUser = nomeParam;
+
+// Moderador = nome especial
+if (moderador) {
+  displayUser = `MOD | ${nomeParam}`;
+}
+// Cliente comum
+else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
+  displayUser = `${nomeParam} (mesa ${mesaId})`;
+}
+
 
     console.log(
       `WebSocket: cliente conectado - ${displayUser} (sessão ${sessionId})`
@@ -125,6 +133,16 @@ wss.on("connection", (ws, req) => {
       try{
 
       const msg = parseMessage(raw);
+
+      // Se for moderador deletando mensagem
+if (msg.type === "delete-message") {
+  broadcast({
+    type: "delete-message",
+    id: msg.id,
+  });
+  return;
+}
+
 
       const texto =
         typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "").trim();

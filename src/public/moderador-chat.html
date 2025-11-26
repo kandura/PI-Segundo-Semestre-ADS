@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat do Moderador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --card-bg: #15151d;
+      --accent: #ffb342;
+      --text: #ffffff;
+      --text-muted: #b4b4c7;
+      --radius-lg: 16px;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000000 100%);
+      font-family: system-ui, sans-serif;
+      color: var(--text);
+    }
+
+    header {
+      background: var(--card-bg);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .msg {
+      background: #1f1f29;
+      border-radius: var(--radius-lg);
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .msg strong {
+      color: var(--accent);
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: #ff5c5c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #form {
+      display: flex;
+      padding: 10px;
+      background: var(--card-bg);
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    #textInput {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: var(--radius-lg);
+      border: none;
+      outline: none;
+      background: #0f0f17;
+      color: white;
+    }
+
+    #sendBtn {
+      margin-left: 8px;
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #ffb342, #ff8a3c);
+      border: none;
+      border-radius: var(--radius-lg);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #backBtn {
+      background: transparent;
+      border: 1px solid #ffffff22;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Chat do Moderador</h1>
+    <button id="backBtn">Voltar</button>
+  </header>
+
+  <div id="messages"></div>
+
+  <form id="form">
+    <input id="textInput" placeholder="Digite uma mensagem..." autocomplete="off" />
+    <button id="sendBtn" type="submit">Enviar</button>
+  </form>
+
+  <script>
+    const moderadorNome = localStorage.getItem("moderadorEmail") || "Moderador";
+
+    // === CONECTAR NO WEBSOCKET COMO MODERADOR ===
+    const socket = new WebSocket(
+      `wss://${window.location.host}/chat?moderador=1&nome=${encodeURIComponent(moderadorNome)}`
+    );
+
+    const messagesDiv = document.getElementById("messages");
+
+    socket.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      console.log("WS recebeu:", msg);
+
+      // mensagem deletada → remover
+      if (msg.type === "delete-message") {
+        const el = document.getElementById(msg.id);
+        if (el) el.remove();
+        return;
+      }
+
+      renderMessage(msg);
+    };
+
+    // === RENDERIZAR MENSAGEM ===
+    function renderMessage(msg) {
+      const div = document.createElement("div");
+      div.className = "msg";
+      div.id = msg.id;
+
+      div.innerHTML = `
+        <button class="delete-btn" onclick="deleteMessage('${msg.id}')">×</button>
+        <strong>${msg.user}:</strong><br>
+        ${msg.text}
+      `;
+
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // === ENVIAR MENSAGEM ===
+    document.getElementById("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const input = document.getElementById("textInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      socket.send(JSON.stringify({ text, user: moderadorNome }));
+      input.value = "";
+    });
+
+    // === DELETAR MENSAGEM (ENVIA PARA TODOS) ===
+    function deleteMessage(id) {
+      socket.send(JSON.stringify({
+        type: "delete-message",
+        id
+      }));
+    }
+
+    // === VOLTAR PARA DASHBOARD ===
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "/moderador-dashboard.html";
+    });
+  </script>
+
+</body>
+</html>

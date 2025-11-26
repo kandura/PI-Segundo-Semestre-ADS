@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel do Moderador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --card-bg: #15151d;
+      --accent: #ffb342;
+      --accent-soft: rgba(255, 179, 66, 0.15);
+      --text: #ffffff;
+      --text-muted: #bbbbbb;
+      --radius-lg: 18px;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000 100%);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 26px 22px;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 999px;
+      border: none;
+      margin-bottom: 14px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #ffb342, #ff8a3c);
+      color: #2b1903;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid #ffffff33;
+      color: var(--text);
+    }
+
+    .danger {
+      background: #8b0000;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <main class="card">
+
+      <h1 class="title">Painel do Moderador</h1>
+      <p class="subtitle">Gerencie o sistema em tempo real.</p>
+
+      <button class="primary" onclick="irChat()">Moderador do Chat</button>
+
+      <button class="secondary" onclick="irPedidos()">Pedidos de Música</button>
+
+      <button class="danger" onclick="logout()">Sair</button>
+
+    </main>
+  </div>
+
+  <script>
+    function irChat() {
+      window.location.href = "/moderador-chat.html";
+    }
+
+    function irPedidos() {
+      window.location.href = "/moderador-pedidos.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("moderadorId");
+      localStorage.removeItem("moderadorEmail");
+
+      window.location.href = "/moderador-login.html";
+    }
+  </script>
+
+</body>
+</html>

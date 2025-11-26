@@ -41,8 +41,31 @@ export const ModeradorController = {
       console.error(e);
       return res.status(500).json({ error: "Erro ao logar" });
     }
-  }
+  },
 
+  // ------------------- FILA -----------------------
+
+  listarFila(req: Request, res: Response) {
+    return res.json(FilaRepository.getFila());
+  },
+
+  colocarNaFrente(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    FilaRepository.colocarNaFrente(id);
+
+    return res.json({ ok: true });
+  },
+
+  removerDaFila(req: Request, res: Response) {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    FilaRepository.remover(id);
+
+    return res.json({ ok: true });
+  }
 };
 
 

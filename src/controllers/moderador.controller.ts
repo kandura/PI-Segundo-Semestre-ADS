@@ -9,12 +9,12 @@ export const ModeradorController = {
     try {
       const { nome, email, senha } = req.body;
 
-      const existe = await prisma.Moderador.findUnique({ where: { email }});
+      const existe = await prisma.moderador.findUnique({ where: { email }});
       if (existe) return res.status(400).json({ error: "Email já cadastrado" });
 
       const hash = await bcrypt.hash(senha, 10);
-
-      await prisma.Moderador.create({
+ 
+      await prisma.moderador.create({
         data: { nome, email, senha: hash }
       });
 
@@ -30,13 +30,13 @@ export const ModeradorController = {
     try {
       const { email, senha } = req.body;
 
-      const user = await prisma.Moderador.findUnique({ where: { email }});
+      const user = await prisma.moderador.findUnique({ where: { email }});
       if (!user) return res.status(400).json({ error: "Usuário não encontrado" });
 
       const ok = await bcrypt.compare(senha, user.senha);
       if (!ok) return res.status(400).json({ error: "Senha inválida" });
 
-      return res.json({ ok: true, ModeradorId: user.id });
+      return res.json({ ok: true, moderadorId: user.id });
 
     } catch (e) {
       console.error(e);

@@ -1,3 +1,4 @@
+import { FilaRepository } from "../repositories/fila.repository.js";
 import { Request, Response } from "express";
 import prisma  from "../database/prismaClient.js";
 import bcrypt from "bcryptjs";
@@ -8,12 +9,12 @@ export const ModeradorController = {
     try {
       const { nome, email, senha } = req.body;
 
-      const existe = await prisma.moderador.findUnique({ where: { email }});
+      const existe = await prisma.Moderador.findUnique({ where: { email }});
       if (existe) return res.status(400).json({ error: "Email já cadastrado" });
 
       const hash = await bcrypt.hash(senha, 10);
 
-      await prisma.moderador.create({
+      await prisma.Moderador.create({
         data: { nome, email, senha: hash }
       });
 
@@ -29,13 +30,13 @@ export const ModeradorController = {
     try {
       const { email, senha } = req.body;
 
-      const user = await prisma.moderador.findUnique({ where: { email }});
+      const user = await prisma.Moderador.findUnique({ where: { email }});
       if (!user) return res.status(400).json({ error: "Usuário não encontrado" });
 
       const ok = await bcrypt.compare(senha, user.senha);
       if (!ok) return res.status(400).json({ error: "Senha inválida" });
 
-      return res.json({ ok: true, moderadorId: user.id });
+      return res.json({ ok: true, ModeradorId: user.id });
 
     } catch (e) {
       console.error(e);

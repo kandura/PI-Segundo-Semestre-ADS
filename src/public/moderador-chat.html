@@ -128,10 +128,21 @@
   <script>
     const moderadorNome = localStorage.getItem("moderadorEmail") || "Moderador";
 
-    // === CONECTAR NO WEBSOCKET COMO MODERADOR ===
-    const socket = new WebSocket(
-      `wss://${window.location.host}/chat?moderador=1&nome=${encodeURIComponent(moderadorNome)}`
-    );
+    // O moderador precisa se conectar como um cliente,
+// mas com IDs especiais:
+const sessionId = `MOD-${localStorage.getItem("moderadorId") || Date.now()}`;
+const mesaId = 0;
+const nome = "Moderador";
+
+const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+
+const socket = new WebSocket(
+  `${wsProtocol}://${window.location.host}/chat` +
+  `?sessionId=${encodeURIComponent(sessionId)}` +
+  `&mesaId=${encodeURIComponent(mesaId)}` +
+  `&nome=${encodeURIComponent(nome)}`
+);
+
 
     const messagesDiv = document.getElementById("messages");
 
@@ -173,7 +184,7 @@
       const text = input.value.trim();
       if (!text) return;
 
-      socket.send(JSON.stringify({ text, user: moderadorNome }));
+      socket.send(JSON.stringify({ text }));
       input.value = "";
     });
 

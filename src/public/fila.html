@@ -1,309 +1,403 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="utf-8" />
-    <meta name=""viewport" content="width=device-width, initial-scale=1" />
-    <title>Fila de Músicas - Smash Brothers Burger</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fila de Músicas - Hamburgueria Smash Bros</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
-        :root {
-            --bg:#0b0b0f;
-            --card-bg: #15151d;
-            --text:#f5f5f5;
-            --text-muted:#a1a1b3;
-            --accent:#ffb342;
-            --radius-lg: 20px;
-        }
+      :root {
+        --bg: radial-gradient(circle at top, #1b2735 0%, #090a0f 45%, #000 100%);
+        --card-bg: rgba(10, 10, 20, 0.9);
+        --accent: #ffb342;
+        --accent-soft: rgba(255, 179, 66, 0.15);
+        --primary-text: #ffffff;
+        --secondary-text: #a7b0c0;
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --danger: #ff4d4f;
+        --success: #3fdca3;
+        --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
+      }
 
-        * {
-            margin:0;
-            padding:0;
-            box-sizing: border-box;
-            font-family: system-ui, sans-serif;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000);
-            min-height: 100vh;
-            padding: 16px;
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-        }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          "Segoe UI", sans-serif;
+        color: var(--primary-text);
+        background: var(--bg);
+        background-attachment: fixed;
+      }
 
+      .page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        max-width: 960px;
+        margin: 32px auto 100px;
+        padding: 0 16px;
+      }
+
+      /* HEADER */
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        background: linear-gradient(145deg, #4f8bff, #a279ff);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 18px;
+        box-shadow: 0 10px 25px rgba(65, 105, 225, 0.6);
+        flex-shrink: 0;
+      }
+
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        color: var(--secondary-text);
+      }
+
+      /* FILA */
+
+      .fila-container {
+        margin-top: 12px;
+      }
+
+      .section-label {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--secondary-text);
+        margin-bottom: 10px;
+      }
+
+      .fila-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .music-card {
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-soft);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .music-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .music-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .music-artist {
+        font-size: 12px;
+        color: var(--secondary-text);
+      }
+
+      .status {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+      }
+
+      .status.playing {
+        background: rgba(63, 220, 163, 0.1);
+        border-color: var(--success);
+        color: var(--success);
+      }
+
+      .status.next {
+        background: rgba(255, 179, 66, 0.12);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .status.waiting {
+        background: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.05);
+        color: var(--secondary-text);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        color: var(--secondary-text);
+        font-size: 14px;
+      }
+
+      /* FOOTER NAV */
+
+      .footer-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.95),
+          rgba(0, 0, 0, 0.88)
+        );
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 16px;
+        z-index: 50;
+      }
+
+      .footer-btn {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        background: rgba(10, 10, 20, 0.85);
+        color: var(--secondary-text);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+        cursor: pointer;
+        transition: all 0.18s ease;
+      }
+
+      .footer-btn.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #1a1210;
+        transform: translateY(-3px);
+        box-shadow: 0 14px 28px rgba(255, 179, 66, 0.55);
+      }
+
+      .footer-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
+      }
+
+      /* MOBILE */
+
+      @media (max-width: 768px) {
         .container {
-            width: 100%;
-            max-width: 420px;
-            padding-bottom: 90px;
+          max-width: 480px;
+          margin: 24px auto 96px;
         }
 
-        /* HEADER */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
+        .title {
+          font-size: 18px;
         }
 
-        .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 20%, #99d0ff, #1c7aff);
-            color: #00152a;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .header-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .header-sub {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-        }
-
-        /* MUSIC LIST */
-        .music-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        .subtitle {
+          font-size: 12px;
         }
 
         .music-card {
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: var(--radius-lg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(6px);
-        }
-
-        .music-info {
-            display: flex;
-            flex-direction: column;
+          padding: 12px 14px;
+          border-radius: 16px;
         }
 
         .music-title {
-            font-size: 1rem;
-            font-weight: 600;
+          font-size: 14px;
         }
 
         .music-artist {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+          font-size: 11px;
         }
 
-        /* STATUS */
         .status {
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
+          font-size: 10px;
+          padding: 4px 10px;
         }
-
-        .status.playing {
-            background: rgba(0,255,120,0.18);
-            color: #61ff9b;
-            border: 1px solid #61ff9b55;
-        }
-
-        .status.next {
-            background: rgba(255,209,48,0.18);
-            color: #ffce5c;
-            border: 1px solid #ffce5c55;
-        }
-
-        .status.waiting {
-            background: rgba(255,255,255,0.05);
-            color: var(--text-muted);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* FOOTER */
-        .footer-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0e0e14cc;
-            padding: 14px 24px;
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid rgba(255,255,255,0.08);
-            backdrop-filter: blur(10px);
-        }
-
-        .footer-btn {
-            width: 64px;
-            height: 64px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.06);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            color: var(--text);
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: .15s;
-        }
-
-        .footer-btn.active {
-            border-color: var(--accent);
-        }
-
-        /* Ajustes para mobile - estilo mais "Spotify" */
-        @media (max-width: 600px) {
-          /* menos padding geral e espaço reservado pro footer */
-          body {
-            padding: 12px 12px 90px;
-          }
-
-          /* container ocupa praticamente toda a largura */
-          .container {
-            max-width: 100%;
-          }
-
-          /* lista mais “apertada” pra caber mais músicas na tela */
-          .music-list {
-            margin-top: 16px;
-            gap: 10px;
-          }
-
-          /* cards mais compactos */
-          .music-card {
-            padding: 10px 12px;
-          }
-
-          .music-title {
-            font-size: 0.95rem;
-          }
-
-          .music-artist {
-            font-size: 0.78rem;
-          }
-
-          /* badge de status menor */
-          .status {
-            padding: 6px 10px;
-            font-size: 0.75rem;
-          }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-<div class="container">
+  <body>
+    <div class="page-wrapper">
+      <div class="container">
+        <header class="header">
+          <div class="avatar" id="avatar">J</div>
+          <div class="header-text">
+            <div class="title">Fila de Músicas</div>
+            <div class="subtitle" id="subtitle"></div>
+          </div>
+        </header>
 
-    <!-- HEADER -->
-    <header class="header">
-        <div class="avatar" id="avatar">C</div>
-        <div>
-            <div class="header-title">Fila de Músicas</div>
-            <div class="header-sub" id="subtitle">Carregando…</div>
-        </div>
-    </header>
+        <section class="fila-container">
+          <div class="section-label">Próximas músicas</div>
+          <div id="fila" class="fila-lista"></div>
+        </section>
+      </div>
+    </div>
 
-    <!-- MUSIC LIST -->
-    <section class="music-list" id="fila"></section>
+    <!-- FOOTER -->
+    <footer class="footer-nav">
+      <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
+      <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
+      <!-- Aqui a pasta fica ativa, porque estamos na fila -->
+      <div class="footer-btn active" onclick="window.location.href='/fila.html'">
+        📁
+      </div>
+    </footer>
 
-</div>
+    <script>
+      /* =========== DADOS DA SESSÃO =========== */
+      const nome = sessionStorage.getItem("nomeCliente");
 
-<!-- FOOTER -->
-<footer class="footer-nav">
-    <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
-    <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
-    <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
-</footer>
+      if (!nome) {
+        window.location.href = "/login.html";
+      }
 
-<script>
-    /* Ativa o botão correto no footer */
-    const path = window.location.pathname;
-    const btns = document.querySelectorAll(".footer-btn");
+      const mesa = sessionStorage.getItem("mesaId") || "-";
 
-    if (path.includes("inicio")) btns[0].classList.add("active");
-    if (path.includes("chat")) btns[1].classList.add("active");
-    if (path.includes("fila")) btns[2].classList.add("active");
-</script>
+      document.getElementById("avatar").textContent = nome[0].toUpperCase();
+      document.getElementById("subtitle").textContent =
+        `Mesa ${mesa} · Bem-vindo(a), ${nome}!`;
 
-<script>
-  /* ============ DADOS DA SESSÃO ============ */
-  const nome = sessionStorage.getItem("nomeCliente");
+      /* ============ MOCK DA FILA (exemplo) ============ */
+      const mockFila = [
+        { id: 1, titulo: "Oceans", artista: "Hillsong" },
+        { id: 2, titulo: "In the End", artista: "Linkin Park" },
+        { id: 3, titulo: "Blinding Lights", artista: "The Weeknd" },
+        { id: 4, titulo: "See You Again", artista: "Wiz Khalifa" },
+        { id: 5, titulo: "Bohemian Rhapsody", artista: "Queen" },
+        { id: 6, titulo: "Smells Like Teen Spirit", artista: "Nirvana" },
+        { id: 7, titulo: "Shape of You", artista: "Ed Sheeran" }
+      ];
 
-  if (!nome) {
-    window.location.href = "/login.html";
-  }
+      function renderMockFila() {
+        const lista = document.getElementById("fila");
+        lista.innerHTML = "";
 
-  const mesa = sessionStorage.getItem("mesaId") || "—";
+        mockFila.forEach((m, index) => {
+          const statusClass =
+            index === 0 ? "playing" :
+            index === 1 ? "next" :
+            "waiting";
 
-  document.getElementById("avatar").textContent = nome[0].toUpperCase();
-  document.getElementById("subtitle").textContent =
-    `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
+          const statusLabel =
+            index === 0 ? "Tocando 🎵" :
+            index === 1 ? "Próxima ⏳" :
+            "Na fila";
 
-  /* ============ RENDERIZAÇÃO DA FILA ============ */
-  function renderFila(pedidos) {
-    const lista = document.getElementById("fila");
-    lista.innerHTML = "";
+          const card = document.createElement("div");
+          card.className = "music-card";
 
-    pedidos.forEach((p, index) => {
-      // Decide visual: tocando / próxima / esperando
-      const statusClass =
-        index === 0 ? "playing" :
-        index === 1 ? "next" :
-        "waiting";
+          card.innerHTML = `
+            <div class="music-info">
+              <span class="music-title">${m.titulo}</span>
+              <span class="music-artist">${m.artista}</span>
+            </div>
+            <div class="status ${statusClass}">
+              ${statusLabel}
+            </div>
+          `;
 
-      const statusLabel =
-        index === 0 ? "Tocando 🎶" :
-        index === 1 ? "Próxima ⏳" :
-        "Na fila";
+          lista.appendChild(card);
+        });
+      }
 
-      const card = document.createElement("div");
-      card.className = "music-card";
+      /* =========== RENDERIZAÇÃO DA FILA REAL =========== */
+      function renderFila(pedidos) {
+        const lista = document.getElementById("fila");
+        lista.innerHTML = "";
 
-      card.innerHTML = `
-        <div class="music-info">
-          <span class="music-title">${p.music.titulo}</span>
-          <span class="music-artist">
-            ${p.music.artista} • Pedido por ${p.cliente.nome}
-          </span>
-        </div>
-        <div class="status ${statusClass}">
-          ${statusLabel}
-        </div>
-      `;
+        pedidos.forEach((p, index) => {
+          const statusClass =
+            index === 0 ? "playing" :
+            index === 1 ? "next" :
+            "waiting";
 
-      lista.appendChild(card);
-    });
-  }
+          const statusLabel =
+            index === 0 ? "Tocando 🎵" :
+            index === 1 ? "Próxima ⏳" :
+            "Na fila";
 
-  async function carregarFila() {
-    try {
-      const res = await fetch("/api/pedidos/fila");
-      if (!res.ok) throw new Error("Erro ao buscar fila");
+          const card = document.createElement("div");
+          card.className = "music-card";
 
-      const pedidos = await res.json();
-      renderFila(pedidos);
-    } catch (err) {
-      console.error("Erro ao carregar fila:", err);
-      const lista = document.getElementById("fila");
-      lista.innerHTML =
-        "<p>Não foi possível carregar a fila agora. Tente novamente em instantes.</p>";
-    }
-  }
+          card.innerHTML = `
+            <div class="music-info">
+              <span class="music-title">${p.music.titulo}</span>
+              <span class="music-artist">
+                ${p.music.artista} · Pedido por ${p.cliente.nome}
+              </span>
+            </div>
+            <div class="status ${statusClass}">
+              ${statusLabel}
+            </div>
+          `;
 
-  // Carrega ao entrar na página
-  carregarFila();
-  // Opcional: atualizar a cada X segundos
-  // setInterval(carregarFila, 5000);
-</script>
+          lista.appendChild(card);
+        });
+      }
 
+      async function carregarFila() {
+        try {
+          const res = await fetch("/api/pedidos/fila");
+          if (!res.ok) throw new Error("Erro ao buscar fila");
 
-</body>
+          const pedidos = await res.json();
+
+          if (!pedidos || pedidos.length === 0) {
+            // Fila de exemplo
+            renderMockFila();
+          } else {
+            renderFila(pedidos);
+          }
+        } catch (err) {
+          console.error("Erro ao carregar fila:", err);
+          // Se der erro na API, também mostra os exemplos
+          renderMockFila();
+        }
+      }
+
+      // Carrega ao entrar na página
+      carregarFila();
+      // setInterval(carregarFila, 5000);
+    </script>
+  </body>
 </html>

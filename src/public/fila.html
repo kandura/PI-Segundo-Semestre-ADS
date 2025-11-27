@@ -158,6 +158,44 @@
         .footer-btn.active {
             border-color: var(--accent);
         }
+
+        /* Ajustes para mobile - estilo mais "Spotify" */
+        @media (max-width: 600px) {
+          /* menos padding geral e espaço reservado pro footer */
+          body {
+            padding: 12px 12px 90px;
+          }
+
+          /* container ocupa praticamente toda a largura */
+          .container {
+            max-width: 100%;
+          }
+
+          /* lista mais “apertada” pra caber mais músicas na tela */
+          .music-list {
+            margin-top: 16px;
+            gap: 10px;
+          }
+
+          /* cards mais compactos */
+          .music-card {
+            padding: 10px 12px;
+          }
+
+          .music-title {
+            font-size: 0.95rem;
+          }
+
+          .music-artist {
+            font-size: 0.78rem;
+          }
+
+          /* badge de status menor */
+          .status {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+          }
+        }
     </style>
 </head>
 

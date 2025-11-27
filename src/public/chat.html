@@ -1,482 +1,528 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Chat da Hamburgueria</title>
-    <!-- MUITO IMPORTANTE PARA CELULAR -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <style>
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        background: #020617;
-        color: #e5e7eb;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat da Hamburgueria</title>
+  <!-- MUITO IMPORTANTE PARA CELULAR -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #020617;
+      border-bottom: 1px solid #1f2937;
+    }
+
+    #backButton {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: #374151;
+      color: #e5e7eb;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    #backButton:hover {
+      background: #4b5563;
+    }
+
+    header h1 {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    header small {
+      display: block;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    #info {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    #status {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px px;
+      gap: 8px;
+    }
+
+    #chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 16px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Linha de mensagem */
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .msg-row.me {
+      justify-content: flex-end;
+    }
+
+    .msg-row.other {
+      justify-content: flex-start;
+    }
+
+    .msg-row.system {
+      justify-content: center;
+    }
+
+    .msg-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #4b5563;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e5e7eb;
+      flex-shrink: 0;
+    }
+
+    .msg-bubble {
+      max-width: 90%;
+      border-radius: 16px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .msg-row.me .msg-bubble {
+      background: #22c55e;
+      color: #022c22;
+    }
+
+    .msg-row.other .msg-bubble {
+      background: #1f2937;
+    }
+
+    .msg-row.system .msg-bubble {
+      background: transparent;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+
+    .msg-user {
+      font-size: 11px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .msg-text {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .msg-time {
+      font-size: 10px;
+      color: #9ca3af;
+      align-self: flex-end;
+    }
+
+    /* -------- FOOTER -------- */
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0e0e14cc;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .footer-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .footer-btn.active {
+      border-color: var(--accent);
+    }
+
+    /* ===== ÁREA DE DIGITAÇÃO ESTILO APP ===== */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: #020617;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+    }
+
+    #msgInput {
+      flex: 1;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: none;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 15px;
+    }
+
+    #msgInput::placeholder {
+      color: #6b7280;
+    }
+
+    #msgInput:focus {
+      outline: none;
+    }
+
+    #sendBtn {
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      background: #22c55e;
+      color: #022c22;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    #sendBtn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    #sendBtn:hover:not(:disabled) {
+      background: #16a34a;
+    }
+
+    /* ===== AJUSTES ESPECÍFICOS PARA CELULAR ===== */
+    @media (max-width: 768px) {
       header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px;
-        background: #020617;
-        border-bottom: 1px solid #1f2937;
-      }
-
-      #backButton {
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: none;
-        background: #374151;
-        color: #e5e7eb;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      #backButton:hover {
-        background: #4b5563;
-      }
-
-      header h1 {
-        font-size: 16px;
-        margin: 0;
-      }
-
-      header small {
-        display: block;
-        font-size: 12px;
-        color: #9ca3af;
-      }
-
-      #info {
-        font-size: 12px;
-        color: #9ca3af;
-      }
-
-      #status {
-        font-size: 12px;
-        margin-top: 2px;
+        padding: 10px 12px;
       }
 
       main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 8px 12px 12px;
-        gap: 8px;
-      }
-
-      #chat {
-        flex: 1;
-        overflow-y: auto;
-        padding: 10px;
-        border-radius: 16px;
-        background: #020617;
-        border: 1px solid #1f2937;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      /* Linha de mensagem */
-      .msg-row {
-        display: flex;
-        align-items: flex-end;
+        padding: 8px 8px 10px;
         gap: 6px;
       }
 
-      .msg-row.me {
-        justify-content: flex-end;
-      }
-
-      .msg-row.other {
-        justify-content: flex-start;
-      }
-
-      .msg-row.system {
-        justify-content: center;
-      }
-
-      .msg-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 999px;
-        background: #4b5563;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 13px;
-        font-weight: 600;
-        color: #e5e7eb;
-        flex-shrink: 0;
+      #chat {
+        padding: 8px;
+        border-radius: 12px;
       }
 
       .msg-bubble {
-        max-width: 90%; 
-        border-radius: 16px;
+        max-width: 95%;
+        font-size: 15px;
         padding: 8px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 14px;
-        line-height: 1.35;
       }
 
       .msg-row.me .msg-bubble {
-        background: #22c55e;
-        color: #022c22;
+        margin-left: 30px;
+        /* espaço pro avatar */
       }
 
       .msg-row.other .msg-bubble {
-        background: #1f2937;
+        margin-right: 30px;
       }
 
-      .msg-row.system .msg-bubble {
-        background: transparent;
-        color: #9ca3af;
-        font-size: 12px;
-      }
-
-      .msg-user {
-        font-size: 11px;
-        font-weight: 600;
-        color: #e5e7eb;
-      }
-
-      .msg-text {
-        white-space: pre-wrap;
-        word-wrap: break-word;
-      }
-
-      .msg-time {
-        font-size: 10px;
-        color: #9ca3af;
-        align-self: flex-end;
-      }
-
-      /* ===== ÁREA DE DIGITAÇÃO ESTILO APP ===== */
       .input-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 6px;
         padding: 8px 10px;
-        background: #020617;
-        border-radius: 999px;
-        border: 1px solid #1f2937;
+        margin-top: 4px;
       }
 
       #msgInput {
-        flex: 1;
-        padding: 12px 14px;      
-        border-radius: 999px;
-        border: none;
-        background: #020617;
-        color: #e5e7eb;
-        font-size: 15px;         
-      }
-
-      #msgInput::placeholder {
-        color: #6b7280;
-      }
-
-      #msgInput:focus {
-        outline: none;
+        padding: 12px 14px;
+        font-size: 15px;
       }
 
       #sendBtn {
-        padding: 12px 18px;       
-        border-radius: 999px;
-        border: none;
-        background: #22c55e;
-        color: #022c22;
-        cursor: pointer;
-        font-weight: 600;
+        padding: 10px 16px;
         font-size: 14px;
-        flex-shrink: 0;
       }
+    }
 
-      #sendBtn:disabled {
-        opacity: 0.6;
-        cursor: default;
+    /* Safe area pra iPhone (não colar no gesto de voltar) */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      main {
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
       }
+    }
+  </style>
+</head>
 
-      #sendBtn:hover:not(:disabled) {
-        background: #16a34a;
-      }
+<body>
+  <header>
+    <button id="backButton">Voltar</button>
+    <div>
+      <h1>Chat com o Atendente</h1>
+      <small id="info"></small>
+      <small id="status"></small>
+    </div>
+  </header>
 
-      /* ===== AJUSTES ESPECÍFICOS PARA CELULAR ===== */
-      @media (max-width: 768px) {
-        header {
-          padding: 10px 12px;
-        }
+  <main>
+    <!-- Janela de mensagens -->
+    <div id="chat"></div>
 
-        main {
-          padding: 8px 8px 10px;
-          gap: 6px;
-        }
+    <!-- Campo de envio -->
+    <div class="input-row">
+      <input id="msgInput" type="text" placeholder="Digite sua mensagem e aperte Enter..." autocomplete="off" />
+      <button id="sendBtn">Enviar</button>
+    </div>
+  </main>
 
-        #chat {
-          padding: 8px;
-          border-radius: 12px;
-        }
+  <!-- Som de nova mensagem -->
+  <audio id="msgSound" src="/sons/notificacao.mp3" preload="auto"></audio>
 
-        .msg-bubble {
-          max-width: 95%;
-          font-size: 15px;
-          padding: 8px 12px;
-        }
+  <!-- SCRIPT DO CHAT  -->
+  <script>
+    // ====== ELEMENTOS DA PÁGINA ======
+    const chat = document.getElementById("chat");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const statusEl = document.getElementById("status");
+    const infoEl = document.getElementById("info");
+    const backButton = document.getElementById("backButton");
+    const msgSound = document.getElementById("msgSound");
 
-        .msg-row.me .msg-bubble {
-          margin-left: 30px; /* espaço pro avatar */
-        }
+    // ====== VOLTAR PARA O INÍCIO ======
+    backButton.addEventListener("click", () => {
+      window.location.href = "/inicio.html";
+    });
 
-        .msg-row.other .msg-bubble {
-          margin-right: 30px;
-        }
+    // ====== RECUPERA SESSION DA ABA ======
+    const sessionId = sessionStorage.getItem("sessionId");
+    const mesaId = sessionStorage.getItem("mesaId");
+    const nomeCliente = sessionStorage.getItem("nomeCliente");
 
-        .input-row {
-          padding: 8px 10px;
-          margin-top: 4px;
-        }
+    // Se não existir, voltar ao login
+    if (!sessionId || !mesaId || !nomeCliente) {
+      alert("Sessão expirada ou ausente. Faça login novamente.");
+      window.location.href = "/login.html";
+    }
 
-        #msgInput {
-          padding: 12px 14px;
-          font-size: 15px;
-        }
+    // Nome que aparece no chat (inclui mesa)
+    const myDisplayName =
+      mesaId && mesaId !== "null" && mesaId !== "undefined"
+        ? `${nomeCliente} (mesa ${mesaId})`
+        : nomeCliente;
 
-        #sendBtn {
-          padding: 10px 16px;
-          font-size: 14px;
-        }
-      }
+    // Exibe informações abaixo do título
+    infoEl.textContent = `Você é "${nomeCliente}", mesa ${mesaId}.`;
 
-      /* Safe area pra iPhone (não colar no gesto de voltar) */
-      @supports (padding: env(safe-area-inset-bottom)) {
-        main {
-          padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        }
-      }
-    </style>
-  </head>
+    // ====== MONTA URL DO WEBSOCKET ======
+    const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const wsHost = window.location.host;
 
-  <body>
-    <header>
-      <button id="backButton">Voltar</button>
-      <div>
-        <h1>Chat com o Atendente</h1>
-        <small id="info"></small>
-        <small id="status"></small>
-      </div>
-    </header>
+    const wsUrl =
+      `${wsProtocol}://${wsHost}/chat` +
+      `?sessionId=${encodeURIComponent(sessionId)}` +
+      `&mesaId=${encodeURIComponent(mesaId)}` +
+      `&nome=${encodeURIComponent(nomeCliente)}`;
 
-    <main>
-      <!-- Janela de mensagens -->
-      <div id="chat"></div>
+    // Abre o WebSocket
+    const socket = new WebSocket(wsUrl);
 
-      <!-- Campo de envio -->
-      <div class="input-row">
-        <input
-          id="msgInput"
-          type="text"
-          placeholder="Digite sua mensagem e aperte Enter..."
-          autocomplete="off"
-        />
-        <button id="sendBtn">Enviar</button>
-      </div>
-    </main>
+    // ====== EVENTOS DO WEBSOCKET ======
+    socket.onopen = () => {
+      statusEl.textContent = "Conectado ao chat.";
+    };
 
-    <!-- Som de nova mensagem -->
-    <audio id="msgSound" src="/sons/notificacao.mp3" preload="auto"></audio>
+    socket.onerror = () => {
+      statusEl.textContent = "Erro ao conectar ao chat.";
+    };
 
-    <!-- SCRIPT DO CHAT  -->
-    <script>
-      // ====== ELEMENTOS DA PÁGINA ======
-      const chat = document.getElementById("chat");
-      const msgInput = document.getElementById("msgInput");
-      const sendBtn = document.getElementById("sendBtn");
-      const statusEl = document.getElementById("status");
-      const infoEl = document.getElementById("info");
-      const backButton = document.getElementById("backButton");
-      const msgSound = document.getElementById("msgSound");
+    socket.onclose = () => {
+      statusEl.textContent = "Conexão encerrada.";
+      sendBtn.disabled = true;
+      msgInput.disabled = true;
+    };
 
-      // ====== VOLTAR PARA O INÍCIO ======
-      backButton.addEventListener("click", () => {
-        window.location.href = "/inicio.html";
+    // ====== FUNÇÕES AUXILIARES ======
+
+    // Remove “(mesa X)” para usar só o nome nas iniciais
+    function extractNameFromUserField(userField) {
+      const idx = userField.indexOf(" (mesa");
+      if (idx === -1) return userField;
+      return userField.slice(0, idx);
+    }
+
+    // Gera iniciais (avatar)
+    function getInitials(name) {
+      const parts = name
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+      if (parts.length === 0) return "?";
+      if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+      return (
+        parts[0].charAt(0).toUpperCase() +
+        parts[parts.length - 1].charAt(0).toUpperCase()
+      );
+    }
+
+    // Renderiza mensagem no chat
+    function addMessageToChat(data) {
+      const isSystem = data.user === "Sistema";
+      const isMe = data.user === myDisplayName;
+
+      const row = document.createElement("div");
+      row.classList.add("msg-row");
+
+      if (isSystem) row.classList.add("system");
+      else if (isMe) row.classList.add("me");
+      else row.classList.add("other");
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("msg-bubble");
+
+      const textEl = document.createElement("div");
+      textEl.classList.add("msg-text");
+      textEl.textContent = data.text;
+
+      const timeEl = document.createElement("div");
+      timeEl.classList.add("msg-time");
+      timeEl.textContent = new Date(data.ts).toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
       });
 
-      // ====== RECUPERA SESSION DA ABA ======
-      const sessionId = sessionStorage.getItem("sessionId");
-      const mesaId = sessionStorage.getItem("mesaId");
-      const nomeCliente = sessionStorage.getItem("nomeCliente");
+      if (isSystem) {
+        bubble.appendChild(textEl);
+        row.appendChild(bubble);
+      } else {
+        const userEl = document.createElement("div");
+        userEl.classList.add("msg-user");
+        userEl.textContent = data.user;
 
-      // Se não existir, voltar ao login
-      if (!sessionId || !mesaId || !nomeCliente) {
-        alert("Sessão expirada ou ausente. Faça login novamente.");
-        window.location.href = "/login.html";
-      }
+        bubble.appendChild(userEl);
+        bubble.appendChild(textEl);
+        bubble.appendChild(timeEl);
 
-      // Nome que aparece no chat (inclui mesa)
-      const myDisplayName =
-        mesaId && mesaId !== "null" && mesaId !== "undefined"
-          ? `${nomeCliente} (mesa ${mesaId})`
-          : nomeCliente;
-
-      // Exibe informações abaixo do título
-      infoEl.textContent = `Você é "${nomeCliente}", mesa ${mesaId}.`;
-
-      // ====== MONTA URL DO WEBSOCKET ======
-      const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsHost = window.location.host;
-
-      const wsUrl =
-        `${wsProtocol}://${wsHost}/chat` +
-        `?sessionId=${encodeURIComponent(sessionId)}` +
-        `&mesaId=${encodeURIComponent(mesaId)}` +
-        `&nome=${encodeURIComponent(nomeCliente)}`;
-
-      // Abre o WebSocket
-      const socket = new WebSocket(wsUrl);
-
-      // ====== EVENTOS DO WEBSOCKET ======
-      socket.onopen = () => {
-        statusEl.textContent = "Conectado ao chat.";
-      };
-
-      socket.onerror = () => {
-        statusEl.textContent = "Erro ao conectar ao chat.";
-      };
-
-      socket.onclose = () => {
-        statusEl.textContent = "Conexão encerrada.";
-        sendBtn.disabled = true;
-        msgInput.disabled = true;
-      };
-
-      // ====== FUNÇÕES AUXILIARES ======
-
-      // Remove “(mesa X)” para usar só o nome nas iniciais
-      function extractNameFromUserField(userField) {
-        const idx = userField.indexOf(" (mesa");
-        if (idx === -1) return userField;
-        return userField.slice(0, idx);
-      }
-
-      // Gera iniciais (avatar)
-      function getInitials(name) {
-        const parts = name
-          .trim()
-          .split(/\s+/)
-          .filter(Boolean);
-        if (parts.length === 0) return "?";
-        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-        return (
-          parts[0].charAt(0).toUpperCase() +
-          parts[parts.length - 1].charAt(0).toUpperCase()
+        const avatar = document.createElement("div");
+        avatar.classList.add("msg-avatar");
+        avatar.textContent = getInitials(
+          extractNameFromUserField(data.user)
         );
-      }
 
-      // Renderiza mensagem no chat
-      function addMessageToChat(data) {
-        const isSystem = data.user === "Sistema";
-        const isMe = data.user === myDisplayName;
-
-        const row = document.createElement("div");
-        row.classList.add("msg-row");
-
-        if (isSystem) row.classList.add("system");
-        else if (isMe) row.classList.add("me");
-        else row.classList.add("other");
-
-        const bubble = document.createElement("div");
-        bubble.classList.add("msg-bubble");
-
-        const textEl = document.createElement("div");
-        textEl.classList.add("msg-text");
-        textEl.textContent = data.text;
-
-        const timeEl = document.createElement("div");
-        timeEl.classList.add("msg-time");
-        timeEl.textContent = new Date(data.ts).toLocaleTimeString("pt-BR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-
-        if (isSystem) {
-          bubble.appendChild(textEl);
+        if (isMe) {
           row.appendChild(bubble);
+          row.appendChild(avatar);
         } else {
-          const userEl = document.createElement("div");
-          userEl.classList.add("msg-user");
-          userEl.textContent = data.user;
-
-          bubble.appendChild(userEl);
-          bubble.appendChild(textEl);
-          bubble.appendChild(timeEl);
-
-          const avatar = document.createElement("div");
-          avatar.classList.add("msg-avatar");
-          avatar.textContent = getInitials(
-            extractNameFromUserField(data.user)
-          );
-
-          if (isMe) {
-            row.appendChild(bubble);
-            row.appendChild(avatar);
-          } else {
-            row.appendChild(avatar);
-            row.appendChild(bubble);
-          }
-        }
-
-        chat.appendChild(row);
-        chat.scrollTop = chat.scrollHeight;
-
-        // Som quando mensagem vem de outro usuário
-        if (!isSystem && !isMe && msgSound) {
-          try {
-            msgSound.currentTime = 0;
-            msgSound.play().catch(() => {});
-          } catch {}
+          row.appendChild(avatar);
+          row.appendChild(bubble);
         }
       }
 
-      // Recebe mensagem do servidor
-      socket.onmessage = (event) => {
+      chat.appendChild(row);
+      chat.scrollTop = chat.scrollHeight;
+
+      // Som quando mensagem vem de outro usuário
+      if (!isSystem && !isMe && msgSound) {
         try {
-          const data = JSON.parse(event.data);
-          addMessageToChat(data);
-        } catch (err) {
-          console.error("Mensagem inválida:", err);
-        }
-      };
+          msgSound.currentTime = 0;
+          msgSound.play().catch(() => { });
+        } catch { }
+      }
+    }
 
-      // Envia mensagem para o servidor
-      function enviarMensagem() {
-        const texto = msgInput.value.trim();
-        if (!texto) return;
+    // Recebe mensagem do servidor
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        addMessageToChat(data);
+      } catch (err) {
+        console.error("Mensagem inválida:", err);
+      }
+    };
 
-        if (socket.readyState !== WebSocket.OPEN) {
-          alert("Conexão com o chat está fechada.");
-          return;
-        }
+    // Envia mensagem para o servidor
+    function enviarMensagem() {
+      const texto = msgInput.value.trim();
+      if (!texto) return;
 
-        socket.send(JSON.stringify({ text: texto }));
-        msgInput.value = "";
+      if (socket.readyState !== WebSocket.OPEN) {
+        alert("Conexão com o chat está fechada.");
+        return;
       }
 
-      sendBtn.onclick = enviarMensagem;
+      socket.send(JSON.stringify({ text: texto }));
+      msgInput.value = "";
+    }
 
-      msgInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          enviarMensagem();
-        }
-      });
-    </script>
-  </body>
+    sendBtn.onclick = enviarMensagem;
+
+    msgInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        enviarMensagem();
+      }
+    });
+  </script>
+  <footer class="footer-nav">
+    <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
+    <div class="footer-btn active" onclick="window.location.href='/chat.html'">💬</div>
+    <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
+  </footer>
+
+  <script>
+    // Ativa o botão correto com base na URL
+    const path = window.location.pathname;
+    const btns = document.querySelectorAll(".footer-btn");
+
+    if (path.includes("inicio")) btns[0].classList.add("active");
+    if (path.includes("chat")) btns[1].classList.add("active");
+    if (path.includes("fila")) btns[2].classList.add("active");
+  </script>
+</body>
+
 </html>

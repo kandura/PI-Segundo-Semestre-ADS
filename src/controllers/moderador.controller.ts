@@ -1,3 +1,4 @@
+import { FilaRepository } from "../repositories/fila.repository.js";
 import { Request, Response } from "express";
 import prisma  from "../database/prismaClient.js";
 import bcrypt from "bcryptjs";
@@ -12,7 +13,7 @@ export const ModeradorController = {
       if (existe) return res.status(400).json({ error: "Email já cadastrado" });
 
       const hash = await bcrypt.hash(senha, 10);
-
+ 
       await prisma.moderador.create({
         data: { nome, email, senha: hash }
       });

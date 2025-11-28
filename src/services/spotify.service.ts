@@ -38,7 +38,7 @@ export class SpotifyService {
   }
 
   // Busca um access token válido; se tiver expirado, faz refresh
-  private async getValidAccessToken(): Promise<string> {
+  public async getValidAccessToken(): Promise<string> {
     const authData = await prisma.spotifyAuth.findFirst();
 
     if (!authData) {

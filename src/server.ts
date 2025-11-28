@@ -23,6 +23,9 @@ import pedidoMusicaSpotifyRouter from "./routes/pedidoMusicaSpotify.routes.js";
 // ⭐ ROTAS DA FILA DE MÚSICAS
 import filaRoutes from "./routes/fila.routes.js";
 
+// ⭐ ROTAS DO PLAYER
+import playerRoutes from "./routes/player.routes.js";
+
 
 // ----------------- APP EXPRESS -----------------
 
@@ -33,7 +36,7 @@ app.use(express.json());
 // Frontend estático
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
-// Rotas de música (existentes)
+// Rotas base do sistema
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
@@ -41,7 +44,6 @@ app.use("/api", pedidoMusicaRouter);
 app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));
 });
-
 
 // ----------------- ROTAS REST -----------------
 
@@ -60,6 +62,9 @@ app.use("/pedido-musica", pedidoMusicaSpotifyRouter);
 
 // ⭐ ROTA DA FILA DE MÚSICAS
 app.use("/api", filaRoutes);
+
+// ⭐ ROTA DO PLAYER
+app.use("/api", playerRoutes);
 
 
 // ----------------- WEBSOCKET DO CHAT -----------------
@@ -102,13 +107,11 @@ wss.on("connection", (ws, req) => {
     const sessionId = url.searchParams.get("sessionId") ?? "";
     const mesaId = url.searchParams.get("mesaId") ?? "";
 
-    let displayUser = nomeParam;
-
-    if (moderador) {
-      displayUser = `MOD | ${nomeParam}`;
-    } else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
-      displayUser = `${nomeParam} (mesa ${mesaId})`;
-    }
+    let displayUser = moderador
+      ? `MOD | ${nomeParam}`
+      : mesaId && mesaId !== "null"
+      ? `${nomeParam} (mesa ${mesaId})`
+      : nomeParam;
 
     console.log(
       `WebSocket: cliente conectado - ${displayUser} (sessão ${sessionId})`
@@ -127,10 +130,7 @@ wss.on("connection", (ws, req) => {
         const msg = parseMessage(raw);
 
         if (msg.type === "delete-message") {
-          broadcast({
-            type: "delete-message",
-            id: msg.id,
-          });
+          broadcast({ type: "delete-message", id: msg.id });
           return;
         }
 
@@ -139,7 +139,7 @@ wss.on("connection", (ws, req) => {
             ? msg.text.trim()
             : String(msg.text ?? "").trim();
 
-        if (texto.length === 0) return;
+        if (!texto) return;
 
         const out: ChatMessage = {
           id: `msg-${Date.now()}-${Math.random()
@@ -158,13 +158,12 @@ wss.on("connection", (ws, req) => {
 
     ws.on("close", () => {
       console.log("WebSocket: cliente desconectado");
-      const leaveMsg: ChatMessage = {
+      broadcast({
         id: `sys-${Date.now()}`,
         user: "Sistema",
         text: `${displayUser} saiu do chat.`,
         ts: Date.now(),
-      };
-      broadcast(leaveMsg);
+      });
     });
 
     ws.on("error", (err) => {
@@ -176,7 +175,7 @@ wss.on("connection", (ws, req) => {
   }
 });
 
-// ----------------- WEBSOCKET DA FILA DE MÚSICAS -----------------
+// ----------------- WEBSOCKET DA FILA -----------------
 
 const wssFila = new WebSocketServer({ server, path: "/fila-ws" });
 
@@ -189,12 +188,8 @@ export function broadcastFila(data: any) {
   });
 }
 
-wssFila.on("connection", (ws) => {
+wssFila.on("connection", () => {
   console.log("Cliente conectado ao WebSocket da Fila");
-
-  ws.on("close", () => {
-    console.log("Cliente saiu do WebSocket da Fila");
-  });
 });
 
 // ----------------- SEED DAS MESAS -----------------
@@ -227,7 +222,6 @@ async function ensureMesasSeeded() {
     console.error("[seed] Erro ao garantir mesas:", err);
   }
 }
-
 
 // ----------------- SUBIR SERVIDOR -----------------
 

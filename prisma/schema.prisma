@@ -4,8 +4,11 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
+
+/**********************
+ * MODELOS PRINCIPAIS
+ **********************/
 
 model Cliente {
   id            Int            @id @default(autoincrement())
@@ -38,38 +41,88 @@ model SessaoCliente {
 }
 
 model SpotifyAuth {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   accessToken     String
-  refreshToken    String   @unique
+  refreshToken    String    @unique
+  tokenType       String    @default("Bearer")
+  scope           String?
   expiresAt       DateTime
-  tokenObtainedAt DateTime @default(now())
-  createdAt       DateTime @default(now())
+  tokenObtainedAt DateTime  @default(now())
+  createdAt       DateTime  @default(now())
 }
 
 model Music {
-  id        Int            @id @default(autoincrement())
-  titulo    String
-  artista   String
-  genero    String
-  createdAt DateTime       @default(now())
-  pedidos   PedidoMusica[]
+  id         Int              @id @default(autoincrement())
+  spotifyId  String           @unique
+  titulo     String
+  artista    String
+  album      String?
+  coverUrl   String?
+  createdAt  DateTime         @default(now())
+  pedidos    PedidoMusica[]
+
+  // 👇 lado inverso da relação com PlaybackQueue
+  queueEntries PlaybackQueue[]
 }
+
+/**********************
+ * RELAÇÃO 1:1 CORRIGIDA
+ **********************/
 
 model PedidoMusica {
   id        Int          @id @default(autoincrement())
   clienteId Int
   musicId   Int
   mesaId    Int
+  queueId   Int?         @unique  // ← OBRIGATÓRIO em 1:1
   status    PedidoStatus @default(PENDENTE)
   createdAt DateTime     @default(now())
+
   cliente   Cliente      @relation(fields: [clienteId], references: [id])
   music     Music        @relation(fields: [musicId], references: [id])
+
+  // Lado DEFINIDOR da relação 1:1
+  queue     PlaybackQueue? @relation("PedidoToQueue", fields: [queueId], references: [id])
+}
+
+model PlaybackQueue {
+  id         Int            @id @default(autoincrement())
+  musicId    Int
+  addedAt    DateTime       @default(now())
+  playedAt   DateTime?
+  order      Int            @default(0)
+  status     QueueStatus    @default(NA_FILA)
+
+  music      Music          @relation(fields: [musicId], references: [id])
+
+  // relação 1:1 com PedidoMusica
+  pedido     PedidoMusica?  @relation("PedidoToQueue")
+
+  // 👇 lado inverso de PlayerState.queue
+  playerState PlayerState?
+}
+
+model PlayerState {
+  id             Int       @id @default(autoincrement())
+  currentQueueId Int?      @unique
+  isPlaying      Boolean   @default(false)
+  progressMs     Int       @default(0)
+  updatedAt      DateTime  @updatedAt
+
+  queue          PlaybackQueue? @relation(fields: [currentQueueId], references: [id])
 }
 
 enum PedidoStatus {
   PENDENTE
   APROVADO
   REJEITADO
+}
+
+enum QueueStatus {
+  NA_FILA
+  TOCANDO
+  TOCADA
+  PULADA
 }
 
 model Moderador {

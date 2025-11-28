@@ -4,34 +4,33 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
-    //Environment Settings
+    // Environment Settings
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "target": "esnext",
     "types": ["node"],
     "lib": ["esnext"],
 
-    // Other Outputs
+    // Output
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
+    // Decorators
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    // Stricter Typechecking Options
+    // Type Checking
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    // ✔ Corrige warnings de funções depreciadas (incluindo baseUrl)
+    "ignoreDeprecations": "5.0"
   },
 
   "include": ["src/**/*"],
-
-  "exclude": [
-    "node_modules",
-    "dist",
-    "prisma.config.ts"
-  ],
+  "exclude": ["node_modules", "dist", "prisma.config.ts"]
 }

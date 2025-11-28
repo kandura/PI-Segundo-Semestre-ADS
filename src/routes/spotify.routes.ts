@@ -1,13 +1,13 @@
 import { Router, Request, Response } from "express";
-import { SpotifyService } from "../services/SpotifyService.js";
+import { SpotifyService } from "../services/spotify.service.js";
 import * as querystring from "querystring";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
-const spotifyRoutes = Router();
+const router = Router();
 const spotifyService = new SpotifyService();
 
-// Escopos necessários pra leitura e controle básico do player
+// escopos necessários
 const scopes = [
   "playlist-read-private",
   "user-modify-playback-state",
@@ -15,8 +15,8 @@ const scopes = [
   "user-read-private",
 ];
 
-// Rota que monta a URL de autorização e redireciona pro Spotify
-spotifyRoutes.get("/login", (req: Request, res: Response) => {
+// LOGIN (redireciona pro spotify)
+router.get("/login", (req: Request, res: Response) => {
   const authorizeUrl =
     "https://accounts.spotify.com/authorize?" +
     querystring.stringify({
@@ -29,16 +29,13 @@ spotifyRoutes.get("/login", (req: Request, res: Response) => {
   return res.redirect(authorizeUrl);
 });
 
-// Callback chamado pelo Spotify após o usuário autorizar
-spotifyRoutes.get("/callback", async (req: Request, res: Response) => {
+// CALLBACK do Spotify
+router.get("/callback", async (req: Request, res: Response) => {
   const code = req.query.code as string;
 
-  if (!code) {
-    return res.status(400).send("Spotify authorization failed.");
-  }
+  if (!code) return res.status(400).send("Spotify authorization failed.");
 
   try {
-    // Troca o "code" pelos tokens
     const tokens = await spotifyService.getTokensFromCode(code);
 
     await prisma.spotifyAuth.upsert({
@@ -60,9 +57,9 @@ spotifyRoutes.get("/callback", async (req: Request, res: Response) => {
 
     return res.send("Spotify Authorized! You can close this window.");
   } catch (error) {
-    console.error("Error during Spotify authorization:", error);
+    console.error("[Spotify Callback Error]", error);
     return res.status(500).send("Error during Spotify authorization.");
   }
 });
 
-export default spotifyRoutes;
+export default router;

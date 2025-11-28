@@ -101,6 +101,59 @@
       color: var(--text-muted);
     }
 
+    /* --- SPOTIFY RESULTS --- */
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .music-card {
+      background: var(--card-bg);
+      padding: 14px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      gap: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(6px);
+      align-items: center;
+    }
+
+    .cover {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: #222;
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .artist {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .add-btn {
+      margin-top: 6px;
+      padding: 6px 10px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
     /* -------- GRID -------- */
     .grid {
       display: grid;
@@ -213,8 +266,11 @@
     <!-- SEARCH -->
     <div class="search-box">
       🔍
-      <input type="text" placeholder="O que você quer ouvir?" />
+      <input id="searchInput" type="text" placeholder="O que você quer ouvir?" />
     </div>
+
+    <!-- SPOTIFY RESULTS -->
+    <section id="spotifyResults" class="results"></section>
 
     <!-- GRID -->
     <section class="grid">
@@ -252,32 +308,71 @@
 
   <!-- FOOTER -->
   <footer class="footer-nav">
-  <div class="footer-btn active" onclick="window.location.href='/inicio.html'">🏠</div>
-  <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
-  <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
-</footer>
+    <div class="footer-btn active" onclick="window.location.href='/inicio.html'">🏠</div>
+    <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
+    <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
+  </footer>
 
   <script>
-    // Carrega dados da sessão (por aba)
+    // Carrega dados da sessão
     const nome = sessionStorage.getItem("nomeCliente");
     const mesa = sessionStorage.getItem("mesaId");
 
-    // Se não tiver sessão → voltar ao login
     if (!nome || !mesa) {
       window.location.href = "/login.html";
     }
 
-    // Avatar = primeira letra do nome
     document.getElementById("avatar").textContent = nome[0].toUpperCase();
-
-    // Subtítulo
     document.getElementById("subtitle").textContent =
       `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
-    // Navegação
     function goTo(genero) {
       window.location.href = `/genero-${genero}.html`;
     }
+
+    // ---------- PESQUISA SPOTIFY ----------
+    const input = document.getElementById("searchInput");
+    const results = document.getElementById("spotifyResults");
+
+    input.addEventListener("keyup", async () => {
+      const q = input.value.trim();
+
+      if (q.length < 2) {
+        results.innerHTML = "";
+        return;
+      }
+
+      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+      const tracks = await res.json();
+
+      results.innerHTML = "";
+
+      tracks.forEach(t => {
+        const card = document.createElement("div");
+        card.className = "music-card";
+
+        card.innerHTML = `
+          <img class="cover" src="${t.album}" />
+          <div class="info">
+            <div class="title">${t.title}</div>
+            <div class="artist">${t.artists}</div>
+            <button class="add-btn">Adicionar</button>
+          </div>
+        `;
+
+        card.querySelector(".add-btn").onclick = async () => {
+          await fetch("/api/spotify/queue", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ uri: t.spotifyUri })
+          });
+
+          alert("Música adicionada à fila!");
+        };
+
+        results.appendChild(card);
+      });
+    });
   </script>
 </body>
 

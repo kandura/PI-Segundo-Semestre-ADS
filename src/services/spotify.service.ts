@@ -148,10 +148,11 @@ export class SpotifyService {
 
     // Normaliza o retorno pro resto do sistema
     return response.data.tracks.items.map((item: any) => ({
-      spotifyUri: item.uri,
-      title: item.name,
-      artists: item.artists.map((artist: any) => artist.name).join(", "),
-      album: item.album?.images?.[0]?.url ?? null,
+        spotifyUri: item.uri,
+        title: item.name,
+        artists: item.artists.map((a: any) => a.name).join(", "),
+        album: item.album?.images?.[0]?.url ?? null,
+        popularity: item.popularity,
     }));
   }
 

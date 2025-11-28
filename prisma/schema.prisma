@@ -74,7 +74,7 @@ model PedidoMusica {
   clienteId Int
   musicId   Int
   mesaId    Int
-  queueId   Int?         @unique  // ← OBRIGATÓRIO em 1:1
+  queueId   Int?         @unique
   status    PedidoStatus @default(PENDENTE)
   createdAt DateTime     @default(now())
 

@@ -1,3 +1,5 @@
+// src/server.ts
+
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -12,8 +14,14 @@ import prisma from "./database/prismaClient.js";
 import pedidoMusicaRouter from "./routes/pedidoMusica.routes.js";
 import moderadorRoutes from "./routes/moderador.routes.js";
 
-// ⭐ ADICIONADO — ROTAS DO SPOTIFY
+// ⭐ ROTAS DO SPOTIFY
 import spotifyRoutes from "./routes/spotify.routes.js";
+
+// ⭐ ROTAS DO PEDIDO DE MÚSICA VIA SPOTIFY
+import pedidoMusicaSpotifyRouter from "./routes/pedidoMusicaSpotify.routes.js";
+
+// ⭐ ROTAS DA FILA DE MÚSICAS
+import filaRoutes from "./routes/fila.routes.js";
 
 
 // ----------------- APP EXPRESS -----------------
@@ -25,7 +33,7 @@ app.use(express.json());
 // Frontend estático
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
-// Rotas de música (já existentes)
+// Rotas de música (existentes)
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
@@ -33,6 +41,7 @@ app.use("/api", pedidoMusicaRouter);
 app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));
 });
+
 
 // ----------------- ROTAS REST -----------------
 
@@ -45,6 +54,12 @@ app.use("/api/moderador", moderadorRoutes);
 
 // ⭐ ROTAS DO SPOTIFY
 app.use("/api/spotify", spotifyRoutes);
+
+// ⭐ ROTA DO PEDIDO DE MÚSICA VIA SPOTIFY
+app.use("/pedido-musica", pedidoMusicaSpotifyRouter);
+
+// ⭐ ROTA DA FILA DE MÚSICAS
+app.use("/api", filaRoutes);
 
 
 // ----------------- WEBSOCKET DO CHAT -----------------
@@ -89,8 +104,9 @@ wss.on("connection", (ws, req) => {
 
     let displayUser = nomeParam;
 
-    if (moderador) displayUser = `MOD | ${nomeParam}`;
-    else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
+    if (moderador) {
+      displayUser = `MOD | ${nomeParam}`;
+    } else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
       displayUser = `${nomeParam} (mesa ${mesaId})`;
     }
 
@@ -160,6 +176,26 @@ wss.on("connection", (ws, req) => {
   }
 });
 
+// ----------------- WEBSOCKET DA FILA DE MÚSICAS -----------------
+
+const wssFila = new WebSocketServer({ server, path: "/fila-ws" });
+
+export function broadcastFila(data: any) {
+  const json = JSON.stringify(data);
+  wssFila.clients.forEach((client: any) => {
+    if (client.readyState === client.OPEN) {
+      client.send(json);
+    }
+  });
+}
+
+wssFila.on("connection", (ws) => {
+  console.log("Cliente conectado ao WebSocket da Fila");
+
+  ws.on("close", () => {
+    console.log("Cliente saiu do WebSocket da Fila");
+  });
+});
 
 // ----------------- SEED DAS MESAS -----------------
 

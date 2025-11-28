@@ -19,26 +19,15 @@
         --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
       }
 
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
 
       body {
         min-height: 100vh;
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-          "Segoe UI", sans-serif;
+        font-family: system-ui, sans-serif;
         color: var(--primary-text);
         background: var(--bg);
         background-attachment: fixed;
-      }
-
-      .page-wrapper {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
       }
 
       .container {
@@ -48,7 +37,6 @@
       }
 
       /* HEADER */
-
       .header {
         display: flex;
         align-items: center;
@@ -66,46 +54,16 @@
         justify-content: center;
         font-weight: 600;
         font-size: 18px;
-        box-shadow: 0 10px 25px rgba(65, 105, 225, 0.6);
         flex-shrink: 0;
       }
 
-      .header-text {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
+      .header-text { display: flex; flex-direction: column; gap: 2px; }
 
-      .title {
-        font-size: 20px;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-      }
-
-      .subtitle {
-        font-size: 13px;
-        color: var(--secondary-text);
-      }
+      .title { font-size: 20px; font-weight: 700; }
+      .subtitle { font-size: 13px; color: var(--secondary-text); }
 
       /* FILA */
-
-      .fila-container {
-        margin-top: 12px;
-      }
-
-      .section-label {
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--secondary-text);
-        margin-bottom: 10px;
-      }
-
-      .fila-lista {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
+      .fila-lista { display: flex; flex-direction: column; gap: 12px; }
 
       .music-card {
         background: var(--card-bg);
@@ -114,52 +72,24 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: var(--shadow-soft);
         border: 1px solid var(--border-subtle);
       }
 
-      .music-info {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
+      .music-info { display: flex; flex-direction: column; gap: 4px; }
 
-      .music-title {
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      .music-artist {
-        font-size: 12px;
-        color: var(--secondary-text);
-      }
+      .music-title { font-size: 15px; font-weight: 600; }
+      .music-artist { font-size: 12px; color: var(--secondary-text); }
 
       .status {
         font-size: 11px;
         font-weight: 600;
         padding: 6px 12px;
         border-radius: 999px;
-        border: 1px solid transparent;
-        white-space: nowrap;
       }
 
-      .status.playing {
-        background: rgba(63, 220, 163, 0.1);
-        border-color: var(--success);
-        color: var(--success);
-      }
-
-      .status.next {
-        background: rgba(255, 179, 66, 0.12);
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      .status.waiting {
-        background: rgba(255, 255, 255, 0.02);
-        border-color: rgba(255, 255, 255, 0.05);
-        color: var(--secondary-text);
-      }
+      .status.playing { background: rgba(63,220,163,.1); color: var(--success); border: 1px solid var(--success); }
+      .status.next { background: rgba(255,179,66,.12); color: var(--accent); border: 1px solid var(--accent); }
+      .status.waiting { background: rgba(255,255,255,.02); color: var(--secondary-text); border: 1px solid rgba(255,255,255,.05); }
 
       .empty-state {
         text-align: center;
@@ -169,235 +99,141 @@
       }
 
       /* FOOTER NAV */
-
       .footer-nav {
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 0; left: 0; right: 0;
         height: 64px;
-        background: linear-gradient(
-          to top,
-          rgba(0, 0, 0, 0.95),
-          rgba(0, 0, 0, 0.88)
-        );
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,.9);
+        border-top: 1px solid rgba(255,255,255,.06);
         display: flex;
         justify-content: space-around;
         align-items: center;
-        padding: 0 16px;
-        z-index: 50;
       }
 
       .footer-btn {
-        width: 52px;
-        height: 52px;
+        width: 52px; height: 52px;
         border-radius: 18px;
-        border: 1px solid rgba(255, 255, 255, 0.13);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        border: 1px solid rgba(255,255,255,.13);
+        display: flex; align-items: center; justify-content: center;
         font-size: 24px;
-        background: rgba(10, 10, 20, 0.85);
+        background: rgba(10,10,20,.85);
         color: var(--secondary-text);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
         cursor: pointer;
-        transition: all 0.18s ease;
       }
 
       .footer-btn.active {
         background: var(--accent);
         border-color: var(--accent);
         color: #1a1210;
-        transform: translateY(-3px);
-        box-shadow: 0 14px 28px rgba(255, 179, 66, 0.55);
-      }
-
-      .footer-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.8);
-      }
-
-      /* MOBILE */
-
-      @media (max-width: 768px) {
-        .container {
-          max-width: 480px;
-          margin: 24px auto 96px;
-        }
-
-        .title {
-          font-size: 18px;
-        }
-
-        .subtitle {
-          font-size: 12px;
-        }
-
-        .music-card {
-          padding: 12px 14px;
-          border-radius: 16px;
-        }
-
-        .music-title {
-          font-size: 14px;
-        }
-
-        .music-artist {
-          font-size: 11px;
-        }
-
-        .status {
-          font-size: 10px;
-          padding: 4px 10px;
-        }
       }
     </style>
   </head>
 
   <body>
-    <div class="page-wrapper">
-      <div class="container">
-        <header class="header">
-          <div class="avatar" id="avatar">J</div>
-          <div class="header-text">
-            <div class="title">Fila de Músicas</div>
-            <div class="subtitle" id="subtitle"></div>
-          </div>
-        </header>
+    <div class="container">
+      <header class="header">
+        <div class="avatar" id="avatar">J</div>
+        <div class="header-text">
+          <div class="title">Fila de Músicas</div>
+          <div class="subtitle" id="subtitle"></div>
+        </div>
+      </header>
 
-        <section class="fila-container">
-          <div class="section-label">Próximas músicas</div>
-          <div id="fila" class="fila-lista"></div>
-        </section>
-      </div>
+      <section>
+        <div class="section-label">Próximas músicas</div>
+        <div id="fila" class="fila-lista"></div>
+      </section>
     </div>
 
     <!-- FOOTER -->
     <footer class="footer-nav">
-      <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
-      <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
-      <!-- Aqui a pasta fica ativa, porque estamos na fila -->
-      <div class="footer-btn active" onclick="window.location.href='/fila.html'">
-        📁
-      </div>
+      <div class="footer-btn" onclick="location.href='/inicio.html'">🏠</div>
+      <div class="footer-btn" onclick="location.href='/chat.html'">💬</div>
+      <div class="footer-btn active" onclick="location.href='/fila.html'">📁</div>
     </footer>
 
-    <script>
-      /* =========== DADOS DA SESSÃO =========== */
-      const nome = sessionStorage.getItem("nomeCliente");
+<script>
+  /* ============ SESSÃO ============ */
+  const nome = sessionStorage.getItem("nomeCliente");
+  if (!nome) location.href = "/login.html";
 
-      if (!nome) {
-        window.location.href = "/login.html";
-      }
+  document.getElementById("avatar").textContent = nome[0].toUpperCase();
+  const mesa = sessionStorage.getItem("mesaId") || "-";
+  document.getElementById("subtitle").textContent =
+    `Mesa ${mesa} · Bem-vindo(a), ${nome}!`;
 
-      const mesa = sessionStorage.getItem("mesaId") || "-";
+  /* ============ RENDERIZAR FILA ============ */
+  function renderFila(pedidos) {
+    const lista = document.getElementById("fila");
+    lista.innerHTML = "";
 
-      document.getElementById("avatar").textContent = nome[0].toUpperCase();
-      document.getElementById("subtitle").textContent =
-        `Mesa ${mesa} · Bem-vindo(a), ${nome}!`;
+    if (!pedidos || pedidos.length === 0) {
+      lista.innerHTML = `
+        <div class="empty-state">
+          Nenhuma música na fila 🎧<br>
+          Use a aba de pesquisa!
+        </div>`;
+      return;
+    }
 
-      /* ============ MOCK DA FILA (exemplo) ============ */
-      const mockFila = [
-        { id: 1, titulo: "Oceans", artista: "Hillsong" },
-        { id: 2, titulo: "In the End", artista: "Linkin Park" },
-        { id: 3, titulo: "Blinding Lights", artista: "The Weeknd" },
-        { id: 4, titulo: "See You Again", artista: "Wiz Khalifa" },
-        { id: 5, titulo: "Bohemian Rhapsody", artista: "Queen" },
-        { id: 6, titulo: "Smells Like Teen Spirit", artista: "Nirvana" },
-        { id: 7, titulo: "Shape of You", artista: "Ed Sheeran" }
-      ];
+    pedidos.forEach((p, index) => {
+      const status =
+        index === 0 ? "playing" :
+        index === 1 ? "next" :
+        "waiting";
 
-      function renderMockFila() {
-        const lista = document.getElementById("fila");
-        lista.innerHTML = "";
+      const label =
+        index === 0 ? "Tocando 🎵" :
+        index === 1 ? "Próxima ⏳" :
+        "Na fila";
 
-        mockFila.forEach((m, index) => {
-          const statusClass =
-            index === 0 ? "playing" :
-            index === 1 ? "next" :
-            "waiting";
+      const card = document.createElement("div");
+      card.className = "music-card";
 
-          const statusLabel =
-            index === 0 ? "Tocando 🎵" :
-            index === 1 ? "Próxima ⏳" :
-            "Na fila";
+      card.innerHTML = `
+        <div class="music-info">
+          <span class="music-title">${p.music.titulo}</span>
+          <span class="music-artist">
+            ${p.music.artista} · Pedido por ${p.cliente.nome}
+          </span>
+        </div>
+        <div class="status ${status}">${label}</div>
+      `;
 
-          const card = document.createElement("div");
-          card.className = "music-card";
+      lista.appendChild(card);
+    });
+  }
 
-          card.innerHTML = `
-            <div class="music-info">
-              <span class="music-title">${m.titulo}</span>
-              <span class="music-artist">${m.artista}</span>
-            </div>
-            <div class="status ${statusClass}">
-              ${statusLabel}
-            </div>
-          `;
+  /* ============ BUSCA API ============ */
+  async function carregarFila() {
+    try {
+      const res = await fetch("/api/pedidos/fila");
+      const dados = await res.json();
+      renderFila(dados);
+    } catch {
+      document.getElementById("fila").innerHTML =
+        `<div class="empty-state">Erro ao carregar a fila 😢</div>`;
+    }
+  }
 
-          lista.appendChild(card);
-        });
-      }
+  carregarFila(); // carrega ao abrir
 
-      /* =========== RENDERIZAÇÃO DA FILA REAL =========== */
-      function renderFila(pedidos) {
-        const lista = document.getElementById("fila");
-        lista.innerHTML = "";
+  /* ============ WEBSOCKET DA FILA ============ */
+  const wsFila = new WebSocket(`ws://${location.host}/fila-ws`);
 
-        pedidos.forEach((p, index) => {
-          const statusClass =
-            index === 0 ? "playing" :
-            index === 1 ? "next" :
-            "waiting";
+  wsFila.onmessage = (event) => {
+    const data = JSON.parse(event.data);
 
-          const statusLabel =
-            index === 0 ? "Tocando 🎵" :
-            index === 1 ? "Próxima ⏳" :
-            "Na fila";
+    if (data.tipo === "atualizar-fila") {
+      carregarFila(); // 🔥 atualização instantânea
+    }
+  };
 
-          const card = document.createElement("div");
-          card.className = "music-card";
+  wsFila.onclose = () => {
+    console.warn("WS da fila desconectado — tentando reconectar...");
+    setTimeout(() => location.reload(), 1500);
+  };
+</script>
 
-          card.innerHTML = `
-            <div class="music-info">
-              <span class="music-title">${p.music.titulo}</span>
-              <span class="music-artist">
-                ${p.music.artista} · Pedido por ${p.cliente.nome}
-              </span>
-            </div>
-            <div class="status ${statusClass}">
-              ${statusLabel}
-            </div>
-          `;
-
-          lista.appendChild(card);
-        });
-      }
-
-      async function carregarFila() {
-        try {
-          const res = await fetch("/api/pedidos/fila");
-          if (!res.ok) throw new Error("Erro ao buscar fila");
-
-          const pedidos = await res.json();
-
-          if (!pedidos || pedidos.length === 0) {
-            // Fila de exemplo
-            renderMockFila();
-          } else {
-            renderFila(pedidos);
-          }
-        } catch (err) {
-          console.error("Erro ao carregar fila:", err);
-          // Se der erro na API, também mostra os exemplos
-          renderMockFila();
-        }
-      }
-
-      // Carrega ao entrar na página
-      carregarFila();
-      // setInterval(carregarFila, 5000);
-    </script>
   </body>
 </html>

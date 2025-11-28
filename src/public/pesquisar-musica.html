@@ -68,7 +68,7 @@
       color: var(--text-muted);
     }
 
-    /* SEARCH BAR */
+    /* SEARCH */
     .search-box {
       background: #0f0f17;
       padding: 12px 16px;
@@ -99,7 +99,7 @@
       font-weight: bold;
     }
 
-    /* RESULT LIST */
+    /* RESULTS */
     .results {
       display: flex;
       flex-direction: column;
@@ -183,6 +183,56 @@
       border: 2px solid transparent;
       cursor: pointer;
     }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: #15151d;
+      padding: 20px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: #666;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    .btn-confirm {
+      flex: 1;
+      background: var(--accent);
+      color: #000;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
   </style>
 </head>
 
@@ -200,13 +250,26 @@
 
     <!-- SEARCH -->
     <div class="search-box">
-      🔍
+      🔍 
       <input id="searchInput" type="text" placeholder="Digite uma música ou artista..." />
       <button onclick="buscar()">Buscar</button>
     </div>
 
     <!-- RESULTS -->
     <div id="resultados" class="results"></div>
+
+    <!-- MODAL -->
+    <div id="confirm-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="modal-title">Confirmar pedido</h3>
+        <p id="modal-desc">Você deseja pedir esta música?</p>
+
+        <div class="modal-buttons">
+          <button class="btn-cancel" onclick="closeModal()">Não</button>
+          <button class="btn-confirm" id="btnConfirm">Sim</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -218,8 +281,12 @@
   </footer>
 
   <script>
-    const resultadosDiv = document.getElementById("resultados");
+    // Avatar
+    const nome = sessionStorage.getItem("nomeCliente") ?? "A";
+    document.getElementById("avatar").textContent = nome[0].toUpperCase();
+
     const input = document.getElementById("searchInput");
+    const resultadosDiv = document.getElementById("resultados");
 
     async function buscar() {
       const q = input.value.trim();
@@ -245,31 +312,75 @@
         const card = document.createElement("div");
         card.className = "music-card";
 
+        const trackObj = {
+          spotifyUri: m.spotifyUri,
+          title: m.title,
+          artists: m.artists,
+          album: m.album,
+          popularity: m.popularity ?? "—"
+        };
+
         card.innerHTML = `
           <img src="${m.album}" class="cover">
           <div class="music-info">
             <span class="music-title">${m.title}</span>
             <span class="music-artist">${m.artists}</span>
-            <span class="popularity">Popularidade: ${m.popularity ?? '—'}</span>
+            <span class="popularity">Popularidade: ${trackObj.popularity}</span>
           </div>
-          <button class="btn-add" onclick="addFila('${m.spotifyUri}')">➕</button>
+          <button class="btn-add">➕</button>
         `;
+
+        card.querySelector(".btn-add").onclick = () =>
+          openConfirmModal(trackObj);
 
         resultadosDiv.appendChild(card);
       });
     }
 
-    async function addFila(uri) {
-      await fetch("/spotify/queue", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ uri })
-      });
+    /* MODAL */
+    let selectedTrack = null;
 
-      alert("🎵 Música adicionada à fila!");
+    function openConfirmModal(track) {
+      selectedTrack = track;
+
+      document.getElementById("modal-desc").textContent =
+        `Deseja pedir "${track.title}" de ${track.artists}?`;
+
+      document.getElementById("confirm-modal").classList.remove("hidden");
     }
+
+    function closeModal() {
+      document.getElementById("confirm-modal").classList.add("hidden");
+      selectedTrack = null;
+    }
+
+    async function sendMusicRequest() {
+      if (!selectedTrack) return;
+
+      try {
+        const res = await fetch("/pedido-musica/spotify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(selectedTrack)
+        });
+
+        if (!res.ok) {
+          alert("Erro ao enviar pedido");
+          return;
+        }
+
+        alert("🎵 Música adicionada à fila!");
+
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao enviar pedido");
+      }
+
+      closeModal();
+    }
+
+    document.getElementById("btnConfirm").onclick = sendMusicRequest;
   </script>
 
 </body>
-
 </html>

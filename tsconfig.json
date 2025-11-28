@@ -1,36 +1,43 @@
 {
   "compilerOptions": {
-    // File Layout
-    "rootDir": "./src",
-    "outDir": "./dist",
-
-    // Environment Settings
+    /* --- Compatibilidade com Node.js e ESModules --- */
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "target": "esnext",
-    "types": ["node"],
     "lib": ["esnext"],
+    "types": ["node"],
 
-    // Output
+    /* --- Caminhos do projeto --- */
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* --- Suporte a decorators (seus controllers usam) --- */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* --- Emitir arquivos adicionais --- */
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
 
-    // Decorators
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    // Type Checking
+    /* --- Regras de type-checking --- */
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
 
-    // ✔ Corrige warnings de funções depreciadas (incluindo baseUrl)
-    "ignoreDeprecations": "5.0"
+    /* --- Remove avisos de depreciação (incluindo node10) --- */
+    "ignoreDeprecations": "6.0"
   },
 
+  /* --- Arquivos que TS deve compilar --- */
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "prisma.config.ts"]
+
+  /* --- Arquivos ignorados --- */
+  "exclude": [
+    "node_modules",
+    "dist",
+    "prisma.config.ts"
+  ]
 }

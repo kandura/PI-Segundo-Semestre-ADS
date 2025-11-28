@@ -1,5 +1,3 @@
-// src/server.ts
-
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -12,65 +10,57 @@ import { sessaoRoutes } from "./routes/sessao.routes.js";
 import musicaRouter from "./routes/musica.routes.js";
 import prisma from "./database/prismaClient.js";
 import pedidoMusicaRouter from "./routes/pedidoMusica.routes.js";
-
-
 import moderadorRoutes from "./routes/moderador.routes.js";
+
+// ⭐ ADICIONADO — ROTAS DO SPOTIFY
+import spotifyRoutes from "./routes/spotify.routes.js";
 
 
 // ----------------- APP EXPRESS -----------------
 
-// Cria a aplicação Express (HTTP)
 const app = express();
-
-// Libera CORS 
 app.use(cors());
-
-// Faz o parse automático de JSON no body das requisições
 app.use(express.json());
 
-// Servir arquivos estáticos do front (HTML / CSS / JS / sons)
+// Frontend estático
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
+// Rotas de música (já existentes)
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
-// Rota raiz ("/") -> envia o login.html
+// Página inicial → login.html
 app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));
 });
 
-// ----------------- ROTAS REST (API) -----------------
+// ----------------- ROTAS REST -----------------
 
 app.use(clienteRoutes);
 app.use(sessaoRoutes);
 app.use(seedRoutes);
 
-// ROTA DO MODERADOR (PAINEL)
+// Rotas do moderador
 app.use("/api/moderador", moderadorRoutes);
+
+// ⭐ ROTAS DO SPOTIFY
+app.use("/api/spotify", spotifyRoutes);
+
 
 // ----------------- WEBSOCKET DO CHAT -----------------
 
-// Cria o servidor HTTP a partir do app Express
 const server = http.createServer(app);
-
-// Cria o servidor WebSocket, reutilizando o mesmo servidor HTTP
 const wss = new WebSocketServer({ server, path: "/chat" });
 
-// Função auxiliar para transformar RawData em objeto
 function parseMessage(raw: RawData): any {
   try {
     const text = raw.toString();
     const obj = JSON.parse(text);
-    if (obj && typeof obj === "object") {
-      return obj;
-    }
-  } catch {
-    // Se não for JSON válido, cai aqui e retorna texto puro
-  }
+    if (obj && typeof obj === "object") return obj;
+  } catch {}
   return { text: raw.toString() };
 }
 
-// Tipo das mensagens trocadas no chat
 type ChatMessage = {
   id: string;
   user: string;
@@ -78,7 +68,6 @@ type ChatMessage = {
   ts: number;
 };
 
-// Envia uma mensagem de chat para TODOS os clientes conectados
 function broadcast(msg: any) {
   const data = JSON.stringify(msg);
   wss.clients.forEach((client: any) => {
@@ -88,38 +77,27 @@ function broadcast(msg: any) {
   });
 }
 
-// Evento disparado sempre que um novo cliente WebSocket se conecta
 wss.on("connection", (ws, req) => {
   try {
-    // Pega sessionId, mesaId e nome vindos da URL:
-    //  ws://host:3000/chat?sessionId=...&mesaId=...&nome=...
-    // URL apenas para ler os parâmetros (query string).
     const baseUrl = `http://${req.headers.host ?? "localhost"}`;
     const url = new URL(req.url ?? "", baseUrl);
 
-const moderador = url.searchParams.get("moderador") === "1";
-const nomeParam = url.searchParams.get("nome") ?? "Anônimo";
-const sessionId = url.searchParams.get("sessionId") ?? "";
-const mesaId = url.searchParams.get("mesaId") ?? "";
+    const moderador = url.searchParams.get("moderador") === "1";
+    const nomeParam = url.searchParams.get("nome") ?? "Anônimo";
+    const sessionId = url.searchParams.get("sessionId") ?? "";
+    const mesaId = url.searchParams.get("mesaId") ?? "";
 
-// Nome exibido
-let displayUser = nomeParam;
+    let displayUser = nomeParam;
 
-// Moderador = nome especial
-if (moderador) {
-  displayUser = `MOD | ${nomeParam}`;
-}
-// Cliente comum
-else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
-  displayUser = `${nomeParam} (mesa ${mesaId})`;
-}
-
+    if (moderador) displayUser = `MOD | ${nomeParam}`;
+    else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
+      displayUser = `${nomeParam} (mesa ${mesaId})`;
+    }
 
     console.log(
       `WebSocket: cliente conectado - ${displayUser} (sessão ${sessionId})`
     );
 
-    // Mensagem de entrada no chat 
     const joinMsg: ChatMessage = {
       id: `sys-${Date.now()}`,
       user: "Sistema",
@@ -128,46 +106,40 @@ else if (mesaId && mesaId !== "null" && mesaId !== "undefined") {
     };
     broadcast(joinMsg);
 
-    // Quando o cliente envia uma mensagem
     ws.on("message", (raw: RawData) => {
-      try{
+      try {
+        const msg = parseMessage(raw);
 
-      const msg = parseMessage(raw);
+        if (msg.type === "delete-message") {
+          broadcast({
+            type: "delete-message",
+            id: msg.id,
+          });
+          return;
+        }
 
-      // Se for moderador deletando mensagem
-if (msg.type === "delete-message") {
-  broadcast({
-    type: "delete-message",
-    id: msg.id,
-  });
-  return;
-}
+        const texto =
+          typeof msg.text === "string"
+            ? msg.text.trim()
+            : String(msg.text ?? "").trim();
 
+        if (texto.length === 0) return;
 
-      const texto =
-        typeof msg.text === "string" ? msg.text.trim() : String(msg.text ?? "").trim();
+        const out: ChatMessage = {
+          id: `msg-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 8)}`,
+          user: msg.user?.toString().trim() || displayUser,
+          text: texto,
+          ts: Date.now(),
+        };
 
-      // bloqueia mensagens vazias
-      if (texto.length === 0 ){ 
-        return;
+        broadcast(out);
+      } catch (err) {
+        console.error("Erro ao processar mensagem do Websocket", err);
       }
-
-      const out: ChatMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user: msg.user?.toString().trim() || displayUser,
-        text: texto,
-        ts: Date.now(),
-
-      };
-
-      // Repassa a mensagem para todos os clientes conectados
-      broadcast(out);
-    } catch(err) {
-      console.error("Erro ao processar mensagem do Websocket", err);
-    }
     });
 
-    // Quando o cliente desconecta
     ws.on("close", () => {
       console.log("WebSocket: cliente desconectado");
       const leaveMsg: ChatMessage = {
@@ -179,7 +151,6 @@ if (msg.type === "delete-message") {
       broadcast(leaveMsg);
     });
 
-    // Tratamento de erro no WebSocket
     ws.on("error", (err) => {
       console.error("WebSocket error:", err);
     });
@@ -189,13 +160,13 @@ if (msg.type === "delete-message") {
   }
 });
 
-// -------- PRA NÃO TER QUE SUBIR AS MESAS TODA VEZ ------//
+
+// ----------------- SEED DAS MESAS -----------------
 
 async function ensureMesasSeeded() {
   try {
     const count = await prisma.mesa.count();
 
-    // Se não tiver nenhuma mesa, cria as mesas padrão
     if (count === 0) {
       await prisma.mesa.createMany({
         data: [
@@ -222,11 +193,8 @@ async function ensureMesasSeeded() {
 }
 
 
-
 // ----------------- SUBIR SERVIDOR -----------------
 
-// No Render, a porta vem de process.env.PORT
-// Em desenvolvimento local, usamos 3000 por padrão.
 const PORT = Number(process.env.PORT ?? 3000);
 
 server.listen(PORT, () => {
@@ -235,5 +203,3 @@ server.listen(PORT, () => {
 
   ensureMesasSeeded();
 });
-
-

@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../database/prismaClient.js";
 
 export async function create(data: { nome: string; mesa: string }) {
   return prisma.cliente.create({ data });

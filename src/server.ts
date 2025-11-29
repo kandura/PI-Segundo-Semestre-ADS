@@ -38,22 +38,6 @@ app.get("/", (req, res) => {
 });
 
 /**************************************
- * ROTA CORRETA DO DASHBOARD DO MODERADOR
- * URL: /moderador-dashboard.html
- **************************************/
-app.get("/moderador-dashboard.html", (req, res) => {
-  res.sendFile(
-    path.join(
-      process.cwd(),
-      "src",
-      "public",
-      "moderador",
-      "moderador-dashboard.html"
-    )
-  );
-});
-
-/**************************************
  * ROTAS REST
  **************************************/
 app.use(clienteRoutes);
@@ -120,10 +104,6 @@ wss.on("connection", (ws, req) => {
       : mesaId && mesaId !== "null"
         ? `${nomeParam} (mesa ${mesaId})`
         : nomeParam;
-
-    console.log(
-      `WS: cliente conectado — ${displayUser} (sessão ${sessionId})`
-    );
 
     broadcast({
       id: `sys-${Date.now()}`,

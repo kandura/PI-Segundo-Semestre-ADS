@@ -14,11 +14,11 @@
   "license": "ISC",
   "author": "",
   "type": "module",
+
   "main": "dist/server.js",
 
   "scripts": {
     "build": "tsc",
-    "postinstall": "npm run build",        
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "migrate": "prisma migrate deploy",

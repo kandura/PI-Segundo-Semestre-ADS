@@ -11,7 +11,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
-    /* --- Suporte a decorators (seus controllers usam) --- */
+    /* --- Suporte a decorators --- */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
@@ -25,10 +25,8 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
 
-    /* --- Remove avisos de depreciação (incluindo node10) --- */
-    "ignoreDeprecations": "6.0"
   },
 
   /* --- Arquivos que TS deve compilar --- */

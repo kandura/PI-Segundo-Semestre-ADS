@@ -7,9 +7,6 @@ const spotify = new SpotifyService();
 
 export class SpotifyController {
 
-  /**
-   * 1) LOGIN SPOTIFY (permanece igual)
-   */
   static async redirectToLogin(req: Request, res: Response) {
     const scope = [
       "user-read-playback-state",
@@ -33,9 +30,6 @@ export class SpotifyController {
     res.redirect(redirectUrl);
   }
 
-  /**
-   * 2) CALLBACK DO SPOTIFY (permanece igual)
-   */
   static async callback(req: Request, res: Response) {
     const code = req.query.code as string;
 
@@ -66,9 +60,6 @@ export class SpotifyController {
     }
   }
 
-  /**
-   * 3) NOVO: Retornar access_token para o Web Playback SDK
-   */
   static async token(req: Request, res: Response) {
     try {
       const token = await spotify.getValidAccessToken();
@@ -78,9 +69,6 @@ export class SpotifyController {
     }
   }
 
-  /**
-   * 4) NOVO SEARCH — compatível com o frontend do cliente
-   */
   static async search(req: Request, res: Response) {
     try {
       const q = String(req.query.q ?? "").trim();

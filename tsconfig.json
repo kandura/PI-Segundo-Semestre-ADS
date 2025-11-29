@@ -1,41 +1,29 @@
 {
   "compilerOptions": {
-    /* --- Compatibilidade com Node.js e ESModules --- */
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "target": "esnext",
-    "lib": ["esnext"],
+    "target": "es2020",
+    "lib": ["es2020"],
     "types": ["node"],
-
-    /* --- Caminhos do projeto --- */
+    
     "rootDir": "./src",
     "outDir": "./dist",
 
-    /* --- Suporte a decorators --- */
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    /* --- Emitir arquivos adicionais --- */
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-
-    /* --- Regras de type-checking --- */
     "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
 
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "sourceMap": true,
+    "declaration": false,
+    "declarationMap": false,
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
 
-  /* --- Arquivos que TS deve compilar --- */
   "include": ["src/**/*"],
-
-  /* --- Arquivos ignorados --- */
-  "exclude": [
-    "node_modules",
-    "dist",
-    "prisma.config.ts"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

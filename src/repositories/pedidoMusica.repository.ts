@@ -2,7 +2,8 @@ import prisma from "../database/prismaClient.js";
 import { Prisma, PedidoStatus } from "@prisma/client";
 
 export const PedidoMusicaRepository = {
-  // criar pedido
+
+  // Criar pedido
   create(data: {
     clienteId: number;
     musicId: number;
@@ -19,12 +20,12 @@ export const PedidoMusicaRepository = {
     });
   },
 
-  // listar todos os pedidos (com filtro por status opcional)
+  // Listar pedidos (com filtro opcional por status)
   findAll(status?: string, mesaId?: number) {
     const where: Prisma.PedidoMusicaWhereInput = {};
 
     if (status) {
-      where.status = status as PedidoStatus;
+      where.status = { equals: status as PedidoStatus };
     }
 
     if (typeof mesaId === "number") {
@@ -41,11 +42,11 @@ export const PedidoMusicaRepository = {
     });
   },
 
-  // 🔥 LISTAR FILA (somente pendentes)
+  // 🔥 Listar apenas pendentes (fila)
   findFila() {
     return prisma.pedidoMusica.findMany({
       where: {
-        status: "PENDENTE" as PedidoStatus,
+        status: { equals: PedidoStatus.PENDENTE },
       },
       include: {
         music: true,
@@ -55,7 +56,7 @@ export const PedidoMusicaRepository = {
     });
   },
 
-  // atualizar status
+  // Atualizar status
   updateStatus(id: number, status: string) {
     return prisma.pedidoMusica.update({
       where: { id },

@@ -44,8 +44,6 @@
       grid-template-columns: 1fr 420px;
       gap: 24px;
     }
-
-    /* 100% SEU CSS ORIGINAL – mantido */
   </style>
 </head>
 
@@ -112,11 +110,12 @@
   </footer>
 
   <script>
-    // Carrega dados da sessão
+    // Carrega sessão
     const nome = sessionStorage.getItem("nomeCliente");
     const mesa = sessionStorage.getItem("mesaId");
+    const clienteId = sessionStorage.getItem("clienteId");
 
-    if (!nome || !mesa) {
+    if (!nome || !mesa || !clienteId) {
       window.location.href = "/login.html";
     }
 
@@ -158,9 +157,33 @@
           </div>
         `;
 
-        // BOTÃO TEMPORÁRIO (Etapa 2 vai substituir)
-        card.querySelector(".add-btn").onclick = () => {
-          alert("🎵 Em breve você poderá adicionar músicas à fila!");
+        // NOVO BOTÃO FUNCIONANDO COM BACKEND
+        card.querySelector(".add-btn").onclick = async () => {
+
+          const payload = {
+            spotifyUri: t.spotifyUri,
+            title: t.title,
+            artists: t.artists,
+            album: t.album
+          };
+
+          const res = await fetch("/pedido-musica/spotify", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "cliente-id": clienteId,
+              "mesa-id": mesa
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const json = await res.json();
+
+          if (json.sucesso) {
+            alert("🎵 Música adicionada à fila!");
+          } else {
+            alert("Erro ao adicionar música à fila.");
+          }
         };
 
         results.appendChild(card);

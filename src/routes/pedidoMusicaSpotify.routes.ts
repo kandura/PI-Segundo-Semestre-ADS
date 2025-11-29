@@ -3,6 +3,8 @@ import { PedidoMusicaSpotifyController } from "../controllers/pedidoMusicaSpotif
 
 const router = Router();
 
-router.post("/spotify", PedidoMusicaSpotifyController.criarPedidoSpotify);
+// ROTA OFICIAL PARA ADICIONAR MÚSICA À FILA
+// endpoint final → POST /pedido-musica/queue
+router.post("/queue", PedidoMusicaSpotifyController.adicionarFila);
 
 export default router;

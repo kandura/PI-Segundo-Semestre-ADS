@@ -1,18 +1,27 @@
+// src/routes/spotify.routes.ts
 import { Router } from "express";
 import { SpotifyController } from "../controllers/spotify.controller.js";
 
 const router = Router();
 
-// 🔐 LOGIN DO SPOTIFY
+/**
+ * LOGIN SPOTIFY (para moderador)
+ */
 router.get("/login", SpotifyController.redirectToLogin);
 
-// 🔄 CALLBACK DO SPOTIFY
+/**
+ * CALLBACK DO SPOTIFY
+ */
 router.get("/callback", SpotifyController.callback);
 
-// 🔍 BUSCAR MÚSICAS
-router.get("/search", SpotifyController.search);
+/**
+ * TOKEN PARA WEB PLAYBACK SDK DO MODERADOR
+ */
+router.get("/token", SpotifyController.token);
 
-// 🎵 ADICIONAR À FILA DO PLAYER
-router.post("/queue", SpotifyController.addToQueue);
+/**
+ * BUSCA SPOTIFY (cliente)
+ */
+router.get("/search", SpotifyController.search);
 
 export default router;

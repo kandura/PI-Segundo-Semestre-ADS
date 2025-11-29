@@ -1,14 +1,16 @@
+// src/controllers/spotify.controller.ts
 import { Request, Response } from "express";
-import { SpotifyService } from "../services/spotify.service.js";
+import axios from "axios";
 import { PrismaClient } from "@prisma/client";
+import { SpotifyService } from "../services/spotify.service.js";
 
 const prisma = new PrismaClient();
-const spotifyService = new SpotifyService();
+const spotify = new SpotifyService();
 
 export class SpotifyController {
 
   /**
-   * 1) Redireciona o usuário para o login do Spotify
+   * 1) LOGIN SPOTIFY (permanece igual)
    */
   static async redirectToLogin(req: Request, res: Response) {
     const scope = [
@@ -17,7 +19,8 @@ export class SpotifyController {
       "user-read-currently-playing",
       "playlist-read-private",
       "user-read-private",
-      "user-library-read"
+      "user-library-read",
+      "streaming"
     ].join(" ");
 
     const redirectUrl =
@@ -33,13 +36,13 @@ export class SpotifyController {
   }
 
   /**
-   * 2) Callback do Spotify — troca o `code` pelos tokens
+   * 2) CALLBACK DO SPOTIFY (permanece igual)
    */
   static async callback(req: Request, res: Response) {
     const code = req.query.code as string;
 
     try {
-      const tokenData = await spotifyService.getTokensFromCode(code);
+      const tokenData = await spotify.getTokensFromCode(code);
 
       await prisma.spotifyAuth.upsert({
         where: { id: 1 },
@@ -66,35 +69,55 @@ export class SpotifyController {
   }
 
   /**
-   * 3) Buscar músicas por nome (Spotify Search)
+   * 3) NOVO: Retornar access_token para o Web Playback SDK
    */
-  static async search(req: Request, res: Response) {
-    const { q } = req.query;
-    if (!q) return res.status(400).json({ error: "Missing query" });
-
+  static async token(req: Request, res: Response) {
     try {
-      const musicas = await spotifyService.searchTracks(q.toString());
-      res.json(musicas);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to search tracks" });
+      const token = await spotify.getValidAccessToken();
+      return res.json({ access_token: token });
+    } catch (err) {
+      return res.status(500).json({ error: "Erro ao gerar token do Spotify" });
     }
   }
 
   /**
-   * 4) Adicionar música à fila do Spotify
+   * 4) NOVO SEARCH — compatível com o frontend do cliente
    */
-  static async addToQueue(req: Request, res: Response) {
-    const { uri } = req.body;
-
-    if (!uri) return res.status(400).json({ error: "Missing track URI" });
-
+  static async search(req: Request, res: Response) {
     try {
-      await spotifyService.addToQueue(uri);
-      res.json({ message: "Track added to queue" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to add to queue" });
+      const q = String(req.query.q ?? "").trim();
+      if (!q) return res.json([]);
+
+      const token = await spotify.getValidAccessToken();
+
+      const params = new URLSearchParams({
+        q,
+        type: "track",
+        limit: "10"
+      });
+
+      const response = await axios.get(
+        `https://api.spotify.com/v1/search?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      const items = response.data.tracks.items || [];
+
+      const results = items.map((t: any) => ({
+        title: t.name,
+        artists: t.artists.map((a: any) => a.name).join(", "),
+        album: t.album.images?.[0]?.url || "",
+        spotifyUri: t.uri,
+        spotifyId: t.id,
+        durationMs: t.duration_ms,
+      }));
+
+      return res.json(results);
+    } catch (err) {
+      console.error("Erro no search Spotify:", err);
+      return res.status(500).json({ error: "Erro na busca Spotify" });
     }
   }
 }

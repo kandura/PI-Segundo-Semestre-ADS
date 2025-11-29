@@ -30,7 +30,7 @@ app.use(express.static(path.join(process.cwd(), "src", "public")));
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
-// Rota inicial
+// Página inicial → login do cliente
 app.get("/", (req, res) => {
   res.sendFile(
     path.join(process.cwd(), "src", "public", "login.html")

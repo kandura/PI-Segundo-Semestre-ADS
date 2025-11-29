@@ -14,39 +14,48 @@ import prisma from "./database/prismaClient.js";
 import pedidoMusicaRouter from "./routes/pedidoMusica.routes.js";
 import moderadorRoutes from "./routes/moderador.routes.js";
 
-// ⭐ ROTAS DO SPOTIFY
 import spotifyRoutes from "./routes/spotify.routes.js";
-
-// ⭐ ROTAS DO PEDIDO DE MÚSICA VIA SPOTIFY
 import pedidoMusicaSpotifyRouter from "./routes/pedidoMusicaSpotify.routes.js";
-
-// ⭐ ROTAS DA FILA DE MÚSICAS
 import filaRoutes from "./routes/fila.routes.js";
-
-// ⭐ ROTAS DO PLAYER
 import playerRoutes from "./routes/player.routes.js";
-
-
-// ----------------- APP EXPRESS -----------------
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Frontend estático
+// Arquivos estáticos da pasta public
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
-// Rotas base do sistema
+// Rotas base
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
-// Página inicial → login.html
+// Rota inicial
 app.get("/", (req, res) => {
-  res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));
+  res.sendFile(
+    path.join(process.cwd(), "src", "public", "login.html")
+  );
 });
 
-// ----------------- ROTAS REST -----------------
+/**************************************
+ * ROTA CORRETA DO DASHBOARD DO MODERADOR
+ * URL: /moderador-dashboard.html
+ **************************************/
+app.get("/moderador-dashboard.html", (req, res) => {
+  res.sendFile(
+    path.join(
+      process.cwd(),
+      "src",
+      "public",
+      "moderador",
+      "moderador-dashboard.html"
+    )
+  );
+});
 
+/**************************************
+ * ROTAS REST
+ **************************************/
 app.use(clienteRoutes);
 app.use(sessaoRoutes);
 app.use(seedRoutes);
@@ -54,31 +63,30 @@ app.use(seedRoutes);
 // Rotas do moderador
 app.use("/api/moderador", moderadorRoutes);
 
-// ⭐ ROTAS DO SPOTIFY
+// Spotify
 app.use("/api/spotify", spotifyRoutes);
 
-// ⭐ ROTA DO PEDIDO DE MÚSICA VIA SPOTIFY
+// Pedido via Spotify
 app.use("/pedido-musica", pedidoMusicaSpotifyRouter);
 
-// ⭐ ROTA DA FILA DE MÚSICAS
+// Fila de músicas
 app.use("/api", filaRoutes);
 
-// ⭐ ROTA DO PLAYER
+// Player
 app.use("/api", playerRoutes);
 
-
-// ----------------- WEBSOCKET DO CHAT -----------------
-
+/**************************************
+ * WEBSOCKET DO CHAT
+ **************************************/
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/chat" });
 
 function parseMessage(raw: RawData): any {
   try {
-    const text = raw.toString();
-    const obj = JSON.parse(text);
-    if (obj && typeof obj === "object") return obj;
-  } catch {}
-  return { text: raw.toString() };
+    return JSON.parse(raw.toString());
+  } catch {
+    return { text: raw.toString() };
+  }
 }
 
 type ChatMessage = {
@@ -110,73 +118,61 @@ wss.on("connection", (ws, req) => {
     let displayUser = moderador
       ? `MOD | ${nomeParam}`
       : mesaId && mesaId !== "null"
-      ? `${nomeParam} (mesa ${mesaId})`
-      : nomeParam;
+        ? `${nomeParam} (mesa ${mesaId})`
+        : nomeParam;
 
     console.log(
-      `WebSocket: cliente conectado - ${displayUser} (sessão ${sessionId})`
+      `WS: cliente conectado — ${displayUser} (sessão ${sessionId})`
     );
 
-    const joinMsg: ChatMessage = {
+    broadcast({
       id: `sys-${Date.now()}`,
       user: "Sistema",
       text: `${displayUser} entrou no chat.`,
-      ts: Date.now(),
-    };
-    broadcast(joinMsg);
+      ts: Date.now()
+    });
 
     ws.on("message", (raw: RawData) => {
-      try {
-        const msg = parseMessage(raw);
+      const msg = parseMessage(raw);
 
-        if (msg.type === "delete-message") {
-          broadcast({ type: "delete-message", id: msg.id });
-          return;
-        }
-
-        const texto =
-          typeof msg.text === "string"
-            ? msg.text.trim()
-            : String(msg.text ?? "").trim();
-
-        if (!texto) return;
-
-        const out: ChatMessage = {
-          id: `msg-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 8)}`,
-          user: msg.user?.toString().trim() || displayUser,
-          text: texto,
-          ts: Date.now(),
-        };
-
-        broadcast(out);
-      } catch (err) {
-        console.error("Erro ao processar mensagem do Websocket", err);
+      if (msg.type === "delete-message") {
+        broadcast({ type: "delete-message", id: msg.id });
+        return;
       }
+
+      const texto =
+        typeof msg.text === "string"
+          ? msg.text.trim()
+          : String(msg.text ?? "").trim();
+
+      if (!texto) return;
+
+      broadcast({
+        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        user: msg.user?.toString().trim() || displayUser,
+        text: texto,
+        ts: Date.now()
+      });
     });
 
     ws.on("close", () => {
-      console.log("WebSocket: cliente desconectado");
       broadcast({
         id: `sys-${Date.now()}`,
         user: "Sistema",
         text: `${displayUser} saiu do chat.`,
-        ts: Date.now(),
+        ts: Date.now()
       });
     });
 
-    ws.on("error", (err) => {
-      console.error("WebSocket error:", err);
-    });
   } catch (err) {
-    console.error("Erro na conexão WebSocket:", err);
+    console.error("Erro no WebSocket:", err);
     ws.close();
   }
 });
 
-// ----------------- WEBSOCKET DA FILA -----------------
-
+/**************************************
+ * WEBSOCKET DA FILA
+ **************************************/
 const wssFila = new WebSocketServer({ server, path: "/fila-ws" });
 
 export function broadcastFila(data: any) {
@@ -189,11 +185,12 @@ export function broadcastFila(data: any) {
 }
 
 wssFila.on("connection", () => {
-  console.log("Cliente conectado ao WebSocket da Fila");
+  console.log("Cliente conectado ao WS da Fila");
 });
 
-// ----------------- SEED DAS MESAS -----------------
-
+/**************************************
+ * SEED DAS MESAS
+ **************************************/
 async function ensureMesasSeeded() {
   try {
     const count = await prisma.mesa.count();
@@ -210,26 +207,23 @@ async function ensureMesasSeeded() {
           { codigo: "M07" },
           { codigo: "M08" },
           { codigo: "M09" },
-          { codigo: "M10" },
-        ],
+          { codigo: "M10" }
+        ]
       });
-
       console.log("[seed] Mesas criadas automaticamente.");
-    } else {
-      console.log(`[seed] Mesas já existem (${count}) – nada a fazer.`);
     }
   } catch (err) {
-    console.error("[seed] Erro ao garantir mesas:", err);
+    console.error("[seed] Erro ao criar mesas:", err);
   }
 }
 
-// ----------------- SUBIR SERVIDOR -----------------
-
+/**************************************
+ * INICIAR SERVIDOR
+ **************************************/
 const PORT = Number(process.env.PORT ?? 3000);
 
 server.listen(PORT, () => {
-  console.log(`Servidor HTTP/WS rodando na porta ${PORT}`);
-  console.log(`Chat WebSocket em ws://localhost:${PORT}/chat (dev)`);
-
+  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Chat WebSocket: ws://localhost:${PORT}/chat`);
   ensureMesasSeeded();
 });

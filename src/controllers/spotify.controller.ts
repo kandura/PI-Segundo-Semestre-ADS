@@ -1,10 +1,8 @@
-// src/controllers/spotify.controller.ts
 import { Request, Response } from "express";
 import axios from "axios";
-import { PrismaClient } from "@prisma/client";
 import { SpotifyService } from "../services/spotify.service.js";
+import prisma from "../database/prismaClient.js";
 
-const prisma = new PrismaClient();
 const spotify = new SpotifyService();
 
 export class SpotifyController {

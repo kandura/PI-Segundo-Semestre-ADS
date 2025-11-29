@@ -1,5 +1,3 @@
-// src/controllers/player.controller.ts
-
 import prisma from "../database/prismaClient.js";
 import { Request, Response } from "express";
 import axios from "axios";

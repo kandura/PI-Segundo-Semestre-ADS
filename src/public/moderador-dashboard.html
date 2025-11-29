@@ -1,119 +1,428 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Painel do Moderador</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>Painel do Moderador - Smash Bros Burger</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     :root {
-      --bg: #0b0b0f;
-      --card-bg: #15151d;
+      --bg: radial-gradient(circle at top, #1b2735 0%, #090a0f 45%, #000 100%);
+      --card-bg: rgba(10, 10, 20, 0.9);
       --accent: #ffb342;
       --accent-soft: rgba(255, 179, 66, 0.15);
-      --text: #ffffff;
-      --text-muted: #bbbbbb;
-      --radius-lg: 18px;
+      --primary-text: #ffffff;
+      --secondary-text: #a7b0c0;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --danger: #ff4d4f;
+      --success: #3fdca3;
+      --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      margin: 0;
-      padding: 20px;
-      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000 100%);
-      color: var(--text);
+      min-height: 100vh;
       font-family: system-ui, sans-serif;
-      display: flex;
-      justify-content: center;
+      color: var(--primary-text);
+      background: var(--bg);
+      background-attachment: fixed;
     }
 
     .container {
-      width: 100%;
-      max-width: 450px;
+      max-width: 1100px;
+      margin: 32px auto 100px;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 24px;
     }
+
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      background: linear-gradient(145deg, #4f8bff, #a279ff);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .header-text { display:flex; flex-direction:column; }
+    .title { font-size: 20px; font-weight: 700; }
+    .subtitle { font-size: 13px; color: var(--secondary-text); }
 
     .card {
       background: var(--card-bg);
-      padding: 26px 22px;
-      border-radius: var(--radius-lg);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-soft);
     }
 
-    .title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 6px;
+    .left-col { display:flex; flex-direction:column; gap:18px; }
+
+    .now-title { font-size: 16px; font-weight:700; }
+    .now-artists { font-size: 13px; color:var(--secondary-text); margin-top:6px; }
+
+    .player-controls { display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+    .btn {
+      background: var(--accent);
+      color:#1a1210;
+      border:none;
+      padding:8px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
     }
 
-    .subtitle {
-      color: var(--text-muted);
-      margin-bottom: 20px;
+    .btn.ghost {
+      background:transparent;
+      color:var(--primary-text);
+      border:1px solid rgba(255,255,255,.06);
     }
 
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 999px;
-      border: none;
-      margin-bottom: 14px;
-      font-size: 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: 0.15s;
+    .volume { display:flex; align-items:center; gap:8px; color:var(--secondary-text); }
+    .volume input { width:140px; }
+
+    .section-label { font-size:13px; color:var(--secondary-text); margin-bottom:6px; }
+
+    .fila-lista { display:flex; flex-direction:column; gap:12px; max-height:420px; overflow:auto; padding-right:6px; }
+
+    .music-card {
+      background: rgba(255,255,255,0.02);
+      border-radius: 14px;
+      padding: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border:1px solid var(--border-subtle);
     }
 
-    .primary {
-      background: linear-gradient(135deg, #ffb342, #ff8a3c);
-      color: #2b1903;
+    .music-info { display:flex; flex-direction:column; gap:4px; max-width:70%; }
+    .music-title { font-size:15px; font-weight:700; }
+    .music-artist { font-size:12px; color:var(--secondary-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .status {
+      font-size:11px;
+      font-weight:700;
+      padding:6px 10px;
+      border-radius:999px;
+      text-align:center;
+      margin-bottom:6px;
     }
 
-    .secondary {
-      background: transparent;
-      border: 1px solid #ffffff33;
-      color: var(--text);
+    .status.playing { color:var(--success); border:1px solid var(--success); background:rgba(63,220,163,.08); }
+    .status.next    { color:var(--accent); border:1px solid var(--accent); background:var(--accent-soft); }
+    .status.waiting { color:var(--secondary-text); border:1px solid rgba(255,255,255,.05); background:rgba(255,255,255,.02); }
+
+    .small-btn {
+      padding:6px 8px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.05);
+      background:transparent;
+      color:var(--secondary-text);
+      cursor:pointer;
+      font-size:12px;
+      font-weight:700;
     }
 
-    .danger {
-      background: #8b0000;
-      color: white;
+    .small-btn.danger { color:var(--danger); border-color:rgba(255,77,79,.18); }
+
+    .right-col { display:flex; flex-direction:column; gap:18px; }
+
+    #chat-box {
+      height:540px;
+      overflow-y:auto;
+      border-radius:12px;
+      padding:12px;
+      background:rgba(0,0,0,0.35);
+      border:1px solid var(--border-subtle);
+    }
+
+    .msg {
+      padding:10px;
+      border-radius:12px;
+      background:rgba(255,255,255,.02);
+      margin-bottom:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    footer {
+      position:fixed;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,0.6);
+      padding:8px 14px;
+      border-radius:16px;
+      border:1px solid var(--border-subtle);
+      display:flex;
+      gap:12px;
+    }
+
+    .footer-action {
+      padding:8px 12px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.02);
+      color:var(--secondary-text);
+      font-weight:700;
+      cursor:pointer;
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
-    <main class="card">
 
-      <h1 class="title">Painel do Moderador</h1>
-      <p class="subtitle">Gerencie o sistema em tempo real.</p>
+    <!-- HEADER -->
+    <header class="header">
+      <div class="avatar" id="avatar">M</div>
+      <div class="header-text">
+        <div class="title">Painel do Moderador</div>
+        <div class="subtitle" id="subtitle">Conectando…</div>
+      </div>
+    </header>
 
-      <button class="primary" onclick="irChat()">Moderador do Chat</button>
+    <!-- LEFT -->
+    <div class="left-col">
 
-      <button class="secondary" disabled style="opacity: 0.4; cursor: not-allowed;">
-  Pedidos de Música (em desenvolvimento)
-</button>
+      <!-- PLAYER CARD -->
+      <div class="card">
+        <div id="now-title" class="now-title">Nenhuma música carregada</div>
+        <div id="now-artists" class="now-artists">—</div>
+        <div id="device-status" style="color:var(--secondary-text); font-size:12px; margin-top:6px;">
+          Player: desconectado
+        </div>
 
+        <div class="player-controls">
+          <button class="btn" id="btnPlayPause">▶ Play / Pause</button>
+          <button class="btn ghost" id="btnSkipLocal">⏭ Pular</button>
+          <button class="btn" id="btnNextBackend">➡ Próxima da Fila</button>
 
-      <button class="danger" onclick="logout()">Sair</button>
+          <div class="volume">
+            <span>🔊</span>
+            <input id="vol" type="range" min="0" max="100" value="50" />
+          </div>
+        </div>
+      </div>
 
-    </main>
+      <!-- FILA -->
+      <div class="card">
+        <div class="section-label">Próximas músicas</div>
+        <div id="fila" class="fila-lista"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <aside class="right-col">
+      <div class="card">
+        <div class="section-label">Chat em tempo real</div>
+        <div id="chat-box"></div>
+      </div>
+    </aside>
+
   </div>
 
+  <footer>
+    <div class="footer-action" id="action-refresh">🔄 Atualizar fila</div>
+    <div class="footer-action" id="action-sync">🔁 Sincronizar estado</div>
+  </footer>
+
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
   <script>
-    function irChat() {
-      window.location.href = "moderador-chat.html";
+    /*********************************
+     * SESSÃO DO MODERADOR
+     *********************************/
+    const nome = sessionStorage.getItem("nomeModerador") || "Moderador";
+    document.getElementById("avatar").textContent = nome[0].toUpperCase();
+    document.getElementById("subtitle").textContent = `Bem-vindo, ${nome}`;
+
+    /*********************************
+     * WS DO CHAT
+     *********************************/
+    const protocol = location.protocol === "https:" ? "wss" : "ws";
+
+    const chatWS = new WebSocket(
+      `${protocol}://${location.host}/chat?moderador=1&nome=${encodeURIComponent(nome)}`
+    );
+
+    chatWS.onmessage = (evt) => {
+      const msg = JSON.parse(evt.data);
+
+      if (msg.type === "delete-message") {
+        const el = document.getElementById(`msg-${msg.id}`);
+        if (el) el.remove();
+        return;
+      }
+
+      appendChatMessage(msg);
+    };
+
+    function appendChatMessage(m) {
+      const box = document.getElementById("chat-box");
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "msg";
+      wrapper.id = `msg-${m.id}`;
+
+      wrapper.innerHTML = `
+        <div style="flex:1;">
+          <div class="meta">${m.user} — ${new Date(m.ts).toLocaleTimeString()}</div>
+          <div class="text">${m.text}</div>
+        </div>
+
+        <button class="small-btn danger" onclick="chatWS.send(JSON.stringify({type:'delete-message',id:'${m.id}'}))">
+          Excluir
+        </button>
+      `;
+
+      box.appendChild(wrapper);
+      box.scrollTop = box.scrollHeight;
     }
 
-    function irPedidos() {
-      window.location.href = "moderador-pedidos.html";
+    /*********************************
+     * WS DA FILA
+     *********************************/
+    const filaWS = new WebSocket(`${protocol}://${location.host}/fila-ws`);
+
+    filaWS.onmessage = (evt) => {
+      const data = JSON.parse(evt.data);
+
+      if (data.tipo === "atualizar-fila") {
+        renderFila(data.fila);
+      }
+    };
+
+    function renderFila(fila) {
+      const box = document.getElementById("fila");
+      box.innerHTML = "";
+
+      if (!fila || fila.length === 0) {
+        box.innerHTML = `<div style="color:var(--secondary-text); padding:20px;">Fila vazia</div>`;
+        return;
+      }
+
+      fila.forEach((p, index) => {
+        const status = index === 0 ? "playing" : index === 1 ? "next" : "waiting";
+        const label  = index === 0 ? "Tocando" : index === 1 ? "Próxima" : "Na fila";
+
+        const div = document.createElement("div");
+        div.className = "music-card";
+
+        div.innerHTML = `
+          <div class="music-info">
+            <div class="music-title">${p.music.titulo}</div>
+            <div class="music-artist">${p.music.artista} · Pedido por ${p.pedido.cliente.nome}</div>
+          </div>
+
+          <div>
+            <div class="status ${status}">${label}</div>
+            <button class="small-btn danger" onclick="excluirMusica(${p.id})">Excluir</button>
+          </div>
+        `;
+
+        box.appendChild(div);
+      });
     }
 
-    function logout() {
-      localStorage.removeItem("moderadorId");
-      localStorage.removeItem("moderadorEmail");
-
-      window.location.href = "moderador-login.html";
+    async function excluirMusica(id) {
+      await fetch(`/api/player/fila/${id}`, { method: "DELETE" });
     }
+
+    /*********************************
+     * SPOTIFY PLAYER
+     *********************************/
+    let player = null;
+
+    async function fetchToken() {
+      const res = await fetch("/api/spotify/token");
+      const data = await res.json();
+      return data.access_token;
+    }
+
+    window.onSpotifyWebPlaybackSDKReady = async () => {
+      const token = await fetchToken();
+
+      player = new Spotify.Player({
+        name: "SMASH-Burger Moderador",
+        getOAuthToken: cb => cb(token),
+        volume: 0.5
+      });
+
+      player.addListener("ready", ({ device_id }) => {
+        document.getElementById("device-status").textContent = "Player: conectado";
+
+        fetch("/api/player/register-device", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ device_id })
+        });
+      });
+
+      player.addListener("player_state_changed", (state) => {
+        if (!state) return;
+
+        const track = state.track_window.current_track;
+
+        document.getElementById("now-title").textContent  = track.name;
+        document.getElementById("now-artists").textContent =
+          track.artists.map(a => a.name).join(", ");
+      });
+
+      await player.connect();
+    };
+
+    document.getElementById("btnPlayPause").onclick = async () => {
+      const st = await player.getCurrentState();
+      if (!st) {
+        await fetch("/api/player/play-current", { method: "PUT" });
+        return;
+      }
+
+      if (st.paused) player.resume();
+      else player.pause();
+    };
+
+    document.getElementById("btnSkipLocal").onclick = () => player.nextTrack();
+
+    document.getElementById("btnNextBackend").onclick = () => {
+      fetch("/api/player/tocar-proxima", { method:"POST" });
+    };
+
+    document.getElementById("vol").oninput = (e) => {
+      const v = e.target.value / 100;
+      player.setVolume(v);
+    };
+
+    /*********************************
+     * FOOTER
+     *********************************/
+    document.getElementById("action-refresh").onclick = () => {
+      fetch("/api/player/fila/refresh", { method: "POST" });
+    };
+
+    document.getElementById("action-sync").onclick = () => {
+      fetch("/api/player/status-sync", { method: "POST" });
+    };
   </script>
 
 </body>

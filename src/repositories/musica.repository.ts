@@ -1,19 +1,35 @@
 import prisma from "../database/prismaClient.js";
 
 export const MusicRepository = {
-  findAll(genero?: string) {
-    const query: any = {
+  /**
+   * Buscar músicas cadastradas no banco
+   * (usado somente para listagens internas)
+   */
+  findAll() {
+    return prisma.music.findMany({
       orderBy: { titulo: "asc" }
-    };
-
-    if (genero) {
-      query.where = { genero };
-    }
-
-    return prisma.music.findMany(query);
+    });
   },
 
-  create(data: { titulo: string; artista: string; genero: string }) {
-    return prisma.music.create({ data });
-  },
+  /**
+   * Criar música — agora exige spotifyId,
+   * pois o schema tem essa coluna obrigatória
+   */
+  create(data: {
+    spotifyId: string;
+    titulo: string;
+    artista: string;
+    album?: string | null;
+    coverUrl?: string | null;
+  }) {
+    return prisma.music.create({
+      data: {
+        spotifyId: data.spotifyId,
+        titulo: data.titulo,
+        artista: data.artista,
+        album: data.album ?? null,
+        coverUrl: data.coverUrl ?? null
+      }
+    });
+  }
 };

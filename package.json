@@ -15,6 +15,11 @@
   "author": "",
   "type": "module",
   "main": "dist/server.js",
+
+  "engines": {
+    "node": "18.x"
+  },
+
   "scripts": {
     "build": "prisma generate && tsc",
     "postinstall": "prisma generate",

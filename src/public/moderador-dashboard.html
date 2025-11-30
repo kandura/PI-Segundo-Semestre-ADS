@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <title>Painel do Moderador - Smash Bros Burger</title>
@@ -19,7 +20,11 @@
       --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       min-height: 100vh;
@@ -59,9 +64,20 @@
       color: white;
     }
 
-    .header-text { display:flex; flex-direction:column; }
-    .title { font-size: 20px; font-weight: 700; }
-    .subtitle { font-size: 13px; color: var(--secondary-text); }
+    .header-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--secondary-text);
+    }
 
     .card {
       background: var(--card-bg);
@@ -71,118 +87,192 @@
       box-shadow: var(--shadow-soft);
     }
 
-    .left-col { display:flex; flex-direction:column; gap:18px; }
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
-    .now-title { font-size: 16px; font-weight:700; }
-    .now-artists { font-size: 13px; color:var(--secondary-text); margin-top:6px; }
+    .now-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
 
-    .player-controls { display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .now-artists {
+      font-size: 13px;
+      color: var(--secondary-text);
+      margin-top: 6px;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
 
     .btn {
       background: var(--accent);
-      color:#1a1210;
-      border:none;
-      padding:8px 12px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:700;
-      font-size:14px;
+      color: #1a1210;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
     }
 
     .btn.ghost {
-      background:transparent;
-      color:var(--primary-text);
-      border:1px solid rgba(255,255,255,.06);
+      background: transparent;
+      color: var(--primary-text);
+      border: 1px solid rgba(255, 255, 255, .06);
     }
 
-    .volume { display:flex; align-items:center; gap:8px; color:var(--secondary-text); }
-    .volume input { width:140px; }
+    .volume {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--secondary-text);
+    }
 
-    .section-label { font-size:13px; color:var(--secondary-text); margin-bottom:6px; }
+    .volume input {
+      width: 140px;
+    }
 
-    .fila-lista { display:flex; flex-direction:column; gap:12px; max-height:420px; overflow:auto; padding-right:6px; }
+    .section-label {
+      font-size: 13px;
+      color: var(--secondary-text);
+      margin-bottom: 6px;
+    }
+
+    .fila-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 6px;
+    }
 
     .music-card {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
       border-radius: 14px;
       padding: 12px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      border:1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--border-subtle);
     }
 
-    .music-info { display:flex; flex-direction:column; gap:4px; max-width:70%; }
-    .music-title { font-size:15px; font-weight:700; }
-    .music-artist { font-size:12px; color:var(--secondary-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .music-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 70%;
+    }
+
+    .music-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .music-artist {
+      font-size: 12px;
+      color: var(--secondary-text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .status {
-      font-size:11px;
-      font-weight:700;
-      padding:6px 10px;
-      border-radius:999px;
-      text-align:center;
-      margin-bottom:6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      text-align: center;
+      margin-bottom: 6px;
     }
 
-    .status.playing { color:var(--success); border:1px solid var(--success); background:rgba(63,220,163,.08); }
-    .status.next    { color:var(--accent); border:1px solid var(--accent); background:var(--accent-soft); }
-    .status.waiting { color:var(--secondary-text); border:1px solid rgba(255,255,255,.05); background:rgba(255,255,255,.02); }
+    .status.playing {
+      color: var(--success);
+      border: 1px solid var(--success);
+      background: rgba(63, 220, 163, .08);
+    }
+
+    .status.next {
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .status.waiting {
+      color: var(--secondary-text);
+      border: 1px solid rgba(255, 255, 255, .05);
+      background: rgba(255, 255, 255, .02);
+    }
 
     .small-btn {
-      padding:6px 8px;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.05);
-      background:transparent;
-      color:var(--secondary-text);
-      cursor:pointer;
-      font-size:12px;
-      font-weight:700;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: transparent;
+      color: var(--secondary-text);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    .small-btn.danger { color:var(--danger); border-color:rgba(255,77,79,.18); }
+    .small-btn.danger {
+      color: var(--danger);
+      border-color: rgba(255, 77, 79, .18);
+    }
 
-    .right-col { display:flex; flex-direction:column; gap:18px; }
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
 
     #chat-box {
-      height:540px;
-      overflow-y:auto;
-      border-radius:12px;
-      padding:12px;
-      background:rgba(0,0,0,0.35);
-      border:1px solid var(--border-subtle);
+      height: 540px;
+      overflow-y: auto;
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-subtle);
     }
 
     .msg {
-      padding:10px;
-      border-radius:12px;
-      background:rgba(255,255,255,.02);
-      margin-bottom:10px;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .02);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     footer {
-      position:fixed;
-      bottom:16px;
-      left:50%;
-      transform:translateX(-50%);
-      background:rgba(0,0,0,0.6);
-      padding:8px 14px;
-      border-radius:16px;
-      border:1px solid var(--border-subtle);
-      display:flex;
-      gap:12px;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 8px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      gap: 12px;
     }
 
     .footer-action {
-      padding:8px 12px;
-      border-radius:10px;
-      background:rgba(255,255,255,0.02);
-      color:var(--secondary-text);
-      font-weight:700;
-      cursor:pointer;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--secondary-text);
+      font-weight: 700;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -323,7 +413,7 @@
 
       fila.forEach((p, index) => {
         const status = index === 0 ? "playing" : index === 1 ? "next" : "waiting";
-        const label  = index === 0 ? "Tocando" : index === 1 ? "Próxima" : "Na fila";
+        const label = index === 0 ? "Tocando" : index === 1 ? "Próxima" : "Na fila";
 
         const div = document.createElement("div");
         div.className = "music-card";
@@ -343,6 +433,23 @@
         box.appendChild(div);
       });
     }
+
+    async function carregarFilaInicial() {
+      try {
+        const res = await fetch("/api/player/fila");
+        if (!res.ok) {
+          console.error("Erro ao buscar fila inicial:", await res.text());
+          return;
+        }
+        const data = await res.json();
+        renderFila(data);
+      } catch (err) {
+        console.error("Erro inesperado ao buscar fila:", err);
+      }
+    }
+
+    // chama ao carregar a página
+    carregarFilaInicial();
 
     async function excluirMusica(id) {
       await fetch(`/api/player/fila/${id}`, { method: "DELETE" });
@@ -372,9 +479,9 @@
         document.getElementById("device-status").textContent = "Player: conectado";
 
         fetch("/api/player/register-device", {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({ device_id })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ device_id })
         });
       });
 
@@ -383,7 +490,7 @@
 
         const track = state.track_window.current_track;
 
-        document.getElementById("now-title").textContent  = track.name;
+        document.getElementById("now-title").textContent = track.name;
         document.getElementById("now-artists").textContent =
           track.artists.map(a => a.name).join(", ");
       });
@@ -405,7 +512,7 @@
     document.getElementById("btnSkipLocal").onclick = () => player.nextTrack();
 
     document.getElementById("btnNextBackend").onclick = () => {
-      fetch("/api/player/tocar-proxima", { method:"POST" });
+      fetch("/api/player/tocar-proxima", { method: "POST" });
     };
 
     document.getElementById("vol").oninput = (e) => {
@@ -426,4 +533,5 @@
   </script>
 
 </body>
+
 </html>

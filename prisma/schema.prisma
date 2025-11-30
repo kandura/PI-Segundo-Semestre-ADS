@@ -7,11 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/**
- * ********************
- * MODELOS PRINCIPAIS
- * ********************
- */
+
+ // ********************
+ // MODELOS PRINCIPAIS
+ // ********************
+
 
 model Cliente {
   id            Int            @id @default(autoincrement())
@@ -67,11 +67,9 @@ model Music {
   queueEntries PlaybackQueue[]
 }
 
-/**
- * ********************
- * RELAÇÃO 1:1 CORRIGIDA
- * ********************
- */
+ // ********************
+ // RELAÇÃO 1:1 CORRIGIDA
+ // ********************
 
 model PedidoMusica {
   id        Int          @id @default(autoincrement())

@@ -65,14 +65,6 @@ app.use("/api", playerRoutes);
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server, path: "/chat" });
 
-function parseMessage(raw: RawData): any {
-  try {
-    return JSON.parse(raw.toString());
-  } catch {
-    return { text: raw.toString() };
-  }
-}
-
 type ChatMessage = {
   id: string;
   user: string;
@@ -91,30 +83,41 @@ function broadcast(msg: any) {
 
 wss.on("connection", (ws, req) => {
   try {
-    const baseUrl = `http://${req.headers.host ?? "localhost"}`;
-    const url = new URL(req.url ?? "", baseUrl);
+    // -------- PARSE SIMPLES DOS PARÂMETROS DA URL --------
+    const urlStr = req.url ?? "";            // ex.: "/chat?nome=Leo&mesaId=2..."
+    const queryStr = urlStr.split("?")[1] ?? "";
+    const params = new URLSearchParams(queryStr);
 
-    const moderador = url.searchParams.get("moderador") === "1";
-    const nomeParam = url.searchParams.get("nome") ?? "Anônimo";
-    const sessionId = url.searchParams.get("sessionId") ?? "";
-    const mesaId = url.searchParams.get("mesaId") ?? "";
+    const moderador = params.get("moderador") === "1";
+    const nomeParam = params.get("nome") ?? "Anônimo";
+    const sessionId = params.get("sessionId") ?? "";
+    const mesaId = params.get("mesaId") ?? "";
 
+    // Monta o nome que vai aparecer no chat
     let displayUser = moderador
       ? `MOD | ${nomeParam}`
       : mesaId && mesaId !== "null"
         ? `${nomeParam} (mesa ${mesaId})`
         : nomeParam;
 
+    // Mensagem de entrada no chat
     broadcast({
       id: `sys-${Date.now()}`,
       user: "Sistema",
       text: `${displayUser} entrou no chat.`,
-      ts: Date.now()
+      ts: Date.now(),
     });
 
+    // Mensagens recebidas do cliente
     ws.on("message", (raw: RawData) => {
-      const msg = parseMessage(raw);
+      let msg: any;
+      try {
+        msg = JSON.parse(raw.toString());
+      } catch {
+        msg = { text: raw.toString() };
+      }
 
+      // Apagar mensagens
       if (msg.type === "delete-message") {
         broadcast({ type: "delete-message", id: msg.id });
         return;
@@ -127,26 +130,30 @@ wss.on("connection", (ws, req) => {
 
       if (!texto) return;
 
-      broadcast({
+      const chatMsg: ChatMessage = {
         id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user: msg.user?.toString().trim() || displayUser,
+        user: (msg.user ?? displayUser).toString().trim() || displayUser,
         text: texto,
-        ts: Date.now()
-      });
+        ts: Date.now(),
+      };
+
+      broadcast(chatMsg);
     });
 
+    // Mensagem de saída
     ws.on("close", () => {
       broadcast({
         id: `sys-${Date.now()}`,
         user: "Sistema",
         text: `${displayUser} saiu do chat.`,
-        ts: Date.now()
+        ts: Date.now(),
       });
     });
-
   } catch (err) {
-    console.error("Erro no WebSocket:", err);
-    ws.close();
+    console.error("Erro no WebSocket do chat:", err);
+    try {
+      ws.close();
+    } catch { }
   }
 });
 

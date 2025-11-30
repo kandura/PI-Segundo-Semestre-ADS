@@ -79,24 +79,25 @@ export class SpotifyController {
       const params = new URLSearchParams({
         q,
         type: "track",
-        limit: "10"
+        limit: "10",
       });
 
-      const response = await axios.get(
+      const { data } = await axios.get(
         `https://api.spotify.com/v1/search?${params.toString()}`,
         {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      const items = response.data.tracks.items || [];
+      const items = data.tracks.items ?? [];
 
       const results = items.map((t: any) => ({
         title: t.name,
         artists: t.artists.map((a: any) => a.name).join(", "),
-        album: t.album.images?.[0]?.url || "",
-        spotifyUri: t.uri,
-        spotifyId: t.id,
+        album: t.album.name,
+        coverUrl: t.album.images?.[0]?.url ?? "",
+        spotifyUri: t.uri,  // ex: "spotify:track:abc123"
+        spotifyId: t.id,    // ex: "abc123"
         durationMs: t.duration_ms,
       }));
 

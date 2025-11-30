@@ -1,4 +1,4 @@
-import * as clienteRepository from "../repositories/cliente.repository.js";
+import clienteRepository from "../repositories/cliente.repository.js";
 
 export async function createCliente(data: { nome: string; mesa: string }) {
   return await clienteRepository.create(data);

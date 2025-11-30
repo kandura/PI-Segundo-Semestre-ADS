@@ -1,26 +1,34 @@
 import prisma from "../database/prismaClient.js";
 
-export async function create(data: { nome: string; mesa: string }) {
-  return prisma.cliente.create({ data });
+class ClienteRepository {
+  async create(data: { nome: string }) {
+    return prisma.cliente.create({
+      data: {
+        nome: data.nome,
+      },
+    });
+  }
+
+  async update(id: number, data: { nome?: string }) {
+    return prisma.cliente.update({
+      where: { id },
+      data: {
+        nome: data.nome,
+      },
+    });
+  }
+
+  async findById(id: number) {
+    return prisma.cliente.findUnique({ where: { id } });
+  }
+
+  async findByName(nome: string) {
+    return prisma.cliente.findFirst({
+      where: { nome },
+    });
+  }
 }
 
-export async function findAll() {
-  return prisma.cliente.findMany({
-    orderBy: { id: "asc" },
-  });
-}
+const clienteRepository = new ClienteRepository();
 
-export async function findById(id: number) {
-  return prisma.cliente.findUnique({ where: { id } });
-}
-
-export async function update(
-  id: number,
-  data: { nome?: string; mesa?: string }
-) {
-  return prisma.cliente.update({ where: { id }, data });
-}
-
-export async function remove(id: number) {
-  return prisma.cliente.delete({ where: { id } });
-}
+export default clienteRepository;

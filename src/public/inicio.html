@@ -7,42 +7,193 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    /* (todo o seu CSS permanece igual — não removi nada) */
     :root {
-      --bg: radial-gradient(circle at top, #1b2735 0%, #090a0f 45%, #000 100%);
-      --card-bg: rgba(10, 10, 20, 0.9);
+      --bg: #0b0b0f;
+      --card-bg: #15151d;
       --accent: #ffb342;
       --accent-soft: rgba(255, 179, 66, 0.15);
-      --primary-text: #ffffff;
-      --secondary-text: #a7b0c0;
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --danger: #ff4d4f;
-      --success: #3fdca3;
-      --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
+      --text: #f5f5f5;
+      --text-muted: #a1a1b3;
+      --radius-lg: 18px;
+
+      --genre-gospel: #ffe27a;
+      --genre-eletronica: #59b5ff;
+      --genre-rock: #7aff9a;
+      --genre-sertanejo: #ff9d6a;
+      --genre-funk: #ff6969;
+      --genre-rap: #ff8ae0;
     }
 
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      font-family: system-ui, sans-serif;
-      color: var(--primary-text);
-      background: var(--bg);
-      background-attachment: fixed;
+      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text);
     }
 
     .container {
       width: 100%;
-      max-width: 1100px;
-      margin: 32px auto 110px;
-      padding: 0 16px;
+      max-width: 420px;
+      padding-bottom: 90px;
+    }
+
+    /* -------- HEADER -------- */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      background: radial-gradient(circle at 30% 20%, #99d0ff, #1c7aff);
+      border-radius: 50%;
+      font-weight: 700;
+      color: #00152a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-text-top {
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .header-text-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* -------- SEARCH BAR -------- */
+    .search-box {
+      background: #0f0f17;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      margin: 14px 0 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .search-box input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* -------- GRID -------- */
+    .grid {
       display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .genre-card {
+      border-radius: 22px;
+      padding: 22px 14px;
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+      transition: transform 0.14s ease, filter 0.14s ease;
+    }
+
+    .genre-card:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.05);
+    }
+
+    .genre-icon {
+      font-size: 2.4rem;
+      opacity: 0.85;
+    }
+
+    .gospel {
+      background: var(--genre-gospel);
+      color: #2a2000;
+    }
+
+    .eletronica {
+      background: var(--genre-eletronica);
+      color: #00162b;
+    }
+
+    .rock {
+      background: var(--genre-rock);
+      color: #02240f;
+    }
+
+    .sertanejo {
+      background: var(--genre-sertanejo);
+      color: #261202;
+    }
+
+    .funk {
+      background: var(--genre-funk);
+      color: #2a0202;
+    }
+
+    .rap {
+      background: var(--genre-rap);
+      color: #280018;
+    }
+
+    /* -------- FOOTER -------- */
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0e0e14cc;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .footer-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .footer-btn.active {
+      border-color: var(--accent);
     }
   </style>
 </head>
@@ -62,11 +213,8 @@
     <!-- SEARCH -->
     <div class="search-box">
       🔍
-      <input id="searchInput" type="text" placeholder="O que você quer ouvir?" />
+      <input type="text" placeholder="O que você quer ouvir?" />
     </div>
-
-    <!-- SPOTIFY RESULTS -->
-    <section id="spotifyResults" class="results"></section>
 
     <!-- GRID -->
     <section class="grid">
@@ -110,86 +258,62 @@
   </footer>
 
   <script>
-    // Carrega sessão
+    // Carrega dados da sessão (por aba)
     const nome = sessionStorage.getItem("nomeCliente");
-    const mesa = sessionStorage.getItem("mesaId");
-    const clienteId = sessionStorage.getItem("clienteId");
+    const mesa = Number(sessionStorage.getItem("mesaId"));
 
-    if (!nome || !mesa || !clienteId) {
+
+    // Se não tiver sessão → voltar ao login
+    if (!nome || !mesa) {
       window.location.href = "/login.html";
     }
 
+    // Avatar = primeira letra do nome
     document.getElementById("avatar").textContent = nome[0].toUpperCase();
+
+    // Subtítulo
     document.getElementById("subtitle").textContent =
       `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
+    // Navegação
     function goTo(genero) {
       window.location.href = `/genero-${genero}.html`;
     }
 
-    // ---------- PESQUISA SPOTIFY ----------
-    const input = document.getElementById("searchInput");
-    const results = document.getElementById("spotifyResults");
-
-    input.addEventListener("keyup", async () => {
-      const q = input.value.trim();
-
-      if (q.length < 2) {
-        results.innerHTML = "";
-        return;
-      }
-
-      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
-      const tracks = await res.json();
-
-      results.innerHTML = "";
-
-      tracks.forEach(t => {
-        const card = document.createElement("div");
-        card.className = "music-card";
-
-        card.innerHTML = `
-          <img class="cover" src="${t.album}" />
-          <div class="info">
-            <div class="title">${t.title}</div>
-            <div class="artist">${t.artists}</div>
-            <button class="add-btn">Adicionar</button>
-          </div>
-        `;
-
-        // NOVO BOTÃO FUNCIONANDO COM BACKEND
-        card.querySelector(".add-btn").onclick = async () => {
-
-          const payload = {
-            spotifyUri: t.spotifyUri,
-            title: t.title,
-            artists: t.artists,
-            album: t.album
-          };
-
-          const res = await fetch("/pedido-musica/spotify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "cliente-id": clienteId,
-              "mesa-id": mesa
-            },
-            body: JSON.stringify(payload)
-          });
-
-          const json = await res.json();
-
-          if (json.sucesso) {
-            alert("🎵 Música adicionada à fila!");
-          } else {
-            alert("Erro ao adicionar música à fila.");
-          }
+    addButton.textContent = "Adicionar";
+    addButton.addEventListener("click", async () => {
+      try {
+        const payload = {
+          spotifyId: t.spotifyId,
+          spotifyUri: t.spotifyUri,
+          title: t.title,
+          artists: t.artists,
+          album: t.album,
+          coverUrl: t.coverUrl,   // URL da capa
+          mesaId: mesaId,         // número da mesa
+          clienteNome: nomeCliente
         };
 
-        results.appendChild(card);
-      });
+        const res = await fetch("/pedido-musica/queue", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          console.error("Erro ao adicionar música na fila:", await res.text());
+          alert("Não foi possível adicionar a música. Tente novamente.");
+          return;
+        }
+
+        alert("Música adicionada na fila!");
+      } catch (err) {
+        console.error("Erro inesperado ao adicionar música:", err);
+        alert("Erro inesperado ao adicionar música.");
+      }
     });
   </script>
-</body>
-
+</body>         
 </html>

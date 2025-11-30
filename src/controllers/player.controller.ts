@@ -32,21 +32,63 @@ export class PlayerController {
     }
   }
 
-  // ============================================================
-  // DELETE /api/player/fila/:id
-  // ============================================================
-  static async excluirMusica(req: Request, res: Response) {
-    const id = Number(req.params.id);
 
+  static async debugPrisma(req: Request, res: Response) {
     try {
-      await prisma.playbackQueue.delete({ where: { id } });
+      const fila = await prisma.playbackQueue.findMany();
+      const player = await prisma.playerState.findMany();
 
+      return res.json({
+        fila,
+        player,
+      });
+    } catch (err: any) {
+      console.error("Erro no debugPrisma:", err);
+      return res.status(500).json({ error: "Erro no debugPrisma", detalhes: String(err) });
+    }
+  }
+
+
+  // ===============================
+  // DELETE /api/player/fila/:id
+  // ===============================
+  static async excluirMusica(req: Request, res: Response) {
+    try {
+      const id = Number(req.params.id);
+
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "ID inválido" });
+      }
+
+      // Remove o vínculo de PedidoMusica -> PlaybackQueue
+      await prisma.pedidoMusica.updateMany({
+        where: { queueId: id },
+        data: {
+          queueId: null,
+          status: "REJEITADO",
+        },
+      });
+
+      // Remove a entrada da fila
+      await prisma.playbackQueue.delete({
+        where: { id },
+      });
+
+      // Recarrega a fila que ainda está NA_FILA
       const novaFila = await prisma.playbackQueue.findMany({
         where: { status: "NA_FILA" },
         orderBy: { order: "asc" },
-        include: { music: true, pedido: { include: { cliente: true } } }
+        include: {
+          music: true,
+          pedido: {
+            include: {
+              cliente: true,
+            },
+          },
+        },
       });
 
+      // Notifica geral via WebSocket
       broadcastFila({ tipo: "atualizar-fila", fila: novaFila });
 
       return res.json({ sucesso: true });
@@ -55,6 +97,7 @@ export class PlayerController {
       return res.status(500).json({ error: "Erro ao excluir música" });
     }
   }
+
 
   // ============================================================
   // POST /api/player/register-device
@@ -99,7 +142,7 @@ export class PlayerController {
       if (!next) return res.status(404).json({ error: "Fila vazia (inconsistente)" });
 
       const nextId = next.id;
-      const uri = next.music.spotifyId;
+      const uri = `spotify:track:${next.music.spotifyId}`;
 
       // agora faz os awaits com segurança
       const token = await spotify.getValidAccessToken();
@@ -148,7 +191,7 @@ export class PlayerController {
 
       // capture valores necessários imediatamente
       const nextId = next.id;
-      const uri = next.music.spotifyId;
+      const uri = `spotify:track:${next.music.spotifyId}`;
 
       const token = await spotify.getValidAccessToken();
 

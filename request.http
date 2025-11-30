@@ -83,3 +83,8 @@ PUT http://localhost:3000/moderador/fila/1/frente
 
 ### Remover pedido da fila
 DELETE http://localhost:3000/moderador/fila/1
+
+
+
+### Debug Prisma fila / player
+GET http://localhost:3000/api/player/debug-prisma

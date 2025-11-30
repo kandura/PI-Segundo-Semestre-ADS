@@ -28,6 +28,9 @@ const router = Router();
  *  - (opcionais) refreshFila, statusSync
  */
 
+router.get("/player/debug-prisma", PlayerController.debugPrisma);
+
+
 router.get("/player/fila", PlayerController.getFila);
 router.delete("/player/fila/:id", PlayerController.excluirMusica);
 

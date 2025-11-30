@@ -27,6 +27,17 @@ class ClienteRepository {
       where: { nome },
     });
   }
+
+  async findAll() {
+    return prisma.cliente.findMany();
+  }
+
+  async remove(id: number) {
+    return prisma.cliente.delete({
+      where: { id },
+    });
+  }
+
 }
 
 const clienteRepository = new ClienteRepository();

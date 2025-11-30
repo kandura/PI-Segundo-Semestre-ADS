@@ -1,7 +1,7 @@
 import clienteRepository from "../repositories/cliente.repository.js";
 
 export async function createCliente(data: { nome: string; mesa: string }) {
-  return await clienteRepository.create(data);
+  return await clienteRepository.create({nome: data.nome});
 }
 
 export async function getAllClientes() {
@@ -12,23 +12,11 @@ export async function getClienteById(id: number) {
   return await clienteRepository.findById(id);
 }
 
-export async function updateCliente(
-  id: number,
-  data: { nome?: string; mesa?: string }
-) {
-  const cliente = await clienteRepository.findById(id);
-  if (!cliente) {
-    return null;
-  }
+export async function updateCliente(id: number,data: { nome?: string; mesa?: string }) {
+  return await clienteRepository.update(id, {nome: data.nome});
 
-  return await clienteRepository.update(id, data);
 }
 
 export async function deleteCliente(id: number) {
-  const cliente = await clienteRepository.findById(id);
-  if (!cliente) {
-    return null;
-  }
-
   return await clienteRepository.remove(id);
 }

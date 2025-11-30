@@ -1,239 +1,264 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Fila de Músicas - Hamburgueria Smash Bros</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <style>
-      :root {
-        --bg: radial-gradient(circle at top, #1b2735 0%, #090a0f 45%, #000 100%);
-        --card-bg: rgba(10, 10, 20, 0.9);
-        --accent: #ffb342;
-        --accent-soft: rgba(255, 179, 66, 0.15);
-        --primary-text: #ffffff;
-        --secondary-text: #a7b0c0;
-        --border-subtle: rgba(255, 255, 255, 0.06);
-        --danger: #ff4d4f;
-        --success: #3fdca3;
-        --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.8);
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Fila de Músicas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-
-      body {
-        min-height: 100vh;
-        margin: 0;
-        font-family: system-ui, sans-serif;
-        color: var(--primary-text);
-        background: var(--bg);
-        background-attachment: fixed;
-      }
-
-      .container {
-        max-width: 960px;
-        margin: 32px auto 100px;
-        padding: 0 16px;
-      }
-
-      /* HEADER */
-      .header {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-
-      .avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 999px;
-        background: linear-gradient(145deg, #4f8bff, #a279ff);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 18px;
-        flex-shrink: 0;
-      }
-
-      .header-text { display: flex; flex-direction: column; gap: 2px; }
-
-      .title { font-size: 20px; font-weight: 700; }
-      .subtitle { font-size: 13px; color: var(--secondary-text); }
-
-      /* FILA */
-      .fila-lista { display: flex; flex-direction: column; gap: 12px; }
-
-      .music-card {
-        background: var(--card-bg);
-        border-radius: 18px;
-        padding: 14px 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid var(--border-subtle);
-      }
-
-      .music-info { display: flex; flex-direction: column; gap: 4px; }
-
-      .music-title { font-size: 15px; font-weight: 600; }
-      .music-artist { font-size: 12px; color: var(--secondary-text); }
-
-      .status {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 6px 12px;
-        border-radius: 999px;
-      }
-
-      .status.playing { background: rgba(63,220,163,.1); color: var(--success); border: 1px solid var(--success); }
-      .status.next { background: rgba(255,179,66,.12); color: var(--accent); border: 1px solid var(--accent); }
-      .status.waiting { background: rgba(255,255,255,.02); color: var(--secondary-text); border: 1px solid rgba(255,255,255,.05); }
-
-      .empty-state {
-        text-align: center;
-        padding: 48px 16px;
-        color: var(--secondary-text);
-        font-size: 14px;
-      }
-
-      /* FOOTER NAV */
-      .footer-nav {
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        height: 64px;
-        background: rgba(0,0,0,.9);
-        border-top: 1px solid rgba(255,255,255,.06);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-      }
-
-      .footer-btn {
-        width: 52px; height: 52px;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,.13);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 24px;
-        background: rgba(10,10,20,.85);
-        color: var(--secondary-text);
-        cursor: pointer;
-      }
-
-      .footer-btn.active {
-        background: var(--accent);
-        border-color: var(--accent);
-        color: #1a1210;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <header class="header">
-        <div class="avatar" id="avatar">J</div>
-        <div class="header-text">
-          <div class="title">Fila de Músicas</div>
-          <div class="subtitle" id="subtitle"></div>
-        </div>
-      </header>
-
-      <section>
-        <div class="section-label">Próximas músicas</div>
-        <div id="fila" class="fila-lista"></div>
-      </section>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="footer-nav">
-      <div class="footer-btn" onclick="location.href='/inicio.html'">🏠</div>
-      <div class="footer-btn" onclick="location.href='/chat.html'">💬</div>
-      <div class="footer-btn active" onclick="location.href='/fila.html'">📁</div>
-    </footer>
-
-<script>
-  /* ============ SESSÃO ============ */
-  const nome = sessionStorage.getItem("nomeCliente");
-  if (!nome) location.href = "/login.html";
-
-  document.getElementById("avatar").textContent = nome[0].toUpperCase();
-  const mesa = sessionStorage.getItem("mesaId") || "-";
-  document.getElementById("subtitle").textContent =
-    `Mesa ${mesa} · Bem-vindo(a), ${nome}!`;
-
-  /* ============ RENDERIZAR FILA ============ */
-  function renderFila(pedidos) {
-    const lista = document.getElementById("fila");
-    lista.innerHTML = "";
-
-    if (!pedidos || pedidos.length === 0) {
-      lista.innerHTML = `
-        <div class="empty-state">
-          Nenhuma música na fila 🎧<br>
-          Use a aba de pesquisa!
-        </div>`;
-      return;
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --card-bg: #15151d;
+      --accent: #ffb342;
+      --text: #f5f5f5;
+      --text-muted: #a1a1b3;
+      --radius-lg: 18px;
     }
 
-    pedidos.forEach((p, index) => {
-      const status =
-        index === 0 ? "playing" :
-        index === 1 ? "next" :
-        "waiting";
-
-      const label =
-        index === 0 ? "Tocando 🎵" :
-        index === 1 ? "Próxima ⏳" :
-        "Na fila";
-
-      const card = document.createElement("div");
-      card.className = "music-card";
-
-      card.innerHTML = `
-        <div class="music-info">
-          <span class="music-title">${p.music.titulo}</span>
-          <span class="music-artist">
-            ${p.music.artista} · Pedido por ${p.cliente.nome}
-          </span>
-        </div>
-        <div class="status ${status}">${label}</div>
-      `;
-
-      lista.appendChild(card);
-    });
-  }
-
-  /* ============ BUSCA API ============ */
-  async function carregarFila() {
-    try {
-      const res = await fetch("/api/pedidos/fila");
-      const dados = await res.json();
-      renderFila(dados);
-    } catch {
-      document.getElementById("fila").innerHTML =
-        `<div class="empty-state">Erro ao carregar a fila 😢</div>`;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, sans-serif;
     }
-  }
 
-  carregarFila(); // carrega ao abrir
-
-  /* ============ WEBSOCKET DA FILA ============ */
-  const wsFila = new WebSocket(`ws://${location.host}/fila-ws`);
-
-  wsFila.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    if (data.tipo === "atualizar-fila") {
-      carregarFila(); // 🔥 atualização instantânea
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #26263a 0, #050509 40%, #000);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text);
     }
-  };
 
-  wsFila.onclose = () => {
-    console.warn("WS da fila desconectado — tentando reconectar...");
-    setTimeout(() => location.reload(), 1500);
-  };
-</script>
+    .container {
+      width: 100%;
+      max-width: 480px;
+      padding-bottom: 90px;
+    }
 
-  </body>
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #99d0ff, #1c7aff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #00152a;
+    }
+
+    .header-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .header-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .item-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .title {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-align: center;
+      align-self: center;
+    }
+
+    .badge.playing {
+      border-color: #3fdca3;
+      color: #3fdca3;
+    }
+
+    .badge.next {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0e0e14cc;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .footer-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--text);
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .footer-btn.active {
+      border-color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="avatar" id="avatar">C</div>
+      <div>
+        <div class="header-title">Fila de músicas</div>
+        <div class="header-sub" id="subtitle">Carregando…</div>
+      </div>
+    </header>
+
+    <section id="lista" class="list">
+      <div style="color:var(--text-muted); font-size:0.9rem;">
+        Carregando fila…
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer-nav">
+    <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
+    <div class="footer-btn" onclick="window.location.href='/chat.html'">💬</div>
+    <div class="footer-btn active" onclick="window.location.href='/fila.html'">📁</div>
+  </footer>
+
+  <script>
+    const nome = sessionStorage.getItem("nomeCliente") ?? "Cliente";
+    const mesaId = Number(sessionStorage.getItem("mesaId"));
+    document.getElementById("avatar").textContent = nome[0].toUpperCase();
+    document.getElementById("subtitle").textContent =
+      mesaId ? `Mesa ${mesaId} • Acompanhe a fila` : "Acompanhe a fila";
+
+    const listaEl = document.getElementById("lista");
+
+    function renderFila(fila) {
+      listaEl.innerHTML = "";
+
+      if (!fila || fila.length === 0) {
+        listaEl.innerHTML =
+          `<div style="color:var(--text-muted); font-size:0.9rem;">Nenhuma música na fila ainda.</div>`;
+        return;
+      }
+
+      fila.forEach((item, index) => {
+        // item = playbackQueue com include de music e pedido.cliente
+        const titulo = item.music?.titulo ?? "Música";
+        const artista = item.music?.artista ?? "";
+        const nomeCliente = item.pedido?.cliente?.nome ?? "Cliente";
+
+        let badgeText = "Na fila";
+        let badgeClass = "";
+
+        if (index === 0) {
+          badgeText = "Tocando agora";
+          badgeClass = "playing";
+        } else if (index === 1) {
+          badgeText = "Próxima";
+          badgeClass = "next";
+        }
+
+        const div = document.createElement("div");
+        div.className = "item";
+
+        div.innerHTML = `
+          <div class="item-main">
+            <div class="title">${titulo}</div>
+            <div class="meta">${artista} · Pedido por ${nomeCliente}</div>
+          </div>
+          <div class="badge ${badgeClass}">${badgeText}</div>
+        `;
+
+        listaEl.appendChild(div);
+      });
+    }
+
+    // Fila inicial via REST
+    async function carregarFilaInicial() {
+      try {
+        const res = await fetch("/api/player/fila");
+        if (!res.ok) {
+          console.error("Erro ao buscar fila inicial:", await res.text());
+          listaEl.innerHTML =
+            `<div style="color:var(--text-muted); font-size:0.9rem;">Erro ao carregar fila.</div>`;
+          return;
+        }
+        const data = await res.json();
+        renderFila(data);
+      } catch (err) {
+        console.error("Erro inesperado ao buscar fila:", err);
+      }
+    }
+
+    carregarFilaInicial();
+
+    // WebSocket de atualizações
+    const protocol = location.protocol === "https:" ? "wss" : "ws";
+    const filaWS = new WebSocket(`${protocol}://${location.host}/fila-ws`);
+
+    filaWS.onmessage = (evt) => {
+      try {
+        const data = JSON.parse(evt.data);
+        if (data.tipo === "atualizar-fila") {
+          renderFila(data.fila);
+        }
+      } catch (err) {
+        console.error("Erro ao processar mensagem de fila:", err);
+      }
+    };
+  </script>
+</body>
 </html>

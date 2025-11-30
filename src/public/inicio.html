@@ -279,6 +279,41 @@
     function goTo(genero) {
       window.location.href = `/genero-${genero}.html`;
     }
+
+    addButton.textContent = "Adicionar";
+    addButton.addEventListener("click", async () => {
+      try {
+        const payload = {
+          spotifyId: t.spotifyId,
+          spotifyUri: t.spotifyUri,
+          title: t.title,
+          artists: t.artists,
+          album: t.album,
+          coverUrl: t.coverUrl,   // URL da capa
+          mesaId: mesaId,         // número da mesa
+          clienteNome: nomeCliente
+        };
+
+        const res = await fetch("/pedido-musica/queue", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          console.error("Erro ao adicionar música na fila:", await res.text());
+          alert("Não foi possível adicionar a música. Tente novamente.");
+          return;
+        }
+
+        alert("Música adicionada na fila!");
+      } catch (err) {
+        console.error("Erro inesperado ao adicionar música:", err);
+        alert("Erro inesperado ao adicionar música.");
+      }
+    });
   </script>
 </body>         
 </html>

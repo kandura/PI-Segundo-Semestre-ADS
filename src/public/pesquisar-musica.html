@@ -281,61 +281,29 @@
   </footer>
 
   <script>
-    // ====== SESSÃO / AVATAR ======
-    const nomeCliente = sessionStorage.getItem("nomeCliente") ?? "Cliente";
-    const mesaId = sessionStorage.getItem("mesaId");
-    const sessionId = sessionStorage.getItem("sessionId");
-
-    // se quiser forçar sessão válida:
-    if (!mesaId || !sessionId) {
-      alert("Sessão expirada. Faça login novamente.");
-      window.location.href = "/login.html";
-    }
-
-    document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
+    // Avatar
+    const nome = sessionStorage.getItem("nomeCliente") ?? "A";
+    document.getElementById("avatar").textContent = nome[0].toUpperCase();
 
     const input = document.getElementById("searchInput");
     const resultadosDiv = document.getElementById("resultados");
 
-    let selectedTrack = null; // track escolhida pro modal
-
-    // ====== BUSCAR NO BACKEND (/api/spotify/search) ======
     async function buscar() {
       const q = input.value.trim();
       if (!q) return;
 
       resultadosDiv.innerHTML = "<p>⏳ Buscando músicas…</p>";
 
-      try {
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
-        if (!res.ok) {
-          const txt = await res.text().catch(() => "");
-          console.error("Erro /api/spotify/search:", res.status, txt);
-          resultadosDiv.innerHTML = "<p>Erro na busca. Tente novamente.</p>";
-          return;
-        }
+      const res = await fetch(`/spotify/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
 
-        const data = await res.json();
-        renderResultados(data);
-      } catch (err) {
-        console.error("Erro inesperado na busca:", err);
-        resultadosDiv.innerHTML = "<p>Erro inesperado. Tente novamente.</p>";
-      }
+      renderResultados(data);
     }
 
-    // permite Enter no input
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        buscar();
-      }
-    });
-
-    // ====== RENDER DOS RESULTADOS ======
     function renderResultados(lista) {
       resultadosDiv.innerHTML = "";
 
-      if (!lista || lista.length === 0) {
+      if (lista.length === 0) {
         resultadosDiv.innerHTML = "<p>Nada encontrado 😕</p>";
         return;
       }
@@ -344,25 +312,19 @@
         const card = document.createElement("div");
         card.className = "music-card";
 
-        // garante spotifyId
-        const spotifyId = m.spotifyId || (m.spotifyUri ? m.spotifyUri.split(":").pop() : null);
-
         const trackObj = {
-          spotifyId,
           spotifyUri: m.spotifyUri,
           title: m.title,
           artists: m.artists,
           album: m.album,
-          coverUrl: m.coverUrl || m.album || "",
-          popularity: m.popularity ?? "—",
-          durationMs: m.durationMs
+          popularity: m.popularity ?? "—"
         };
 
         card.innerHTML = `
-          <img src="${trackObj.coverUrl}" class="cover" alt="Capa do álbum">
+          <img src="${m.album}" class="cover">
           <div class="music-info">
-            <span class="music-title">${trackObj.title}</span>
-            <span class="music-artist">${trackObj.artists}</span>
+            <span class="music-title">${m.title}</span>
+            <span class="music-artist">${m.artists}</span>
             <span class="popularity">Popularidade: ${trackObj.popularity}</span>
           </div>
           <button class="btn-add">➕</button>
@@ -375,7 +337,9 @@
       });
     }
 
-    // ====== MODAL ======
+    /* MODAL */
+    let selectedTrack = null;
+
     function openConfirmModal(track) {
       selectedTrack = track;
 
@@ -390,43 +354,26 @@
       selectedTrack = null;
     }
 
-    // ====== ENVIAR PEDIDO PARA /pedido-musica/queue ======
     async function sendMusicRequest() {
       if (!selectedTrack) return;
 
-      const mesa = sessionStorage.getItem("mesaId");
-      const nome = sessionStorage.getItem("nomeCliente") ?? "Cliente";
-
-      if (!mesa || !nome) {
-        alert("Sessão expirada. Faça login novamente.");
-        window.location.href = "/login.html";
-        return;
-      }
-
-      const payload = {
-        ...selectedTrack,          // spotifyId, spotifyUri, title, artists, album, coverUrl
-        mesaId: Number(mesa),
-        clienteNome: nome
-      };
-
       try {
-        const res = await fetch("/pedido-musica/queue", {
+        const res = await fetch("/pedido-musica/spotify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(selectedTrack)
         });
 
         if (!res.ok) {
-          const txt = await res.text().catch(() => "");
-          console.error("Erro /pedido-musica/queue:", res.status, txt);
-          alert("Erro ao enviar pedido. Tente novamente.");
+          alert("Erro ao enviar pedido");
           return;
         }
 
         alert("🎵 Música adicionada à fila!");
+
       } catch (err) {
-        console.error("Erro ao enviar pedido:", err);
-        alert("Erro ao enviar pedido.");
+        console.error(err);
+        alert("Erro ao enviar pedido");
       }
 
       closeModal();

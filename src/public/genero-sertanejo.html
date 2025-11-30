@@ -311,68 +311,165 @@
     </button>
   </footer>
 
-  <script>
-    // RESGATA NOME E MESA DA LOGIN.HTML
-    const nome = localStorage.getItem("nomeCliente") || "Cliente";
-    const mesa = localStorage.getItem("mesaId") || "--";
+<script>
+  // ====== CONFIG POR GÊNERO ======
+  // Ajuste esses dois conforme a página:
+  const GENRE_LABEL = "Sertanejo";        // aparece em textos / logs
+  const GENRE_QUERY = "sertanejo";        // termo base pro Spotify (ex.: "rock", "funk", "gospel")
 
-    document.getElementById("avatar").textContent = nome[0].toUpperCase();
-    document.getElementById("subtitle").textContent =
-      "Mesa " + mesa + " • " + nome;
+  // ====== SESSÃO (igual o resto do app) ======
+  const nomeCliente = sessionStorage.getItem("nomeCliente");
+  const mesaId = sessionStorage.getItem("mesaId");
 
-    // === AQUI SERÁ A INTEGRAÇÃO COM O BACKEND / SPOTIFY ===
-    // Clique no botão "Pedir"
-    document.querySelectorAll(".btn-request").forEach((btn) => {
-      btn.addEventListener("click", async (event) => {
-        event.stopPropagation(); // evita disparar o clique do card inteiro
+  if (!nomeCliente || !mesaId) {
+    alert("Sessão expirada. Faça login novamente.");
+    window.location.href = "/login.html";
+  }
 
-        const card = btn.closest(".track-card");
-        const trackId = card.dataset.trackId;
-        const genre = card.dataset.genre;
+  document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
+  document.getElementById("subtitle").textContent =
+    `Mesa ${mesaId} • ${nomeCliente}`;
 
-        // TODO: trocar URL e formato do body conforme API de vocês
-        /*
-        await fetch("http://localhost:3000/api/musicas/solicitar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trackId,
-            genre,
-            sessionId: localStorage.getItem("sessionId"),
-            mesaId: mesa,
-            nomeCliente: nome,
-          }),
+  // ====== ELEMENTOS DE TELA ======
+  const searchInput = document.getElementById("searchInput");
+  const tracksList = document.getElementById("tracksList");
+
+  // ====== BUSCAR MÚSICAS DO SPOTIFY POR GÊNERO ======
+  async function carregarMusicasIniciais() {
+    await buscarMusicas(GENRE_QUERY);
+  }
+
+  async function buscarMusicas(termoExtra) {
+    let q = GENRE_QUERY;
+
+    if (termoExtra && termoExtra.trim()) {
+      // se o usuário digitar algo, fazemos "gênero + termo"
+      q = `${GENRE_QUERY} ${termoExtra.trim()}`;
+    }
+
+    tracksList.innerHTML = "<p>Carregando sugestões…</p>";
+
+    try {
+      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("Erro /api/spotify/search:", res.status, txt);
+        tracksList.innerHTML = "<p>Erro ao carregar músicas. Tente de novo.</p>";
+        return;
+      }
+
+      const dados = await res.json();
+      renderTracks(dados);
+    } catch (err) {
+      console.error("Erro inesperado ao buscar músicas:", err);
+      tracksList.innerHTML = "<p>Erro inesperado. Tente novamente.</p>";
+    }
+  }
+
+  // ====== RENDERIZAR TRACKS NA LISTA ======
+  function renderTracks(musicas) {
+    tracksList.innerHTML = "";
+
+    if (!musicas || !musicas.length) {
+      tracksList.innerHTML = "<p>Nenhuma música encontrada.</p>";
+      return;
+    }
+
+    musicas.forEach((m) => {
+      const minutes = Math.floor(m.durationMs / 60000);
+      const seconds = Math.floor((m.durationMs % 60000) / 1000)
+        .toString()
+        .padStart(2, "0");
+      const duracao = `${minutes}:${seconds}`;
+
+      const article = document.createElement("article");
+      article.className = "track-card";
+
+      article.innerHTML = `
+        <div class="track-cover">
+          <img src="${m.coverUrl || "/img/placeholder-cover.png"}"
+               alt="Capa"
+               style="width:100%;height:100%;border-radius:999px;object-fit:cover;">
+        </div>
+
+        <div class="track-info">
+          <div class="track-title">${m.title}</div>
+          <div class="track-meta">${m.artists} • ${m.album} • ${duracao}</div>
+        </div>
+
+        <div class="track-actions">
+          <div class="wave-icon">📶</div>
+          <button class="btn-request">Pedir</button>
+        </div>
+      `;
+
+      const btnPedir = article.querySelector(".btn-request");
+      btnPedir.addEventListener("click", () => {
+        enviarPedido({
+          spotifyId: m.spotifyId,
+          spotifyUri: m.spotifyUri,
+          title: m.title,
+          artists: m.artists,
+          album: m.album,
+          coverUrl: m.coverUrl,
         });
-        */
-
-        alert(
-          "Aqui vai a chamada para o backend pedindo a música: " +
-          trackId +
-          " (" +
-          genre +
-          ")"
-        );
       });
+
+      tracksList.appendChild(article);
     });
+  }
 
-    // Botão "+ Sugerir outra música"
-    document
-      .getElementById("btnAddCustom")
-      .addEventListener("click", () => {
-        // Aqui você pode abrir um modal, prompt, etc.
-        const custom = prompt(
-          "Digite o nome da música e artista que quer sugerir:"
-        );
-        if (!custom) return;
+  // ====== ENVIAR PARA /pedido-musica/queue ======
+  async function enviarPedido(track) {
+    try {
+      const payload = {
+        spotifyId: track.spotifyId,
+        spotifyUri: track.spotifyUri,
+        title: track.title,
+        artists: track.artists,
+        album: track.album,
+        coverUrl: track.coverUrl,
+        mesaId: Number(mesaId),
+        clienteNome: nomeCliente,
+      };
 
-        // TODO: enviar sugestão pro backend / spotify
-        /*
-        fetch("http://localhost:3000/api/musicas/sugerir", {...})
-        */
-
-        alert("Sugestão enviada (placeholder): " + custom);
+      const res = await fetch("/pedido-musica/queue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-  </script>
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        console.error("Erro /pedido-musica/queue:", res.status, txt);
+        alert("Não foi possível adicionar a música na fila.");
+        return;
+      }
+
+      alert("Música adicionada na fila! 🎵");
+    } catch (err) {
+      console.error("Erro inesperado ao enviar pedido:", err);
+      alert("Erro inesperado ao enviar o pedido.");
+    }
+  }
+
+  // ====== BUSCA PELO INPUT DA PÁGINA ======
+  if (searchInput) {
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        buscarMusicas(searchInput.value);
+      }
+    });
+  }
+
+  // ====== CARREGA LISTA INICIAL AO ABRIR ======
+  carregarMusicasIniciais();
+</script>
+
+
+
+
 </body>
 
 </html>

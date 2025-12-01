@@ -70,7 +70,7 @@ export class SpotifyController {
   }
 
   // BUSCA LIVRE (pesquisar-musica / telas gerais)
-  
+
   static async search(req: Request, res: Response) {
     try {
       const q = String(req.query.q ?? "").trim();
@@ -102,7 +102,7 @@ export class SpotifyController {
       const params = new URLSearchParams({
         q,
         type: "track",
-        limit: "30", // 
+        limit: "50", // 
       });
 
       const { data } = await axios.get(
@@ -132,6 +132,64 @@ export class SpotifyController {
       return res.status(500).json({ error: "Erro na busca Spotify" });
     }
   }
+
+  static async playlist(req: Request, res: Response) {
+    try {
+      const playlistId = req.params.id;
+
+      if (!playlistId) {
+        return res.status(400).json({ error: "Playlist ID é obrigatório" });
+      }
+
+      // token da conta logada (a mesma do moderador / dono do app)
+      const accessToken = await spotify.getValidAccessToken();
+
+      const limit = 50; // quantas por página
+      let offset = 0;
+      const allItems: any[] = [];
+
+      // busca várias páginas até acabar ou chegar num limite de segurança
+      while (true) {
+        const { data } = await axios.get(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          {
+            params: { limit, offset },
+            headers: { Authorization: `Bearer ${accessToken}` },
+          }
+        );
+
+        const items = data.items ?? [];
+        allItems.push(...items);
+
+        if (items.length < limit) break; // acabou a playlist
+        offset += limit;
+        if (offset >= 200) break; // hard-limit pra não exagerar
+      }
+
+      const results = allItems
+        .filter((i: any) => i.track && !i.track.is_local)
+        .map((i: any) => {
+          const t = i.track;
+          return {
+            title: t.name,
+            artists: t.artists.map((a: any) => a.name).join(", "),
+            album: t.album.name,
+            coverUrl: t.album.images?.[0]?.url ?? "",
+            spotifyUri: t.uri,
+            spotifyId: t.id,
+            durationMs: t.duration_ms,
+          };
+        });
+
+      return res.json(results);
+    } catch (err: any) {
+      console.error("Erro na playlist Spotify:", err?.response?.data ?? err);
+      return res
+        .status(500)
+        .json({ error: "Erro ao carregar playlist do Spotify" });
+    }
+  }
+
 
   static async getPlaylistTracks(req: Request, res: Response) {
     try {

@@ -106,6 +106,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      /* A página já rola por padrão, não precisa limitar a altura */
     }
 
     .track-card {
@@ -132,6 +133,7 @@
       border-radius: 999px;
       background: radial-gradient(circle at 30% 20%, #ffffff, #b3b3b3);
       flex-shrink: 0;
+      object-fit: cover;
     }
 
     .track-info {
@@ -173,18 +175,6 @@
       color: #2b1903;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-    }
-
-    .btn-add-custom {
-      margin-top: 8px;
-      width: 100%;
-      border-radius: 999px;
-      border: 1px dashed rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: var(--text-muted);
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      cursor: pointer;
     }
 
     /* FOOTER NAV */
@@ -241,65 +231,12 @@
       <input type="text" placeholder="O que você quer ouvir de Funk?" id="searchInput" />
     </div>
 
-    <!-- LISTA DE MÚSICAS (exemplos / placeholders) -->
-    <section class="tracks-list" id="tracksList">
-      <!--
-          CADA .track-card representa uma música.
-
-          ONDE VÃO ENTRAR OS DADOS REAIS (Spotify + backend):
-          - data-track-id  -> ID da música no Spotify ou no banco.
-          - Dentro de .track-title, .track-meta -> nome/artista/duração.
-        -->
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_1" data-genre="funk">
-        <div class="track-cover"></div>
-
-        <div class="track-info">
-          <div class="track-title">Nome da Música 1</div>
-          <div class="track-meta">Artista • 3:20</div>
-        </div>
-
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">
-            Pedir
-          </button>
-        </div>
-      </article>
-
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_2" data-genre="funk">
-        <div class="track-cover"></div>
-        <div class="track-info">
-          <div class="track-title">Nome da Música 2</div>
-          <div class="track-meta">Artista • 4:02</div>
-        </div>
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">Pedir</button>
-        </div>
-      </article>
-
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_3" data-genre="funk">
-        <div class="track-cover"></div>
-        <div class="track-info">
-          <div class="track-title">Nome da Música 3</div>
-          <div class="track-meta">Artista • 2:58</div>
-        </div>
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">Pedir</button>
-        </div>
-      </article>
-
-      <!-- BOTÃO PARA SUGERIR OUTRA MÚSICA -->
-      <button class="btn-add-custom" id="btnAddCustom">
-        + Sugerir outra música
-      </button>
-    </section>
+    <!-- LISTA DE MÚSICAS -->
+    <section class="tracks-list" id="tracksList"></section>
   </div>
 
-  <!-- FOOTER ( -->
+  <!-- FOOTER -->
   <footer class="footer-nav">
-    <!-- ONDE PLUGAR OS LINKS: substituir "#" por .html reais -->
     <button class="footer-btn active" onclick="window.location.href='inicio.html'">
       🏠
     </button>
@@ -311,165 +248,147 @@
     </button>
   </footer>
 
- <script>
-  // ====== CONFIG POR GÊNERO ======
-  // Ajuste esses dois conforme a página:
-  const GENRE_LABEL = "Funk";        // aparece em textos / logs
-  const GENRE_QUERY = "funk";        // termo base pro Spotify (ex.: "rock", "funk", "gospel")
+  <script>
+    // ===========================
+    //   DADOS DA SESSÃO
+    // ===========================
+    const nomeCliente = sessionStorage.getItem("nomeCliente") || "Cliente";
+    const mesaId = Number(sessionStorage.getItem("mesaId"));
 
-  // ====== SESSÃO (igual o resto do app) ======
-  const nomeCliente = sessionStorage.getItem("nomeCliente");
-  const mesaId = sessionStorage.getItem("mesaId");
-
-  if (!nomeCliente || !mesaId) {
-    alert("Sessão expirada. Faça login novamente.");
-    window.location.href = "/login.html";
-  }
-
-  document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
-  document.getElementById("subtitle").textContent =
-    `Mesa ${mesaId} • ${nomeCliente}`;
-
-  // ====== ELEMENTOS DE TELA ======
-  const searchInput = document.getElementById("searchInput");
-  const tracksList = document.getElementById("tracksList");
-
-  // ====== BUSCAR MÚSICAS DO SPOTIFY POR GÊNERO ======
-  async function carregarMusicasIniciais() {
-    await buscarMusicas(GENRE_QUERY);
-  }
-
-  async function buscarMusicas(termoExtra) {
-    let q = GENRE_QUERY;
-
-    if (termoExtra && termoExtra.trim()) {
-      // se o usuário digitar algo, fazemos "gênero + termo"
-      q = `${GENRE_QUERY} ${termoExtra.trim()}`;
+    if (!nomeCliente || !mesaId) {
+      window.location.href = "/login.html";
     }
 
-    tracksList.innerHTML = "<p>Carregando sugestões…</p>";
+    document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
+    document.getElementById("subtitle").textContent =
+      "Mesa " + mesaId + " • " + nomeCliente;
 
-    try {
-      const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        console.error("Erro /api/spotify/search:", res.status, txt);
-        tracksList.innerHTML = "<p>Erro ao carregar músicas. Tente de novo.</p>";
+    const searchInput = document.getElementById("searchInput");
+    const tracksList = document.getElementById("tracksList");
+
+    const PLAYLIST_ID_FUNK = "5ifcelrC9QRGO7wkqhkfnn,0FCLqxrKb3QjKLO0jgUVni,1Li2GHwyWDaUUsJpXxEfhp,5TPEneuulbJMhgz6PtnkaW,0g9DQ9UB0Vr1y3KwgAXr1C";
+
+    let allTracks = []; // cache da playlist
+
+    function formatDuration(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+
+    // =========================
+    //   CARREGAR PLAYLIST
+    // =========================
+    async function carregarPlaylistFunk() {
+      tracksList.innerHTML = "<p>⏳ Carregando playlist de  Funk…</p>";
+
+      try {
+        const res = await fetch(`/api/spotify/playlist/${PLAYLIST_ID_FUNK}`);
+        if (!res.ok) {
+          console.error("Erro ao carregar playlist:", await res.text());
+          tracksList.innerHTML = "<p>Erro ao carregar playlist 😕</p>";
+          return;
+        }
+
+        const data = await res.json();
+        allTracks = data;
+        renderTracks(allTracks);
+      } catch (err) {
+        console.error("Erro inesperado ao carregar playlist:", err);
+        tracksList.innerHTML = "<p>Erro inesperado 😕</p>";
+      }
+    }
+
+    function renderTracks(lista) {
+      tracksList.innerHTML = "";
+
+      if (!lista || lista.length === 0) {
+        tracksList.innerHTML = "<p>Nenhuma música encontrada.</p>";
         return;
       }
 
-      const dados = await res.json();
-      renderTracks(dados);
-    } catch (err) {
-      console.error("Erro inesperado ao buscar músicas:", err);
-      tracksList.innerHTML = "<p>Erro inesperado. Tente novamente.</p>";
+      lista.forEach((m) => {
+        const card = document.createElement("article");
+        card.className = "track-card";
+
+        const durationText = m.durationMs ? formatDuration(m.durationMs) : "";
+        const coverSrc = m.coverUrl || "https://via.placeholder.com/64?text=♪";
+
+        card.innerHTML = `
+          <img src="${coverSrc}" alt="Capa do álbum" class="track-cover" />
+          <div class="track-info">
+            <div class="track-title">${m.title}</div>
+            <div class="track-meta">${m.artists} ${durationText ? "• " + durationText : ""}</div>
+          </div>
+          <div class="track-actions">
+            <div class="wave-icon">📶</div>
+            <button class="btn-request">Pedir</button>
+          </div>
+        `;
+
+        card.querySelector(".btn-request").onclick = () => pedirMusica(m);
+
+        tracksList.appendChild(card);
+      });
     }
-  }
 
-  // ====== RENDERIZAR TRACKS NA LISTA ======
-  function renderTracks(musicas) {
-    tracksList.innerHTML = "";
-
-    if (!musicas || !musicas.length) {
-      tracksList.innerHTML = "<p>Nenhuma música encontrada.</p>";
-      return;
-    }
-
-    musicas.forEach((m) => {
-      const minutes = Math.floor(m.durationMs / 60000);
-      const seconds = Math.floor((m.durationMs % 60000) / 1000)
-        .toString()
-        .padStart(2, "0");
-      const duracao = `${minutes}:${seconds}`;
-
-      const article = document.createElement("article");
-      article.className = "track-card";
-
-      article.innerHTML = `
-        <div class="track-cover">
-          <img src="${m.coverUrl || "/img/placeholder-cover.png"}"
-               alt="Capa"
-               style="width:100%;height:100%;border-radius:999px;object-fit:cover;">
-        </div>
-
-        <div class="track-info">
-          <div class="track-title">${m.title}</div>
-          <div class="track-meta">${m.artists} • ${m.album} • ${duracao}</div>
-        </div>
-
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">Pedir</button>
-        </div>
-      `;
-
-      const btnPedir = article.querySelector(".btn-request");
-      btnPedir.addEventListener("click", () => {
-        enviarPedido({
+    // ===========================
+    //   ENVIAR PEDIDO PRO BACK
+    // ===========================
+    async function pedirMusica(m) {
+      try {
+        const payload = {
           spotifyId: m.spotifyId,
           spotifyUri: m.spotifyUri,
           title: m.title,
           artists: m.artists,
           album: m.album,
           coverUrl: m.coverUrl,
+          mesaId: mesaId,
+          clienteNome: nomeCliente,
+        };
+
+        const res = await fetch("/api/pedido-musica/queue", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
-      });
 
-      tracksList.appendChild(article);
-    });
-  }
+        if (!res.ok) {
+          console.error("Erro ao pedir música:", await res.text());
+          alert("Não foi possível adicionar a música. Tente novamente.");
+          return;
+        }
 
-  // ====== ENVIAR PARA /pedido-musica/queue ======
-  async function enviarPedido(track) {
-    try {
-      const payload = {
-        spotifyId: track.spotifyId,
-        spotifyUri: track.spotifyUri,
-        title: track.title,
-        artists: track.artists,
-        album: track.album,
-        coverUrl: track.coverUrl,
-        mesaId: Number(mesaId),
-        clienteNome: nomeCliente,
-      };
+        alert("🎵 Música adicionada à fila!");
+      } catch (err) {
+        console.error("Erro inesperado ao pedir música:", err);
+        alert("Erro inesperado ao pedir música.");
+      }
+    }
 
-      const res = await fetch("/pedido-musica/queue", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    // ===========================
+    //   FILTRO LOCAL NA PLAYLIST
+    // ===========================
+    searchInput.addEventListener("input", () => {
+      const termo = searchInput.value.trim().toLowerCase();
 
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        console.error("Erro /pedido-musica/queue:", res.status, txt);
-        alert("Não foi possível adicionar a música na fila.");
+      if (!termo) {
+        renderTracks(allTracks);
         return;
       }
 
-      alert("Música adicionada na fila! 🎵");
-    } catch (err) {
-      console.error("Erro inesperado ao enviar pedido:", err);
-      alert("Erro inesperado ao enviar o pedido.");
-    }
-  }
+      const filtradas = allTracks.filter((m) =>
+        (m.title + " " + m.artists).toLowerCase().includes(termo)
+      );
 
-  // ====== BUSCA PELO INPUT DA PÁGINA ======
-  if (searchInput) {
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        buscarMusicas(searchInput.value);
-      }
+      renderTracks(filtradas);
     });
-  }
 
-  // ====== CARREGA LISTA INICIAL AO ABRIR ======
-  carregarMusicasIniciais();
-</script>
-
-
-
-
+    // Carregar playlist ao abrir a página
+    carregarPlaylistFunk();
+  </script>
 </body>
 
 </html>

@@ -7,59 +7,80 @@
 
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #0b0b0f;
-      font-family: Arial, sans-serif;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+  margin: 0;
+  padding: 0;
+  background: #0b0b0f;
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
 
-    .card {
-      background: #15151d;
-      padding: 30px;
-      border-radius: 16px;
-      width: 350px;
-      box-shadow: 0 0 10px #000;
-    }
+/* --- Card e alinhamento padrão do projeto (Solução 2) --- */
+.card {
+  background: #15151d;
+  padding: 30px;
+  border-radius: 16px;
+  width: min(360px, 92vw); /* responsivo e centralizado */
+  box-shadow: 0 0 10px #000;
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: none;
-    }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+/* Inputs e botões padronizados */
+input, button {
+  width: 100%;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
 
-    #btnSubmit {
-      background: #ffb342;
-      font-weight: bold;
-    }
+/* Estilo dos inputs padrão do projeto */
+input {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: #0f0f17;
+  color: #fff;
+}
 
-    #btnRegister {
-      background: transparent;
-      color: #ffb342;
-      margin-top: 10px;
-    }
+input::placeholder {
+  color: #9e9eaa;
+}
 
-    #errorBox {
-      display: none;
-      color: #ff6d6d;
-      margin-bottom: 10px;
-      text-align: center;
-      font-size: 14px;
-    }
+/* Botão principal */
+#btnSubmit {
+  background: linear-gradient(180deg,#ffb342,#ffa042);
+  color: #2b1903;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+/* Botão de registrar */
+#btnRegister {
+  background: transparent;
+  color: #ffb342;
+  border: none;
+  width: auto;
+  padding: 6px 0;
+  align-self: center;
+}
+
+/* Mensagem de erro */
+#errorBox {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  color: #ff6d6d;
+  font-size: 14px;
+  display: none;
+}
+
   </style>
 </head>
 

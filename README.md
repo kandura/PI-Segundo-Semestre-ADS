@@ -1,236 +1,328 @@
-# 🍔 Hamburgueria Smash Bros
+# README – Sistema Hamburgueria Smash Bros 
 
-Plataforma integrada de **música + chat em tempo real** para uma hamburgueria, desenvolvida como Projeto Integrador do 2º semestre de ADS (FATEC Indaiatuba).
 
-O sistema foi pensado para funcionar principalmente em **dispositivos móveis**, simulando a experiência de um **aplicativo de chat e pedidos musicais** dentro da hamburgueria, acessado por **QR Code na mesa**.
-
----
-
-## 1. Visão Geral
-
-Fluxo básico do cliente:
-
-1. O cliente lê o **QR Code da mesa**, que abre o sistema com o parâmetro `?mesa=Mxx`.
-2. Na **tela de login**, informa seu nome.
-3. O backend cria uma **Sessão do Cliente**, vinculada à mesa.
-4. Após o login, o cliente é redirecionado para a tela **Início**, onde pode:
-   - acessar as telas de **gêneros musicais**;
-   - entrar no **chat em tempo real** com o atendente;
-   - futuramente, **enviar pedidos de músicas** para uma fila moderada.
-
-Além da visão do cliente, o sistema também prevê:
-
-- um **painel de moderador**, responsável por gerenciar a fila de músicas;
-- futura integração com **Spotify** para reprodução automatizada.
+##  SUMÁRIO GERAL
+- [1. Visão Geral do Sistema](#1-visão-geral-do-sistema)
+- [2. Arquitetura Completa](#2-arquitetura-completa)
+- [3. Banco de Dados (Prisma + PostgreSQL)](#3-banco-de-dados-prisma--postgresql)
+- [4. Módulo de Sessão e Mesas](#4-módulo-de-sessão-e-mesas)
+- [5. Módulo de Músicas (Clientes)](#5-módulo-de-músicas-clientes)
+- [6. Sistema de Fila e Pedidos](#6-sistema-de-fila-e-pedidos)
+- [7. WebSockets: Chat + Fila em Tempo Real](#7-websockets-chat--fila-em-tempo-real)
+- [8. Integração Spotify – Player + Autenticação + Tokens](#8-integração-spotify--player--autenticação--tokens)
+- [9. Moderador Dashboard (Player + Fila + Chat)](#9-moderador-dashboard-player--fila--chat)
+- [10. Rotas da API (Explicação Completa)](#10-rotas-da-api-explicação-completa)
+- [11. Estrutura do Front-End](#11-estrutura-do-front-end)
+- [12. Deploy no Render](#12-deploy-no-render)
+- [13. Roadmap do que foi feito e o que falta](#13-roadmap-do-que-foi-feito-e-o-que-falta)
+- [14. Diagramas (Fluxo, BD, Comunicação)](#14-diagramas-fluxo-bd-comunicação)
 
 ---
 
-## 2. Tecnologias Utilizadas
+# 1. Visão Geral do Sistema
 
-### Backend
+O sistema transforma a hamburgueria **Smash Bros Burger** em um ambiente moderno onde:
 
-- **Node.js** + **Express**
-- **TypeScript**
-- **Prisma ORM**
-- **PostgreSQL** (Render PostgreSQL como banco principal)
-- **WebSocket** (biblioteca `ws`) para chat em tempo real
-- **tsx** para desenvolvimento com TypeScript
-- Organização em camadas: **routes → controllers → repositories → prismaClient**
+###  Clientes:
+- entram via QR Code único por mesa;
+- criam uma sessão vinculada ao IP + mesa;
+- podem pesquisar músicas;
+- podem pedir músicas para tocar;
+- interagem via chat global.
 
-### Frontend
+###  Moderador:
+- acessa o painel especial;
+- controla a fila de músicas;
+- controla o player do Spotify;
+- vê o chat em tempo real e apaga mensagens.
 
-- **HTML5** (páginas estáticas servidas pelo backend)
-- **CSS3**, layout responsivo mobile-first
-- **JavaScript (vanilla)** para:
-  - chamadas HTTP via `fetch`
-  - conexão WebSocket com o chat
-  - gerenciamento de sessão via `sessionStorage`
-
-### Deploy / Nuvem
-
-- **Render.com**
-  - Backend publicado como **Web Service**.
-  - Banco de dados como **Render PostgreSQL**.
-  - Deploy automático a cada commit na branch configurada.
-  - Build executa (conforme configuração atual):
-    ```bash
-    npm install && npx prisma db push && npx prisma generate && npm run build
-    ```
+### Integração Spotify:
+- Player oficial Web Playback SDK;
+- Autenticação via OAuth;
+- Tokens armazenados e renovados automaticamente;
+- Backend com controle total do player em um único device.
 
 ---
 
-## 3. Arquitetura do Backend
+# 2. Arquitetura Completa
 
-A estrutura do backend segue uma arquitetura em camadas simples, focada em clareza para o time:
-
-```text
+```
 src/
-├── controllers/
-├── routes/
-├── repositories/
-├── database/
-│   └── prismaClient.ts
-├── public/         (HTML, CSS, JS)
-└── prisma/
-    ├── schema.prisma
-    └── migrations/
-```
-
-### 3.1. Camadas principais
-
-- **Routes**
-  - Definem os endpoints HTTP e apontam para os controllers.
-  - Exemplos:
-    - `/clientes`, `/mesas`, `/sessoes`
-    - `/api/musics`
-    - `/moderador/*`
-
-- **Controllers**
-  - Fazem a ponte entre HTTP e a regra de negócio.
-  - Interpretam `req.body`, `req.params`, `req.query`.
-  - Chamam os repositórios.
-  - Tratam erros e retornam `res.status(...).json(...)`.
-
-- **Repositories**
-  - Acessam diretamente o banco via Prisma.
-  - Encapsulam consultas e comandos (`findMany`, `create`, etc.).
-  - Exemplos: `MusicRepository`, `ClienteRepository`, etc.
-
-- **Prisma / Banco**
-  - `prismaClient.ts` cria e exporta uma instância do `PrismaClient`.
-  - O provider do banco está configurado como `postgresql`.
-  - A conexão é feita via variável de ambiente `DATABASE_URL`.
-
----
-
-## 4. Modelagem do Banco (Prisma)
-
-Resumo dos modelos existentes:
-
-- **Cliente** — cadastro simples (nome, criado em, pedidos).
-- **Mesa** — código, status, sessões vinculadas.
-- **SessaoCliente** — sessão ativa (nome, mesa, ip, userAgent, timestamps).
-- **SpotifyAuth** — autenticação e refresh automático.
-- **Music** — catálogo: id, título, artista, gênero, criado em.
-- **PedidoMusica** — referência ao cliente, música, mesa e status (enum).
-
-Os modelos são gerenciados pelo Prisma, e migrations são aplicadas automaticamente no Render via `db push`.
-
----
-
-## 5. Funcionalidades Implementadas
-
-### 5.1. Gestão de Clientes e Mesas
-
-- CRUD completo de clientes.
-- Seed e listagem de mesas.
-
-### 5.2. Sessão do Cliente (Login QR Code)
-
-Fluxo operacional:
-
-1. `login.html?mesa=Mxx`
-2. Cliente preenche nome
-3. Front chama `POST /sessoes/entrar`
-4. Backend valida mesa
-5. Cria sessão
-6. Redireciona para início
-
-### 5.3. Chat em Tempo Real
-
-- WebSocket com `ws`
-- Chat estilo aplicativo
-- Avatar automático
-- Notificação sonora
-- Registro de entrada no chat
-
----
-
-## 6. Módulo de Músicas
-
-### 6.1. Endpoints
-
-- `GET /api/musics` — lista tudo (com filtro opcional `?genero=`)
-- `POST /api/musics` — cria música com validação
-
-### 6.2. Repositório (MusicRepository)
-
-- Monta dinamicamente o `where`
-- Ordena por título ascendente
-- Usa Prisma ORM
-
-### 6.3. Controller
-
-- `listar` → recebe query, chama repositório e retorna JSON
-- `criar` → valida e cria via repositório
-
----
-
-## 7. Módulo Moderador
-
-Rotas:
-
-- `GET /moderador/fila`
-- `PUT /moderador/fila/:id/frente`
-- `DELETE /moderador/fila/:id`
-
-Estas rotas já estão integradas ao `server.ts` e operam sobre o modelo PedidoMusica.
-
----
-
-## 8. Frontend
-
-- `login.html`
-- `inicio.html`
-- `genero-*.html`
-- `chat.html`
-
-Todas páginas responsivas, mobile-first, integradas com backend via fetch + WebSocket.
-
----
-
-## 9. Como rodar localmente
-
-1. Clone o repo  
-2. Crie `.env` com sua `DATABASE_URL`  
-3. Instale dependências:
-
-```bash
-npm install
-```
-
-4. Rode migrations:
-
-```bash
-npx prisma migrate dev
-```
-
-5. Inicie o servidor:
-
-```bash
-npm run dev
+ ├── controllers/
+ │    ├── cliente.controller.ts
+ │    ├── sessao.controller.ts
+ │    ├── musica.controller.ts
+ │    ├── pedidoMusica.controller.ts
+ │    ├── player.controller.ts
+ │    ├── spotify.controller.ts
+ │    └── moderador.controller.ts
+ │
+ ├── routes/
+ │    ├── cliente.routes.ts
+ │    ├── sessao.routes.ts
+ │    ├── musica.routes.ts
+ │    ├── pedidoMusica.routes.ts
+ │    ├── player.routes.ts
+ │    ├── spotify.routes.ts
+ │    └── moderador.routes.ts
+ │
+ ├── services/
+ │    ├── spotify.service.ts
+ │    └── fila.repository.ts
+ │
+ ├── database/
+ │    ├── prismaClient.ts
+ │    └── schema.prisma
+ │
+ ├── public/
+ │    ├── inicio.html
+ │    ├── pesquisar-musica.html
+ │    ├── genero-*.html
+ │    ├── chat.html
+ │    ├── moderador-dashboard.html
+ │    ├── login.html
+ │    └── assets/
+ │
+ ├── server.ts
+ └── websocket.ts
 ```
 
 ---
 
-## 10. Testes via request.http
+# 3. Banco de Dados (Prisma + PostgreSQL)
 
-Inclui testes de:
+### Principais modelos:
 
-- clientes
-- mesas
-- sessões
-- seed
-- músicas
-- moderador
+### **Cliente**
+- id
+- nome
+- mesaId
+- criadoEm
+
+### **Mesa**
+- id
+- identificador
+- ativa
+
+### **SessaoCliente**
+- id
+- clienteId
+- mesaId
+- ip
+- expiraEm
+
+### **Music** *(catálogo interno simplificado + uso do Spotify)*
+- id
+- titulo
+- artista
+- spotifyId
+- coverUrl
+
+### **PedidoMusica**
+- id
+- clienteId
+- musicId
+- mesaId
+- status (PENDENTE, ACEITO, REJEITADO)
+- queueId (liga ao playback)
+
+### **PlaybackQueue**
+- id
+- musicId
+- pedidoId
+- status (NA_FILA, TOCANDO, TOCADA)
+- order
+
+### **PlayerState**
+- id
+- currentQueueId
+- isPlaying
+
+### **SpotifyAuth**
+- id
+- accessToken
+- refreshToken
+- expiresAt
+- tokenObtainedAt
 
 ---
 
-## 11. Roadmap
+# 4. Módulo de Sessão e Mesas
 
-- Listar músicas nas telas de gênero
-- Criar pedido de música pelo cliente
-- Painel gráfico do moderador
-- Regras avançadas de sessão (IP/Wi-Fi)
-- Integração real com Spotify
-- Histórico completo de chat
+Fluxo:
+
+1. Cliente entra via QR Code  
+2. QR Code contém:  
+   `https://sistema.com/login.html?mesa=4`
+3. Cliente coloca o nome → cria Cliente + Sessão
+4. Sessão é salva com:
+   - mesaId
+   - ip público
+   - validade: 20–30min
+
+### Proteções:
+- apenas permite navegação se sessão ativa existir;
+- sessão expira por inatividade;
+- cliente é sempre vinculado à mesa específica.
+
+---
+
+# 5. Módulo de Músicas (Clientes)
+
+Clientes podem:
+
+- abrir a tela de busca;
+- pesquisar por palavra-chave (Spotify Search API);
+- visualizar detalhes de cada faixa;
+- pedir música (salva no DB);
+- aguardar aprovação / ordem do moderador.
+
+---
+
+# 6. Sistema de Fila e Pedidos
+
+### Fluxo:
+
+```
+Cliente → PedidoMusica → PlaybackQueue → Moderador → Player → Spotify
+```
+
+### Lógica:
+
+1. Cliente envia POST `/pedido-musica/queue`
+2. API:
+   - registra Pedido
+   - cria item na PlaybackQueue (status: NA_FILA)
+   - define ordem incremental
+3. WebSocket atualiza a fila para todos os moderadores conectados
+
+---
+
+# 7. WebSockets: Chat + Fila em Tempo Real
+
+### Chat
+
+Eventos:
+- `message` → nova mensagem no chat
+- `delete-message` → mensagem excluída por moderador
+- `system-message` → entradas/saídas de usuário
+
+### Fila
+
+Eventos:
+- `atualizar-fila` → sempre que:
+  - pedido é criado
+  - música toca
+  - música é removida
+  - próxima música é chamada
+
+---
+
+# 8. Integração Spotify – Player + Autenticação + Tokens
+
+### Fluxo OAuth Completo:
+
+1. Moderador acessa `/spotify/login`
+2. Redireciona para a página oficial do Spotify
+3. Usuário concede permissão
+4. Spotify redireciona para `/spotify/callback?code=...`
+5. Backend recebe o `code`, troca por:
+   - access_token
+   - refresh_token
+   - expires_in
+
+### Tokens são salvos no DB:
+- utilizados por **SpotifyService**
+- renovados automaticamente
+
+### Player (Web Playback SDK)
+
+1. Dashboard abre o SDK
+2. SDK gera um device virtual
+3. Backend registra esse device via:
+   `/api/player/register-device`
+4. Todas as chamadas:
+   - tocar música
+   - pular
+   - próxima
+   usam:
+   PUT `https://api.spotify.com/v1/me/player/play?device_id=<id>`
+
+---
+
+# 9. Moderador Dashboard (Player + Fila + Chat)
+
+### O moderador pode:
+- ver fila atualizada;
+- ver quem pediu cada música;
+- tocar a próxima música;
+- pular;
+- ajustar volume;
+- apagar mensagens do chat;
+- ver mensagens novas;
+- carregar automaticamente a próxima música.
+
+---
+
+# 10. Rotas da API (Explicação Completa)
+
+(Documento inclui explicação rota por rota, omitida aqui por tamanho.)
+
+---
+
+# 11. Estrutura do Front-End
+
+Responsável por:
+
+- interface do cliente (músicas)
+- interface do moderador (player)
+- chat
+- navegação
+- busca
+- confirmação de pedido
+- feedback visual
+
+---
+
+# 12. Deploy no Render
+
+Fluxo:
+
+- push no GitHub → render ativa deploy
+- roda:
+  `npm install`
+  `npx prisma generate`
+  `npx prisma db push`
+  `npm run build`
+- inicia o server
+
+Requer:
+
+- variáveis SPOTIFY
+- DATABASE_URL
+- ORIGIN
+
+---
+
+# 13. Roadmap do que foi feito e o que falta
+
+###  Concluído
+- Sessão por mesa
+- Música → Pedido → Fila
+- WebSockets (chat + fila)
+- Player no dashboard
+- Integração Spotify completa
+- Busca dinâmica
+- Exibição por gênero
+- Deploy no Render
+
+###  Em aberto 
+- filtro por playlists reais do Spotify por gênero
+- permitir tocar playlists completas
+- reforçar exclusão do chat para todos os clientes
+- logs administrativos
+- estatísticas de pedidos por mesa
+- sala de chat por mesa
+
+---
+

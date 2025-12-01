@@ -164,7 +164,17 @@ export class PlayerController {
         create: { id: 1, currentQueueId: nextId }
       });
 
+      // 🔥 Atualiza a fila no painel do moderador
+      const filaAtual = await prisma.playbackQueue.findMany({
+        where: { status: "NA_FILA" },
+        orderBy: { order: "asc" },
+        include: { music: true, pedido: { include: { cliente: true } } }
+      });
+
+      broadcastFila({ tipo: "atualizar-fila", fila: filaAtual });
+
       return res.json({ sucesso: true, tocando: next.music });
+
     } catch (err: any) {
       console.error("Erro playCurrent:", err.response?.data || err);
       return res.status(500).json({ error: "Erro ao tocar música" });

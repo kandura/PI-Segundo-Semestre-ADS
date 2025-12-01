@@ -1,5 +1,4 @@
-// Simulação da fila SEM Spotify
-// Pessoal para adiantar e fazer uns testes crie isso aqui depois vamos trocar pela integração real
+
 
 interface Musica {
   id: number;

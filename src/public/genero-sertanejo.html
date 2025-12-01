@@ -132,6 +132,7 @@
       border-radius: 999px;
       background: radial-gradient(circle at 30% 20%, #ffffff, #b3b3b3);
       flex-shrink: 0;
+      object-fit: cover;
     }
 
     .track-info {
@@ -173,18 +174,6 @@
       color: #2b1903;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-    }
-
-    .btn-add-custom {
-      margin-top: 8px;
-      width: 100%;
-      border-radius: 999px;
-      border: 1px dashed rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: var(--text-muted);
-      padding: 8px 12px;
-      font-size: 0.8rem;
-      cursor: pointer;
     }
 
     /* FOOTER NAV */
@@ -241,65 +230,12 @@
       <input type="text" placeholder="O que você quer ouvir de Sertanejo?" id="searchInput" />
     </div>
 
-    <!-- LISTA DE MÚSICAS (exemplos / placeholders) -->
-    <section class="tracks-list" id="tracksList">
-      <!--
-          CADA .track-card representa uma música.
-
-          ONDE VÃO ENTRAR OS DADOS REAIS (Spotify + backend):
-          - data-track-id  -> ID da música no Spotify ou no banco.
-          - Dentro de .track-title, .track-meta -> nome/artista/duração.
-        -->
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_1" data-genre="sertanejo">
-        <div class="track-cover"></div>
-
-        <div class="track-info">
-          <div class="track-title">Nome da Música 1</div>
-          <div class="track-meta">Artista • 3:20</div>
-        </div>
-
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">
-            Pedir
-          </button>
-        </div>
-      </article>
-
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_2" data-genre="sertanejo">
-        <div class="track-cover"></div>
-        <div class="track-info">
-          <div class="track-title">Nome da Música 2</div>
-          <div class="track-meta">Artista • 4:02</div>
-        </div>
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">Pedir</button>
-        </div>
-      </article>
-
-      <article class="track-card" data-track-id="TRACK_ID_EXEMPLO_3" data-genre="sertanejo">
-        <div class="track-cover"></div>
-        <div class="track-info">
-          <div class="track-title">Nome da Música 3</div>
-          <div class="track-meta">Artista • 2:58</div>
-        </div>
-        <div class="track-actions">
-          <div class="wave-icon">📶</div>
-          <button class="btn-request">Pedir</button>
-        </div>
-      </article>
-
-      <!-- BOTÃO PARA SUGERIR OUTRA MÚSICA -->
-      <button class="btn-add-custom" id="btnAddCustom">
-        + Sugerir outra música
-      </button>
-    </section>
+    <!-- LISTA DE MÚSICAS (preenchida via JS) -->
+    <section class="tracks-list" id="tracksList"></section>
   </div>
 
-  <!-- FOOTER ( -->
+  <!-- FOOTER -->
   <footer class="footer-nav">
-    <!-- ONDE PLUGAR OS LINKS: substituir "#" por .html reais -->
     <button class="footer-btn active" onclick="window.location.href='inicio.html'">
       🏠
     </button>
@@ -312,66 +248,154 @@
   </footer>
 
   <script>
-    // RESGATA NOME E MESA DA LOGIN.HTML
-    const nome = localStorage.getItem("nomeCliente") || "Cliente";
-    const mesa = localStorage.getItem("mesaId") || "--";
+    // ===========================
+    //   DADOS DA SESSÃO
+    // ===========================
+    const nomeCliente = sessionStorage.getItem("nomeCliente") || "Cliente";
+    const mesaId = Number(sessionStorage.getItem("mesaId"));
 
-    document.getElementById("avatar").textContent = nome[0].toUpperCase();
+    if (!nomeCliente || !mesaId) {
+      // se não tiver sessão válida, volta pro login
+      window.location.href = "/login.html";
+    }
+
+    document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
     document.getElementById("subtitle").textContent =
-      "Mesa " + mesa + " • " + nome;
+      "Mesa " + mesaId + " • " + nomeCliente;
 
-    // === AQUI SERÁ A INTEGRAÇÃO COM O BACKEND / SPOTIFY ===
-    // Clique no botão "Pedir"
-    document.querySelectorAll(".btn-request").forEach((btn) => {
-      btn.addEventListener("click", async (event) => {
-        event.stopPropagation(); // evita disparar o clique do card inteiro
+    const searchInput = document.getElementById("searchInput");
+    const tracksList = document.getElementById("tracksList");
 
-        const card = btn.closest(".track-card");
-        const trackId = card.dataset.trackId;
-        const genre = card.dataset.genre;
+    const GENRE = "sertanejo";
 
-        // TODO: trocar URL e formato do body conforme API de vocês
-        /*
-        await fetch("http://localhost:3000/api/musicas/solicitar", {
+    // Converte ms -> "3:45"
+    function formatDuration(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    }
+
+    // ===========================
+    //   BUSCA NO SPOTIFY (BACK)
+    // ===========================
+    async function buscarSertanejo(termo) {
+      // se não, usamos só "sertanejo" pra pegar músicas populares
+      const queryBase = termo && termo.trim().length > 0
+        ? `${termo.trim()} ${GENRE}`
+        : GENRE;
+
+      tracksList.innerHTML = "<p>⏳ Buscando músicas de sertanejo…</p>";
+
+      try {
+        const res = await fetch(`/spotify/search?q=${encodeURIComponent(queryBase)}`);
+        if (!res.ok) {
+          console.error("Erro em /spotify/search:", await res.text());
+          tracksList.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
+          return;
+        }
+
+        const data = await res.json();
+        renderTracks(data);
+      } catch (err) {
+        console.error("Erro inesperado ao buscar músicas:", err);
+        tracksList.innerHTML = "<p>Erro inesperado na busca 😕</p>";
+      }
+    }
+
+    function renderTracks(lista) {
+      tracksList.innerHTML = "";
+
+      if (!lista || lista.length === 0) {
+        tracksList.innerHTML = "<p>Nenhuma música encontrada para esse gênero.</p>";
+        return;
+      }
+
+      lista.forEach((m) => {
+        const card = document.createElement("article");
+        card.className = "track-card";
+
+        const track = {
+          spotifyId: m.spotifyId,
+          spotifyUri: m.spotifyUri,
+          title: m.title,
+          artists: m.artists,
+          album: m.album,
+          coverUrl: m.coverUrl || "",
+          durationMs: m.durationMs,
+        };
+
+        const coverSrc = track.coverUrl || "https://via.placeholder.com/64?text=♪";
+        const durationText = track.durationMs
+          ? formatDuration(track.durationMs)
+          : "";
+
+        card.innerHTML = `
+          <img src="${coverSrc}" alt="Capa do álbum" class="track-cover" />
+          <div class="track-info">
+            <div class="track-title">${track.title}</div>
+            <div class="track-meta">${track.artists} ${durationText ? "• " + durationText : ""}</div>
+          </div>
+          <div class="track-actions">
+            <div class="wave-icon">📶</div>
+            <button class="btn-request">Pedir</button>
+          </div>
+        `;
+
+        card.querySelector(".btn-request").onclick = () => pedirMusica(track);
+
+        tracksList.appendChild(card);
+      });
+    }
+
+    // ===========================
+    //   ENVIAR PEDIDO PRO BACK
+    // ===========================
+    async function pedirMusica(track) {
+      try {
+        const payload = {
+          spotifyId: track.spotifyId,
+          spotifyUri: track.spotifyUri,
+          title: track.title,
+          artists: track.artists,
+          album: track.album,
+          coverUrl: track.coverUrl,
+          mesaId: mesaId,
+          clienteNome: nomeCliente,
+        };
+
+        const res = await fetch("/pedido-musica/spotify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            trackId,
-            genre,
-            sessionId: localStorage.getItem("sessionId"),
-            mesaId: mesa,
-            nomeCliente: nome,
-          }),
+          body: JSON.stringify(payload),
         });
-        */
 
-        alert(
-          "Aqui vai a chamada para o backend pedindo a música: " +
-          trackId +
-          " (" +
-          genre +
-          ")"
-        );
-      });
+        if (!res.ok) {
+          console.error("Erro ao pedir música:", await res.text());
+          alert("Não foi possível adicionar a música. Tente novamente.");
+          return;
+        }
+
+        alert("🎵 Música adicionada à fila!");
+      } catch (err) {
+        console.error("Erro inesperado ao pedir música:", err);
+        alert("Erro inesperado ao pedir música.");
+      }
+    }
+
+    // ===========================
+    //   EVENTOS
+    // ===========================
+    // Enter faz a busca
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        buscarSertanejo(searchInput.value);
+      }
     });
 
-    // Botão "+ Sugerir outra música"
-    document
-      .getElementById("btnAddCustom")
-      .addEventListener("click", () => {
-        // Aqui você pode abrir um modal, prompt, etc.
-        const custom = prompt(
-          "Digite o nome da música e artista que quer sugerir:"
-        );
-        if (!custom) return;
-
-        // TODO: enviar sugestão pro backend / spotify
-        /*
-        fetch("http://localhost:3000/api/musicas/sugerir", {...})
-        */
-
-        alert("Sugestão enviada (placeholder): " + custom);
-      });
+    // Busca inicial automática só com "sertanejo"
+    buscarSertanejo("");
   </script>
 </body>
 

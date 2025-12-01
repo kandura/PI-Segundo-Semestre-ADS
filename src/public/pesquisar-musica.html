@@ -89,6 +89,10 @@
       font-size: 1rem;
     }
 
+    .search-box input::placeholder {
+      color: var(--text-muted);
+    }
+
     .search-box button {
       background: var(--accent);
       color: #000;
@@ -281,9 +285,14 @@
   </footer>
 
   <script>
-    // Dados do cliente a partir da sessão
+    // Dados da sessão
     const nomeCliente = sessionStorage.getItem("nomeCliente") ?? "Cliente";
     const mesaId = Number(sessionStorage.getItem("mesaId"));
+
+    // Se não tiver sessão, volta pro login
+    if (!sessionStorage.getItem("nomeCliente") || !sessionStorage.getItem("mesaId")) {
+      window.location.href = "/login.html";
+    }
 
     // Avatar
     document.getElementById("avatar").textContent = nomeCliente[0].toUpperCase();
@@ -299,11 +308,10 @@
       resultadosDiv.innerHTML = "<p>⏳ Buscando músicas…</p>";
 
       try {
-        // IMPORTANTE: rota correta com prefixo /api
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/spotify/search?q=${encodeURIComponent(q)}`);
         if (!res.ok) {
           resultadosDiv.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
-          console.error("Erro em /api/spotify/search:", await res.text());
+          console.error("Erro em /spotify/search:", await res.text());
           return;
         }
 
@@ -333,19 +341,20 @@
           title: m.title,
           artists: m.artists,
           album: m.album,
-          coverUrl: m.coverUrl ?? null,
+          coverUrl: m.coverUrl ?? "",
+          durationMs: m.durationMs,
         };
 
-        const coverSrc = m.coverUrl ?? "https://via.placeholder.com/64?text=♪";
+        const coverSrc = m.coverUrl || "https://via.placeholder.com/64?text=♪";
 
         card.innerHTML = `
-        <img src="${coverSrc}" class="cover">
-        <div class="music-info">
-          <span class="music-title">${m.title}</span>
-          <span class="music-artist">${m.artists}</span>
-        </div>
-        <button class="btn-add">➕</button>
-      `;
+          <img src="${coverSrc}" class="cover">
+          <div class="music-info">
+            <span class="music-title">${m.title}</span>
+            <span class="music-artist">${m.artists}</span>
+          </div>
+          <button class="btn-add">➕</button>
+        `;
 
         card.querySelector(".btn-add").onclick = () =>
           openConfirmModal(trackObj);
@@ -374,39 +383,23 @@
     async function sendMusicRequest() {
       if (!selectedTrack) return;
 
-      if (!mesaId || !nomeCliente) {
-        alert("Sessão inválida. Volte para o login e entre novamente.");
-        return;
-      }
-
       try {
-        const payload = {
-          spotifyId: selectedTrack.spotifyId,
-          spotifyUri: selectedTrack.spotifyUri,
-          title: selectedTrack.title,
-          artists: selectedTrack.artists,
-          album: selectedTrack.album,
-          coverUrl: selectedTrack.coverUrl,
-          mesaId: mesaId,
-          clienteNome: nomeCliente,
-        };
-
-        const res = await fetch("/pedido-musica/queue", {
+        const res = await fetch("/pedido-musica/spotify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(selectedTrack),
         });
 
         if (!res.ok) {
-          console.error("Erro ao adicionar na fila:", await res.text());
-          alert("Não foi possível adicionar a música. Tente novamente.");
+          console.error("Erro ao enviar pedido:", await res.text());
+          alert("Erro ao enviar pedido");
           return;
         }
 
         alert("🎵 Música adicionada à fila!");
       } catch (err) {
-        console.error("Erro ao enviar pedido:", err);
-        alert("Erro ao enviar pedido.");
+        console.error(err);
+        alert("Erro ao enviar pedido");
       }
 
       closeModal();
@@ -421,8 +414,15 @@
         buscar();
       }
     });
-  </script>
 
+    // Se veio da home com ?q=...
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q");
+    if (query) {
+      input.value = query;
+      buscar();
+    }
+  </script>
 
 </body>
 

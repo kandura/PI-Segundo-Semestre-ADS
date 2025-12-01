@@ -276,6 +276,16 @@
     function goTo(genero) {
       window.location.href = `/genero-${genero}.html`;
     }
+
+    const searchInput = document.querySelector(".search-box input");
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const q = searchInput.value.trim();
+        window.location.href = `/pesquisar-musica.html?q=${encodeURIComponent(q)}`;
+      }
+    });
+
   </script>
 </body>
 

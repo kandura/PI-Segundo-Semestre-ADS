@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8" />
   <title>Funk • Hamburgueria Smash Bros</title>
@@ -106,7 +105,6 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      /* A página já rola por padrão, não precisa limitar a altura */
     }
 
     .track-card {
@@ -248,14 +246,12 @@
     </button>
   </footer>
 
-    <script>
+  <script>
+    // ===========================
     //   DADOS DA SESSÃO
-
+    // ===========================
     const nomeCliente = sessionStorage.getItem("nomeCliente") || "Cliente";
     const mesaId = Number(sessionStorage.getItem("mesaId"));
-
-    const PLAYLIST_ID_FUNK = "37i9dQZF1DWYYeOy9vs7I5";
-
 
     if (!nomeCliente || !mesaId) {
       window.location.href = "/login.html";
@@ -268,7 +264,10 @@
     const searchInput = document.getElementById("searchInput");
     const tracksList = document.getElementById("tracksList");
 
-    let allTracks = []; // cache das músicas
+    // BONDE DO FUNK – playlist oficial
+    const PLAYLIST_ID_FUNK = "37i9dQZF1DWYYeOy9vs7I5";
+
+    let allTracks = []; // cache da playlist
 
     function formatDuration(ms) {
       const totalSeconds = Math.floor(ms / 1000);
@@ -278,27 +277,24 @@
     }
 
     // =========================
-    //   CARREGAR MÚSICAS (SEARCH)
+    //   CARREGAR PLAYLIST
     // =========================
     async function carregarPlaylistFunk() {
-      tracksList.innerHTML = "<p>⏳ Carregando músicas de Funk…</p>";
+      tracksList.innerHTML = "<p>⏳ Carregando playlist de Funk…</p>";
 
       try {
-        // usamos a mesma rota que o resto do sistema: /api/spotify/search
-        const query = "funk";
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
-
+        const res = await fetch(`/api/spotify/playlist/${PLAYLIST_ID_FUNK}`);
         if (!res.ok) {
-          console.error("Erro em /api/spotify/search:", await res.text());
-          tracksList.innerHTML = "<p>Erro ao carregar músicas 😕</p>";
+          console.error("Erro ao carregar playlist:", await res.text());
+          tracksList.innerHTML = "<p>Erro ao carregar playlist 😕</p>";
           return;
         }
 
         const data = await res.json();
-        allTracks = data;          // guarda todas
-        renderTracks(allTracks);   // mostra na tela
+        allTracks = data;
+        renderTracks(allTracks);
       } catch (err) {
-        console.error("Erro inesperado ao carregar músicas:", err);
+        console.error("Erro inesperado ao carregar playlist:", err);
         tracksList.innerHTML = "<p>Erro inesperado 😕</p>";
       }
     }
@@ -348,12 +344,11 @@
           artists: m.artists,
           album: m.album,
           coverUrl: m.coverUrl,
-          mesaId: Number(mesaId),
+          mesaId: mesaId,
           clienteNome: nomeCliente,
         };
 
-        // aqui é SEM /api, igual no resto do sistema
-        const res = await fetch("/pedido-musica/queue", {
+        const res = await fetch("/api/pedido-musica/queue", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -373,7 +368,7 @@
     }
 
     // ===========================
-    //   FILTRO LOCAL NA LISTA
+    //   FILTRO LOCAL NA PLAYLIST
     // ===========================
     searchInput.addEventListener("input", () => {
       const termo = searchInput.value.trim().toLowerCase();
@@ -390,10 +385,8 @@
       renderTracks(filtradas);
     });
 
-    // Carrega músicas ao abrir a página
+    // Carregar playlist ao abrir a página
     carregarPlaylistFunk();
   </script>
-
 </body>
-
 </html>

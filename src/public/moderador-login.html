@@ -32,6 +32,14 @@
   gap: 12px;
 }
 
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* Agora o Criar conta centraliza */
+  gap: 10px;            /* Espaço entre os elementos */
+}
+
 /* Inputs e botões padronizados */
 input, button {
   width: 100%;
@@ -46,10 +54,10 @@ input {
   border: 1px solid rgba(255,255,255,0.08);
   background: #0f0f17;
   color: #fff;
-  margin-bottom: 16px; 
   border-radius: 10px;
   padding: 12px;
   font-size: 15px;
+  width: 100%;
 }
 
 input::placeholder {
@@ -63,18 +71,19 @@ input::placeholder {
   font-weight: 700;
   border: none;
   cursor: pointer;
+  width: 90%;      
+  align-self: center;
 }
 
 /* Botão de registrar */
 #btnRegister {
-  width: 100%;    
-  text-align: center;
   background: transparent;
   color: #ffb342;
   border: none;
-  width: auto;
   padding: 6px 0;
-  align-self: center;
+  width: auto; 
+  align-self: center;  
+  cursor: pointer;
 }
 
 /* Mensagem de erro */

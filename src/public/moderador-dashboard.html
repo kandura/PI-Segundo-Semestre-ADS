@@ -411,23 +411,23 @@
       }
 
       fila.forEach((p, index) => {
-        const status = index === 0 ? "playing" : index === 1 ? "next" : "waiting";
-        const label = index === 0 ? "Tocando" : index === 1 ? "Próxima" : "Na fila";
+        const status = index === 0 ? "next" : "waiting";
+        const label = index === 0 ? "Próxima" : "Na fila";
 
         const div = document.createElement("div");
         div.className = "music-card";
 
         div.innerHTML = `
-          <div class="music-info">
-            <div class="music-title">${p.music.titulo}</div>
-            <div class="music-artist">${p.music.artista} · Pedido por ${p.pedido.cliente.nome}</div>
-          </div>
+      <div class="music-info">
+        <div class="music-title">${p.music.titulo}</div>
+        <div class="music-artist">${p.music.artista} · Pedido por ${p.pedido.cliente.nome}</div>
+      </div>
 
-          <div>
-            <div class="status ${status}">${label}</div>
-            <button class="small-btn danger" onclick="excluirMusica(${p.id})">Excluir</button>
-          </div>
-        `;
+      <div>
+        <div class="status ${status}">${label}</div>
+        <button class="small-btn danger" onclick="excluirMusica(${p.id})">Excluir</button>
+      </div>
+    `;
 
         box.appendChild(div);
       });

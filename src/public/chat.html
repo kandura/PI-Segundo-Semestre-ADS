@@ -67,7 +67,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 8px 12px px;
+      padding: 8px 12px 90px;
       gap: 8px;
     }
 
@@ -293,7 +293,7 @@
     /* Safe area pra iPhone */
     @supports (padding: env(safe-area-inset-bottom)) {
       main {
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        padding-bottom: calc(90px + env(safe-area-inset-bottom));
       }
     }
   </style>
@@ -383,8 +383,6 @@
 
     socket.onclose = () => {
       statusEl.textContent = "Conexão encerrada.";
-      sendBtn.disabled = true;
-      msgInput.disabled = true;
     };
 
     // ====== FUNÇÕES AUXILIARES ======
@@ -417,6 +415,9 @@
 
       const row = document.createElement("div");
       row.classList.add("msg-row");
+
+      // Mensagem recebe um id no DOM — necessário para remoção posterior
+      row.id = data.id;
 
       if (isSystem) row.classList.add("system");
       else if (isMe) row.classList.add("me");
@@ -479,6 +480,15 @@
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+
+        // Se for comando de apagar, remove do DOM
+        if (data.type === "delete-message") {
+          const msgEl = document.getElementById(data.id);
+          if (msgEl) msgEl.remove();
+          return;
+        }
+
+        // Caso contrário: adicionar mensagens normais
         addMessageToChat(data);
       } catch (err) {
         console.error("Mensagem inválida:", err);
@@ -508,6 +518,7 @@
       }
     });
   </script>
+
   <footer class="footer-nav">
     <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
     <div class="footer-btn active" onclick="window.location.href='/chat.html'">💬</div>

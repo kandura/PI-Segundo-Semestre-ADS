@@ -35,7 +35,7 @@
     .container {
       width: 100%;
       max-width: 480px;
-      padding-bottom: 90px;
+      padding-bottom: 100px;
     }
 
     /* HEADER */
@@ -56,6 +56,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
     }
 
     .header-title {
@@ -103,7 +104,7 @@
     .results {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     .music-card {
@@ -140,12 +141,6 @@
       margin-top: 3px;
     }
 
-    .popularity {
-      font-size: 0.75rem;
-      color: var(--accent);
-      margin-top: 4px;
-    }
-
     .btn-add {
       background: var(--accent);
       border: none;
@@ -156,7 +151,59 @@
       color: #000;
     }
 
-    /* FOOTER */
+    /* MODAL */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: #15151d;
+      padding: 20px;
+      border-radius: 14px;
+      width: 90%;
+      max-width: 360px;
+      text-align: center;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel,
+    .btn-confirm {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-cancel {
+      background: #666;
+      color: white;
+    }
+
+    .btn-confirm {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* FOOTER NAV */
     .footer-nav {
       position: fixed;
       bottom: 0;
@@ -175,63 +222,13 @@
       height: 64px;
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.06);
+      font-size: 2rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
       color: var(--text);
       border: 2px solid transparent;
       cursor: pointer;
-    }
-
-    /* MODAL */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .modal.hidden {
-      display: none;
-    }
-
-    .modal-content {
-      background: #15151d;
-      padding: 20px;
-      border-radius: 14px;
-      width: 90%;
-      max-width: 360px;
-      text-align: center;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .modal-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .btn-cancel {
-      flex: 1;
-      background: #666;
-      color: white;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-    }
-
-    .btn-confirm {
-      flex: 1;
-      background: var(--accent);
-      color: #000;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
     }
   </style>
 </head>
@@ -241,7 +238,7 @@
 
     <!-- HEADER -->
     <header class="header">
-      <div class="avatar" id="avatar">A</div>
+      <div class="avatar" id="avatar">?</div>
       <div>
         <div class="header-title">Pesquisar Música</div>
         <div class="header-sub">Use o Spotify para escolher</div>
@@ -250,7 +247,7 @@
 
     <!-- SEARCH -->
     <div class="search-box">
-      🔍 
+      🔍
       <input id="searchInput" type="text" placeholder="Digite uma música ou artista..." />
       <button onclick="buscar()">Buscar</button>
     </div>
@@ -261,7 +258,7 @@
     <!-- MODAL -->
     <div id="confirm-modal" class="modal hidden">
       <div class="modal-content">
-        <h3 id="modal-title">Confirmar pedido</h3>
+        <h3>Confirmar pedido</h3>
         <p id="modal-desc">Você deseja pedir esta música?</p>
 
         <div class="modal-buttons">
@@ -280,107 +277,173 @@
     <div class="footer-btn" onclick="window.location.href='/fila.html'">📁</div>
   </footer>
 
+  <!-- SCRIPT FINAL -->
   <script>
-    // Avatar
-    const nome = sessionStorage.getItem("nomeCliente") ?? "A";
-    document.getElementById("avatar").textContent = nome[0].toUpperCase();
+    window.addEventListener("DOMContentLoaded", () => {
 
-    const input = document.getElementById("searchInput");
-    const resultadosDiv = document.getElementById("resultados");
+      // ==========================
+      // SESSÃO DO CLIENTE
+      // ==========================
+      const nomeCliente = sessionStorage.getItem("nomeCliente") ?? "Cliente";
+      const mesaId = Number(sessionStorage.getItem("mesaId"));
 
-    async function buscar() {
-      const q = input.value.trim();
-      if (!q) return;
-
-      resultadosDiv.innerHTML = "<p>⏳ Buscando músicas…</p>";
-
-      const res = await fetch(`/spotify/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-
-      renderResultados(data);
-    }
-
-    function renderResultados(lista) {
-      resultadosDiv.innerHTML = "";
-
-      if (lista.length === 0) {
-        resultadosDiv.innerHTML = "<p>Nada encontrado 😕</p>";
-        return;
+      const avatarEl = document.getElementById("avatar");
+      if (avatarEl && nomeCliente) {
+        avatarEl.textContent = nomeCliente[0].toUpperCase();
       }
 
-      lista.forEach(m => {
-        const card = document.createElement("div");
-        card.className = "music-card";
+      const input = document.getElementById("searchInput");
+      const resultadosDiv = document.getElementById("resultados");
 
-        const trackObj = {
-          spotifyUri: m.spotifyUri,
-          title: m.title,
-          artists: m.artists,
-          album: m.album,
-          popularity: m.popularity ?? "—"
-        };
+      let selectedTrack = null;
 
-        card.innerHTML = `
-          <img src="${m.album}" class="cover">
-          <div class="music-info">
-            <span class="music-title">${m.title}</span>
-            <span class="music-artist">${m.artists}</span>
-            <span class="popularity">Popularidade: ${trackObj.popularity}</span>
-          </div>
-          <button class="btn-add">➕</button>
-        `;
+      // ==========================
+      // BUSCAR NO SPOTIFY
+      // ==========================
+      async function buscar() {
+        const q = input.value.trim();
+        if (!q) return;
 
-        card.querySelector(".btn-add").onclick = () =>
-          openConfirmModal(trackObj);
+        resultadosDiv.innerHTML = "<p>⏳ Buscando músicas…</p>";
 
-        resultadosDiv.appendChild(card);
-      });
-    }
+        try {
+          const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
 
-    /* MODAL */
-    let selectedTrack = null;
+          if (!res.ok) {
+            const text = await res.text();
+            console.error("Erro em /api/spotify/search:", text);
+            resultadosDiv.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
+            return;
+          }
 
-    function openConfirmModal(track) {
-      selectedTrack = track;
+          const data = await res.json();
+          renderResultados(data);
+        } catch (err) {
+          console.error("Erro inesperado:", err);
+          resultadosDiv.innerHTML = "<p>Erro inesperado 😕</p>";
+        }
+      }
 
-      document.getElementById("modal-desc").textContent =
-        `Deseja pedir "${track.title}" de ${track.artists}?`;
+      window.buscar = buscar; // botão usa isso
 
-      document.getElementById("confirm-modal").classList.remove("hidden");
-    }
+      // ==========================
+      // RENDERIZAR RESULTADOS
+      // ==========================
+      function renderResultados(lista) {
+        resultadosDiv.innerHTML = "";
 
-    function closeModal() {
-      document.getElementById("confirm-modal").classList.add("hidden");
-      selectedTrack = null;
-    }
-
-    async function sendMusicRequest() {
-      if (!selectedTrack) return;
-
-      try {
-        const res = await fetch("/pedido-musica/spotify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedTrack)
-        });
-
-        if (!res.ok) {
-          alert("Erro ao enviar pedido");
+        if (!lista || lista.length === 0) {
+          resultadosDiv.innerHTML = "<p>Nada encontrado 😕</p>";
           return;
         }
 
-        alert("🎵 Música adicionada à fila!");
+        lista.forEach((m) => {
+          const card = document.createElement("div");
+          card.className = "music-card";
 
-      } catch (err) {
-        console.error(err);
-        alert("Erro ao enviar pedido");
+          const trackObj = {
+            spotifyId: m.spotifyId,
+            spotifyUri: m.spotifyUri,
+            title: m.title,
+            artists: m.artists,
+            album: m.album,
+            coverUrl: m.coverUrl ?? "",
+            durationMs: m.durationMs,
+          };
+
+          card.innerHTML = `
+            <img src="${trackObj.coverUrl || "https://via.placeholder.com/64?text=♪"}" class="cover">
+            <div class="music-info">
+              <span class="music-title">${trackObj.title}</span>
+              <span class="music-artist">${trackObj.artists}</span>
+            </div>
+            <button class="btn-add">➕</button>
+          `;
+
+          card.querySelector(".btn-add").onclick = () =>
+            openConfirmModal(trackObj);
+
+          resultadosDiv.appendChild(card);
+        });
       }
 
-      closeModal();
-    }
+      // ==========================
+      // MODAL
+      // ==========================
+      function openConfirmModal(track) {
+        selectedTrack = track;
+        document.getElementById("modal-desc").textContent =
+          `Deseja pedir "${track.title}" de ${track.artists}?`;
 
-    document.getElementById("btnConfirm").onclick = sendMusicRequest;
+        document.getElementById("confirm-modal").classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("confirm-modal").classList.add("hidden");
+        selectedTrack = null;
+      }
+
+      window.closeModal = closeModal;
+
+      // ==========================
+      // ENVIAR PEDIDO
+      // ==========================
+      async function sendMusicRequest() {
+        if (!selectedTrack) return;
+
+        const payload = {
+          spotifyId: selectedTrack.spotifyId,
+          spotifyUri: selectedTrack.spotifyUri,
+          title: selectedTrack.title,
+          artists: selectedTrack.artists,
+          album: selectedTrack.album,
+          coverUrl: selectedTrack.coverUrl,
+          mesaId,
+          clienteNome: nomeCliente,
+        };
+
+        try {
+          const res = await fetch("/api/pedido-musica/queue", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            console.error("Erro ao enviar pedido:", await res.text());
+            alert("Não foi possível adicionar a música. Tente novamente.");
+            return;
+          }
+
+          alert("🎵 Música adicionada à fila!");
+        } catch (err) {
+          console.error("Erro ao enviar pedido:", err);
+          alert("Erro ao enviar pedido.");
+        }
+
+        closeModal();
+      }
+
+      document.getElementById("btnConfirm").onclick = sendMusicRequest;
+
+      // ENTER pra buscar
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          buscar();
+        }
+      });
+
+      // AUTO-BUSCA quando veio com ?q=
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("q");
+
+      if (query) {
+        input.value = query;
+        buscar();
+      }
+    });
   </script>
 
 </body>
+
 </html>

@@ -23,18 +23,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api", spotifyRoutes);
+
 // Arquivos estáticos da pasta public
 app.use(express.static(path.join(process.cwd(), "src", "public")));
 
-// Rotas base
+// Rotas base (músicas e pedidos simples)
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
+app.use("/api/pedido-musica", pedidoMusicaSpotifyRouter);
+
 // Página inicial → login do cliente
 app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(process.cwd(), "src", "public", "login.html")
-  );
+  res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));
 });
 
 /**************************************
@@ -60,18 +62,15 @@ app.use("/api", filaRoutes);
 app.use("/api", playerRoutes);
 
 /**************************************
- * WEBSOCKET DO CHAT
+ * SERVIDOR HTTP
  **************************************/
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server, path: "/chat" });
 
-function parseMessage(raw: RawData): any {
-  try {
-    return JSON.parse(raw.toString());
-  } catch {
-    return { text: raw.toString() };
-  }
-}
+/**************************************
+ * WEBSOCKET DO CHAT  (/chat)
+ **************************************/
+
+const wssChat = new WebSocketServer({ noServer: true });
 
 type ChatMessage = {
   id: string;
@@ -80,24 +79,25 @@ type ChatMessage = {
   ts: number;
 };
 
-function broadcast(msg: any) {
+function broadcastChat(msg: any) {
   const data = JSON.stringify(msg);
-  wss.clients.forEach((client: any) => {
+  wssChat.clients.forEach((client: any) => {
     if (client.readyState === client.OPEN) {
       client.send(data);
     }
   });
 }
 
-wss.on("connection", (ws, req) => {
+wssChat.on("connection", (ws, req) => {
   try {
-    const baseUrl = `http://${req.headers.host ?? "localhost"}`;
-    const url = new URL(req.url ?? "", baseUrl);
+    const urlStr = req.url ?? ""; // ex.: "/chat?nome=Leo&mesaId=2..."
+    const queryStr = urlStr.split("?")[1] ?? "";
+    const params = new URLSearchParams(queryStr);
 
-    const moderador = url.searchParams.get("moderador") === "1";
-    const nomeParam = url.searchParams.get("nome") ?? "Anônimo";
-    const sessionId = url.searchParams.get("sessionId") ?? "";
-    const mesaId = url.searchParams.get("mesaId") ?? "";
+    const moderador = params.get("moderador") === "1";
+    const nomeParam = params.get("nome") ?? "Anônimo";
+    const sessionId = params.get("sessionId") ?? "";
+    const mesaId = params.get("mesaId") ?? "";
 
     let displayUser = moderador
       ? `MOD | ${nomeParam}`
@@ -105,18 +105,25 @@ wss.on("connection", (ws, req) => {
         ? `${nomeParam} (mesa ${mesaId})`
         : nomeParam;
 
-    broadcast({
+    // Mensagem de entrada no chat
+    broadcastChat({
       id: `sys-${Date.now()}`,
       user: "Sistema",
       text: `${displayUser} entrou no chat.`,
-      ts: Date.now()
+      ts: Date.now(),
     });
 
     ws.on("message", (raw: RawData) => {
-      const msg = parseMessage(raw);
+      let msg: any;
+      try {
+        msg = JSON.parse(raw.toString());
+      } catch {
+        msg = { text: raw.toString() };
+      }
 
+      // Apagar mensagens
       if (msg.type === "delete-message") {
-        broadcast({ type: "delete-message", id: msg.id });
+        broadcastChat({ type: "delete-message", id: msg.id });
         return;
       }
 
@@ -127,33 +134,37 @@ wss.on("connection", (ws, req) => {
 
       if (!texto) return;
 
-      broadcast({
+      const chatMsg: ChatMessage = {
         id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        user: msg.user?.toString().trim() || displayUser,
+        user: (msg.user ?? displayUser).toString().trim() || displayUser,
         text: texto,
-        ts: Date.now()
-      });
+        ts: Date.now(),
+      };
+
+      broadcastChat(chatMsg);
     });
 
     ws.on("close", () => {
-      broadcast({
+      broadcastChat({
         id: `sys-${Date.now()}`,
         user: "Sistema",
         text: `${displayUser} saiu do chat.`,
-        ts: Date.now()
+        ts: Date.now(),
       });
     });
-
   } catch (err) {
-    console.error("Erro no WebSocket:", err);
-    ws.close();
+    console.error("Erro no WebSocket do chat:", err);
+    try {
+      ws.close();
+    } catch {}
   }
 });
 
 /**************************************
- * WEBSOCKET DA FILA
+ * WEBSOCKET DA FILA (/fila-ws)
  **************************************/
-const wssFila = new WebSocketServer({ server, path: "/fila-ws" });
+
+const wssFila = new WebSocketServer({ noServer: true });
 
 export function broadcastFila(data: any) {
   const json = JSON.stringify(data);
@@ -166,6 +177,32 @@ export function broadcastFila(data: any) {
 
 wssFila.on("connection", () => {
   console.log("Cliente conectado ao WS da Fila");
+});
+
+/**************************************
+ * ROUTER DE UPGRADE (CHAT x FILA)
+ **************************************/
+
+server.on("upgrade", (req, socket, head) => {
+  try {
+    const url = new URL(req.url ?? "", `http://${req.headers.host}`);
+    const pathname = url.pathname;
+
+    if (pathname === "/chat") {
+      wssChat.handleUpgrade(req, socket, head, (ws) => {
+        wssChat.emit("connection", ws, req);
+      });
+    } else if (pathname === "/fila-ws") {
+      wssFila.handleUpgrade(req, socket, head, (ws) => {
+        wssFila.emit("connection", ws, req);
+      });
+    } else {
+      socket.destroy();
+    }
+  } catch (err) {
+    console.error("Erro no upgrade de WebSocket:", err);
+    socket.destroy();
+  }
 });
 
 /**************************************
@@ -187,8 +224,8 @@ async function ensureMesasSeeded() {
           { codigo: "M07" },
           { codigo: "M08" },
           { codigo: "M09" },
-          { codigo: "M10" }
-        ]
+          { codigo: "M10" },
+        ],
       });
       console.log("[seed] Mesas criadas automaticamente.");
     }
@@ -205,5 +242,6 @@ const PORT = Number(process.env.PORT ?? 3000);
 server.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Chat WebSocket: ws://localhost:${PORT}/chat`);
+  console.log(`Fila WebSocket: ws://localhost:${PORT}/fila-ws`);
   ensureMesasSeeded();
 });

@@ -258,10 +258,8 @@
   </footer>
 
   <script>
-    // Carrega dados da sessão (por aba)
     const nome = sessionStorage.getItem("nomeCliente");
     const mesa = Number(sessionStorage.getItem("mesaId"));
-
 
     // Se não tiver sessão → voltar ao login
     if (!nome || !mesa) {
@@ -275,45 +273,20 @@
     document.getElementById("subtitle").textContent =
       `Mesa ${mesa} • Bem-vindo(a), ${nome}!`;
 
-    // Navegação
     function goTo(genero) {
       window.location.href = `/genero-${genero}.html`;
     }
 
-    addButton.textContent = "Adicionar";
-    addButton.addEventListener("click", async () => {
-      try {
-        const payload = {
-          spotifyId: t.spotifyId,
-          spotifyUri: t.spotifyUri,
-          title: t.title,
-          artists: t.artists,
-          album: t.album,
-          coverUrl: t.coverUrl,   // URL da capa
-          mesaId: mesaId,         // número da mesa
-          clienteNome: nomeCliente
-        };
+    const searchInput = document.querySelector(".search-box input");
 
-        const res = await fetch("/pedido-musica/queue", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!res.ok) {
-          console.error("Erro ao adicionar música na fila:", await res.text());
-          alert("Não foi possível adicionar a música. Tente novamente.");
-          return;
-        }
-
-        alert("Música adicionada na fila!");
-      } catch (err) {
-        console.error("Erro inesperado ao adicionar música:", err);
-        alert("Erro inesperado ao adicionar música.");
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const q = searchInput.value.trim();
+        window.location.href = `/pesquisar-musica.html?q=${encodeURIComponent(q)}`;
       }
     });
+
   </script>
-</body>         
+</body>
+
 </html>

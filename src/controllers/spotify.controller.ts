@@ -74,8 +74,31 @@ export class SpotifyController {
       const q = String(req.query.q ?? "").trim();
       if (!q) return res.json([]);
 
-      const token = await spotify.getValidAccessToken();
+      const clientId = process.env.SPOTIFY_CLIENT_ID;
+      const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 
+      if (!clientId || !clientSecret) {
+        console.error("SPOTIFY_CLIENT_ID ou SPOTIFY_CLIENT_SECRET não definidos");
+        return res.status(500).json({ error: "Spotify não configurado no servidor" });
+      }
+
+      // 1) Pega um access_token via Client Credentials
+      const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+      const tokenResp = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        new URLSearchParams({ grant_type: "client_credentials" }).toString(),
+        {
+          headers: {
+            Authorization: `Basic ${basic}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      const accessToken = tokenResp.data.access_token as string;
+
+      // 2) Usa esse token pra chamar o /search
       const params = new URLSearchParams({
         q,
         type: "track",
@@ -85,25 +108,27 @@ export class SpotifyController {
       const { data } = await axios.get(
         `https://api.spotify.com/v1/search?${params.toString()}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
-      const items = data.tracks.items ?? [];
+      const items = data.tracks?.items ?? [];
 
       const results = items.map((t: any) => ({
         title: t.name,
         artists: t.artists.map((a: any) => a.name).join(", "),
         album: t.album.name,
         coverUrl: t.album.images?.[0]?.url ?? "",
-        spotifyUri: t.uri,  // ex: "spotify:track:abc123"
-        spotifyId: t.id,    // ex: "abc123"
+        spotifyUri: t.uri,
+        spotifyId: t.id,
         durationMs: t.duration_ms,
       }));
 
       return res.json(results);
-    } catch (err) {
-      console.error("Erro no search Spotify:", err);
+    } catch (err: any) {
+      console.error("Erro no search Spotify:", err?.response?.data ?? err);
       return res.status(500).json({ error: "Erro na busca Spotify" });
     }
   }

@@ -1,8 +1,6 @@
 import prisma from "../database/prismaClient.js";
-import { Prisma, PedidoStatus } from "@prisma/client";
 
 export const PedidoMusicaRepository = {
-
   // Criar pedido
   create(data: {
     clienteId: number;
@@ -15,17 +13,17 @@ export const PedidoMusicaRepository = {
     return prisma.pedidoMusica.create({
       data: {
         ...rest,
-        ...(status ? { status: status as PedidoStatus } : {}),
+        ...(status ? { status } : {}),
       },
     });
   },
 
-  // Listar pedidos (com filtro opcional por status)
+  // Listar pedidos (com filtro opcional por status / mesa)
   findAll(status?: string, mesaId?: number) {
-    const where: Prisma.PedidoMusicaWhereInput = {};
+    const where: any = {};
 
     if (status) {
-      where.status = { equals: status as PedidoStatus };
+      where.status = status;
     }
 
     if (typeof mesaId === "number") {
@@ -42,11 +40,11 @@ export const PedidoMusicaRepository = {
     });
   },
 
-  // 🔥 Listar apenas pendentes (fila)
+  // Listar apenas pendentes (fila)
   findFila() {
     return prisma.pedidoMusica.findMany({
       where: {
-        status: { equals: PedidoStatus.PENDENTE },
+        status: "PENDENTE", // valor da enum no banco
       },
       include: {
         music: true,
@@ -61,7 +59,7 @@ export const PedidoMusicaRepository = {
     return prisma.pedidoMusica.update({
       where: { id },
       data: {
-        status: status as PedidoStatus,
+        status,
       },
     });
   },

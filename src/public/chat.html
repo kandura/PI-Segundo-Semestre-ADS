@@ -416,6 +416,9 @@
       const row = document.createElement("div");
       row.classList.add("msg-row");
 
+      // Mensagem recebe um id no DOM — necessário para remoção posterior
+      row.id = data.id;
+
       if (isSystem) row.classList.add("system");
       else if (isMe) row.classList.add("me");
       else row.classList.add("other");
@@ -477,6 +480,15 @@
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+
+        // Se for comando de apagar, remove do DOM
+        if (data.type === "delete-message") {
+          const msgEl = document.getElementById(data.id);
+          if (msgEl) msgEl.remove();
+          return;
+        }
+
+        // Caso contrário: adicionar mensagens normais
         addMessageToChat(data);
       } catch (err) {
         console.error("Mensagem inválida:", err);
@@ -506,6 +518,7 @@
       }
     });
   </script>
+
   <footer class="footer-nav">
     <div class="footer-btn" onclick="window.location.href='/inicio.html'">🏠</div>
     <div class="footer-btn active" onclick="window.location.href='/chat.html'">💬</div>

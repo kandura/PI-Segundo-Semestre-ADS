@@ -15,7 +15,6 @@
 - [11. Estrutura do Front-End](#11-estrutura-do-front-end)
 - [12. Deploy no Render](#12-deploy-no-render)
 - [13. Roadmap do que foi feito e o que falta](#13-roadmap-do-que-foi-feito-e-o-que-falta)
-- [14. Diagramas (Fluxo, BD, Comunicação)](#14-diagramas-fluxo-bd-comunicação)
 
 ---
 

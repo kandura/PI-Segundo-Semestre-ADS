@@ -364,7 +364,7 @@
           clienteNome: nomeCliente,
         };
 
-        const res = await fetch("/api/pedido-musica/spotify", {
+        const res = await fetch("/api/pedido-musica/queue", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

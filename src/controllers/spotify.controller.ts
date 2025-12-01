@@ -134,61 +134,88 @@ export class SpotifyController {
   }
 
   static async playlist(req: Request, res: Response) {
-    try {
-      const playlistId = req.params.id;
+  try {
+    const rawIds = req.params.id;
 
-      if (!playlistId) {
-        return res.status(400).json({ error: "Playlist ID é obrigatório" });
-      }
+    if (!rawIds) {
+      return res.status(400).json({ error: "Playlist ID é obrigatório" });
+    }
 
-      // token da conta logada (a mesma do moderador / dono do app)
-      const accessToken = await spotify.getValidAccessToken();
+    // Aceita "id1,id2,id3"
+    const playlistIds = rawIds
+      .split(",")
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0);
 
-      const limit = 50; // quantas por página
+    if (playlistIds.length === 0) {
+      return res.status(400).json({ error: "Nenhuma playlist válida informada" });
+    }
+
+    // token da conta logada 
+    const accessToken = await spotify.getValidAccessToken();
+
+    const limit = 100;           // quantas por página
+    const maxPerPlaylist = 200; // hard-limit por playlist
+
+    // Mapa pra remover duplicadas 
+    const trackMap = new Map<string, any>();
+
+    for (const playlistId of playlistIds) {
       let offset = 0;
-      const allItems: any[] = [];
 
-      // busca várias páginas até acabar ou chegar num limite de segurança
       while (true) {
-        const { data } = await axios.get(
-          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
-          {
-            params: { limit, offset },
-            headers: { Authorization: `Bearer ${accessToken}` },
-          }
-        );
+        const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`;
 
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const data = response.data;
         const items = data.items ?? [];
-        allItems.push(...items);
 
-        if (items.length < limit) break; // acabou a playlist
-        offset += limit;
-        if (offset >= 200) break; // hard-limit pra não exagerar
-      }
+        if (!items.length) break;
 
-      const results = allItems
-        .filter((i: any) => i.track && !i.track.is_local)
-        .map((i: any) => {
-          const t = i.track;
-          return {
+        for (const item of items) {
+          const t = item.track;
+          if (!t || t.is_local) continue;
+
+          const spotifyId = t.id;
+          if (!spotifyId) continue;
+
+          // se já veio essa música de outra playlist, ignora
+          if (trackMap.has(spotifyId)) continue;
+
+          trackMap.set(spotifyId, {
             title: t.name,
             artists: t.artists.map((a: any) => a.name).join(", "),
             album: t.album.name,
             coverUrl: t.album.images?.[0]?.url ?? "",
             spotifyUri: t.uri,
-            spotifyId: t.id,
+            spotifyId,
             durationMs: t.duration_ms,
-          };
-        });
+          });
+        }
 
-      return res.json(results);
-    } catch (err: any) {
-      console.error("Erro na playlist Spotify:", err?.response?.data ?? err);
-      return res
-        .status(500)
-        .json({ error: "Erro ao carregar playlist do Spotify" });
+        if (items.length < limit || offset + limit >= maxPerPlaylist) {
+          break; // acabou a playlist ou bateu o limite
+        }
+
+        offset += limit;
+      }
     }
+
+    // Resultado final = todas as músicas únicas
+    const results = Array.from(trackMap.values());
+    return res.json(results);
+  } catch (err: any) {
+    console.error("Erro na playlist Spotify:", err?.response?.data ?? err);
+    return res
+      .status(500)
+      .json({ error: "Erro ao carregar playlist do Spotify" });
   }
+}
 
 
   static async getPlaylistTracks(req: Request, res: Response) {

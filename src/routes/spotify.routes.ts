@@ -8,6 +8,7 @@ router.get("/login",    SpotifyController.redirectToLogin);
 router.get("/callback", SpotifyController.callback);
 router.get("/token",    SpotifyController.token);
 router.get("/search",   SpotifyController.search);
-router.get("/playlist/:id", SpotifyController.playlist);
+router.get("/playlist/:playlistId", SpotifyController.getPlaylistTracks);
+
 
 export default router;

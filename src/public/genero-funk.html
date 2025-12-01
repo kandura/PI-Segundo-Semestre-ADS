@@ -250,8 +250,12 @@
 
     <script>
     //   DADOS DA SESSÃO
+
     const nomeCliente = sessionStorage.getItem("nomeCliente") || "Cliente";
     const mesaId = Number(sessionStorage.getItem("mesaId"));
+
+    const PLAYLIST_ID_FUNK = "37i9dQZF1DWYYeOy9vs7I5";
+
 
     if (!nomeCliente || !mesaId) {
       window.location.href = "/login.html";
@@ -263,8 +267,6 @@
 
     const searchInput = document.getElementById("searchInput");
     const tracksList = document.getElementById("tracksList");
-
-    const PLAYLIST_ID_FUNK = "37i9dQZF1DWYYeOy9vs7I5";
 
     let allTracks = []; // cache das músicas
 

@@ -285,11 +285,13 @@
   </footer>
 
   <script>
-    // Dados da sessão
+    // ==========================
+    //   DADOS DA SESSÃO
+    // ==========================
     const nomeCliente = sessionStorage.getItem("nomeCliente") ?? "Cliente";
     const mesaId = Number(sessionStorage.getItem("mesaId"));
 
-    // Se não tiver sessão, volta pro login
+    // Se não tiver sessão, manda pro login
     if (!sessionStorage.getItem("nomeCliente") || !sessionStorage.getItem("mesaId")) {
       window.location.href = "/login.html";
     }
@@ -300,7 +302,12 @@
     const input = document.getElementById("searchInput");
     const resultadosDiv = document.getElementById("resultados");
 
-    // ---- BUSCA NO SPOTIFY (BACKEND) ----
+    // Track selecionada no modal
+    let selectedTrack = null;
+
+    // ==========================
+    //   BUSCA NO SPOTIFY
+    // ==========================
     async function buscar() {
       const q = input.value.trim();
       if (!q) return;
@@ -308,10 +315,13 @@
       resultadosDiv.innerHTML = "<p>⏳ Buscando músicas…</p>";
 
       try {
+        // ROTA CERTA -> /api/spotify/search
         const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(q)}`);
+
         if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          console.error("Erro em /api/spotify/search:", errText);
           resultadosDiv.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
-          console.error("Erro em /spotify/search:", await res.text());
           return;
         }
 
@@ -331,7 +341,7 @@
         return;
       }
 
-      lista.forEach(m => {
+      lista.forEach((m) => {
         const card = document.createElement("div");
         card.className = "music-card";
 
@@ -345,30 +355,28 @@
           durationMs: m.durationMs,
         };
 
-        const coverSrc = m.coverUrl || "https://via.placeholder.com/64?text=♪";
+        const coverSrc = trackObj.coverUrl || "https://via.placeholder.com/64?text=♪";
 
         card.innerHTML = `
-          <img src="${coverSrc}" class="cover">
-          <div class="music-info">
-            <span class="music-title">${m.title}</span>
-            <span class="music-artist">${m.artists}</span>
-          </div>
-          <button class="btn-add">➕</button>
-        `;
+        <img src="${coverSrc}" class="cover" alt="Capa do álbum">
+        <div class="music-info">
+          <span class="music-title">${trackObj.title}</span>
+          <span class="music-artist">${trackObj.artists}</span>
+        </div>
+        <button class="btn-add">➕</button>
+      `;
 
-        card.querySelector(".btn-add").onclick = () =>
-          openConfirmModal(trackObj);
+        card.querySelector(".btn-add").onclick = () => openConfirmModal(trackObj);
 
         resultadosDiv.appendChild(card);
       });
     }
 
-    /* MODAL */
-    let selectedTrack = null;
-
+    // ==========================
+    //   MODAL DE CONFIRMAÇÃO
+    // ==========================
     function openConfirmModal(track) {
       selectedTrack = track;
-
       document.getElementById("modal-desc").textContent =
         `Deseja pedir "${track.title}" de ${track.artists}?`;
 
@@ -383,22 +391,40 @@
     async function sendMusicRequest() {
       if (!selectedTrack) return;
 
+      if (!mesaId || !nomeCliente) {
+        alert("Sessão inválida. Volte para o login e entre novamente.");
+        return;
+      }
+
       try {
-        const res = await fetch("/api/pedido-musica/spotify", {
+        const payload = {
+          spotifyId: selectedTrack.spotifyId,
+          spotifyUri: selectedTrack.spotifyUri,
+          title: selectedTrack.title,
+          artists: selectedTrack.artists,
+          album: selectedTrack.album,
+          coverUrl: selectedTrack.coverUrl,
+          mesaId,
+          clienteNome: nomeCliente,
+        };
+
+        // ROTA CERTA -> /api/pedido-musica/queue
+        const res = await fetch("/api/pedido-musica/queue", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(selectedTrack),
+          body: JSON.stringify(payload),
         });
 
         if (!res.ok) {
-          console.error("Erro ao enviar pedido:", await res.text());
+          const errText = await res.text().catch(() => "");
+          console.error("Erro ao enviar pedido:", errText);
           alert("Erro ao enviar pedido");
           return;
         }
 
         alert("🎵 Música adicionada à fila!");
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao enviar pedido:", err);
         alert("Erro ao enviar pedido");
       }
 
@@ -423,6 +449,7 @@
       buscar();
     }
   </script>
+
 
 </body>
 

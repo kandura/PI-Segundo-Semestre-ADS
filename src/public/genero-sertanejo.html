@@ -288,7 +288,7 @@
       tracksList.innerHTML = "<p>⏳ Buscando músicas de sertanejo…</p>";
 
       try {
-        const res = await fetch(`/spotify/search?q=${encodeURIComponent(queryBase)}`);
+        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(queryBase)}`);
         if (!res.ok) {
           console.error("Erro em /spotify/search:", await res.text());
           tracksList.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
@@ -364,7 +364,7 @@
           clienteNome: nomeCliente,
         };
 
-        const res = await fetch("/pedido-musica/spotify", {
+        const res = await fetch("/api/pedido-musica/spotify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),

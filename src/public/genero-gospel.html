@@ -106,6 +106,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      /* A página já rola por padrão, não precisa limitar a altura */
     }
 
     .track-card {
@@ -230,7 +231,7 @@
       <input type="text" placeholder="O que você quer ouvir de Gospel?" id="searchInput" />
     </div>
 
-    <!-- LISTA DE MÚSICAS (preenchida via JS) -->
+    <!-- LISTA DE MÚSICAS -->
     <section class="tracks-list" id="tracksList"></section>
   </div>
 
@@ -255,7 +256,6 @@
     const mesaId = Number(sessionStorage.getItem("mesaId"));
 
     if (!nomeCliente || !mesaId) {
-      // se não tiver sessão válida, volta pro login
       window.location.href = "/login.html";
     }
 
@@ -266,9 +266,10 @@
     const searchInput = document.getElementById("searchInput");
     const tracksList = document.getElementById("tracksList");
 
-    const GENRE = "gospel";
+    const PLAYLIST_ID_GOSPEL = "3OXUzmhUNF2RJTjPYxkjIW,30eqrwAdj5vxvE6faMBqIm,73lcSYfzWhVuiVdXk3aY5U";
 
-    // Converte ms -> "3:45"
+    let allTracks = []; // cache da playlist
+
     function formatDuration(ms) {
       const totalSeconds = Math.floor(ms / 1000);
       const minutes = Math.floor(totalSeconds / 60);
@@ -276,31 +277,26 @@
       return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     }
 
-    // ===========================
-    //   BUSCA NO SPOTIFY (BACK)
-    // ===========================
-    async function buscarGospel(termo) {
-      // se o usuário digitar algo, usamos "<termo> Gospel"
-      // se não, usamos só "Gospel" pra pegar músicas populares
-      const queryBase = termo && termo.trim().length > 0
-        ? `${termo.trim()} ${GENRE}`
-        : GENRE;
-
-      tracksList.innerHTML = "<p>⏳ Buscando músicas de Gospel...</p>";
+    // =========================
+    //   CARREGAR PLAYLIST
+    // =========================
+    async function carregarPlaylistnSertaejo() {
+      tracksList.innerHTML = "<p>⏳ Carregando playlist de  Gospel…</p>";
 
       try {
-        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(queryBase)}`);
+        const res = await fetch(`/api/spotify/playlist/${PLAYLIST_ID_GOSPEL}`);
         if (!res.ok) {
-          console.error("Erro em /spotify/search:", await res.text());
-          tracksList.innerHTML = "<p>Erro ao buscar músicas 😕</p>";
+          console.error("Erro ao carregar playlist:", await res.text());
+          tracksList.innerHTML = "<p>Erro ao carregar playlist 😕</p>";
           return;
         }
 
         const data = await res.json();
-        renderTracks(data);
+        allTracks = data;
+        renderTracks(allTracks);
       } catch (err) {
-        console.error("Erro inesperado ao buscar músicas:", err);
-        tracksList.innerHTML = "<p>Erro inesperado na busca 😕</p>";
+        console.error("Erro inesperado ao carregar playlist:", err);
+        tracksList.innerHTML = "<p>Erro inesperado 😕</p>";
       }
     }
 
@@ -308,7 +304,7 @@
       tracksList.innerHTML = "";
 
       if (!lista || lista.length === 0) {
-        tracksList.innerHTML = "<p>Nenhuma música encontrada para esse gênero.</p>";
+        tracksList.innerHTML = "<p>Nenhuma música encontrada.</p>";
         return;
       }
 
@@ -316,26 +312,14 @@
         const card = document.createElement("article");
         card.className = "track-card";
 
-        const track = {
-          spotifyId: m.spotifyId,
-          spotifyUri: m.spotifyUri,
-          title: m.title,
-          artists: m.artists,
-          album: m.album,
-          coverUrl: m.coverUrl || "",
-          durationMs: m.durationMs,
-        };
-
-        const coverSrc = track.coverUrl || "https://via.placeholder.com/64?text=♪";
-        const durationText = track.durationMs
-          ? formatDuration(track.durationMs)
-          : "";
+        const durationText = m.durationMs ? formatDuration(m.durationMs) : "";
+        const coverSrc = m.coverUrl || "https://via.placeholder.com/64?text=♪";
 
         card.innerHTML = `
           <img src="${coverSrc}" alt="Capa do álbum" class="track-cover" />
           <div class="track-info">
-            <div class="track-title">${track.title}</div>
-            <div class="track-meta">${track.artists} ${durationText ? "• " + durationText : ""}</div>
+            <div class="track-title">${m.title}</div>
+            <div class="track-meta">${m.artists} ${durationText ? "• " + durationText : ""}</div>
           </div>
           <div class="track-actions">
             <div class="wave-icon">📶</div>
@@ -343,7 +327,7 @@
           </div>
         `;
 
-        card.querySelector(".btn-request").onclick = () => pedirMusica(track);
+        card.querySelector(".btn-request").onclick = () => pedirMusica(m);
 
         tracksList.appendChild(card);
       });
@@ -352,15 +336,15 @@
     // ===========================
     //   ENVIAR PEDIDO PRO BACK
     // ===========================
-    async function pedirMusica(track) {
+    async function pedirMusica(m) {
       try {
         const payload = {
-          spotifyId: track.spotifyId,
-          spotifyUri: track.spotifyUri,
-          title: track.title,
-          artists: track.artists,
-          album: track.album,
-          coverUrl: track.coverUrl,
+          spotifyId: m.spotifyId,
+          spotifyUri: m.spotifyUri,
+          title: m.title,
+          artists: m.artists,
+          album: m.album,
+          coverUrl: m.coverUrl,
           mesaId: mesaId,
           clienteNome: nomeCliente,
         };
@@ -385,18 +369,25 @@
     }
 
     // ===========================
-    //   EVENTOS
+    //   FILTRO LOCAL NA PLAYLIST
     // ===========================
-    // Enter faz a busca
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        buscarGospel(searchInput.value);
+    searchInput.addEventListener("input", () => {
+      const termo = searchInput.value.trim().toLowerCase();
+
+      if (!termo) {
+        renderTracks(allTracks);
+        return;
       }
+
+      const filtradas = allTracks.filter((m) =>
+        (m.title + " " + m.artists).toLowerCase().includes(termo)
+      );
+
+      renderTracks(filtradas);
     });
 
-    // Busca inicial automática só com "Gospel"
-    buscarGospel("");
+    // Carregar playlist ao abrir a página
+    carregarPlaylistGospel();
   </script>
 </body>
 

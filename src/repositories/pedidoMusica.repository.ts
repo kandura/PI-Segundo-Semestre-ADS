@@ -13,7 +13,8 @@ export const PedidoMusicaRepository = {
     return prisma.pedidoMusica.create({
       data: {
         ...rest,
-        ...(status ? { status } : {}),
+        // cast pra não brigar com o enum PedidoStatus do Prisma
+        ...(status ? { status: status as any } : {}),
       },
     });
   },
@@ -23,7 +24,7 @@ export const PedidoMusicaRepository = {
     const where: any = {};
 
     if (status) {
-      where.status = status;
+      where.status = status as any;
     }
 
     if (typeof mesaId === "number") {
@@ -44,7 +45,8 @@ export const PedidoMusicaRepository = {
   findFila() {
     return prisma.pedidoMusica.findMany({
       where: {
-        status: "PENDENTE", // valor da enum no banco
+        // mesma coisa aqui: cast pro enum
+        status: "PENDENTE" as any,
       },
       include: {
         music: true,
@@ -59,7 +61,7 @@ export const PedidoMusicaRepository = {
     return prisma.pedidoMusica.update({
       where: { id },
       data: {
-        status,
+        status: status as any,
       },
     });
   },

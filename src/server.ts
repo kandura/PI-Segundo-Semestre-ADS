@@ -30,6 +30,8 @@ app.use(express.static(path.join(process.cwd(), "src", "public")));
 app.use("/api", musicaRouter);
 app.use("/api", pedidoMusicaRouter);
 
+app.use("/api/pedido-musica", pedidoMusicaSpotifyRouter);
+
 // Página inicial → login do cliente
 app.get("/", (req, res) => {
   res.sendFile(path.join(process.cwd(), "src", "public", "login.html"));

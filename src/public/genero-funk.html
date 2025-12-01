@@ -248,10 +248,8 @@
     </button>
   </footer>
 
-  <script>
-    // ===========================
+    <script>
     //   DADOS DA SESSÃO
-    // ===========================
     const nomeCliente = sessionStorage.getItem("nomeCliente") || "Cliente";
     const mesaId = Number(sessionStorage.getItem("mesaId"));
 
@@ -268,7 +266,7 @@
 
     const PLAYLIST_ID_FUNK = "37i9dQZF1DWYYeOy9vs7I5";
 
-    let allTracks = []; // cache da playlist
+    let allTracks = []; // cache das músicas
 
     function formatDuration(ms) {
       const totalSeconds = Math.floor(ms / 1000);
@@ -278,24 +276,27 @@
     }
 
     // =========================
-    //   CARREGAR PLAYLIST
+    //   CARREGAR MÚSICAS (SEARCH)
     // =========================
     async function carregarPlaylistFunk() {
-      tracksList.innerHTML = "<p>⏳ Carregando playlist de  Funk…</p>";
+      tracksList.innerHTML = "<p>⏳ Carregando músicas de Funk…</p>";
 
       try {
-        const res = await fetch(`/api/spotify/playlist/${PLAYLIST_ID_FUNK}`);
+        // usamos a mesma rota que o resto do sistema: /api/spotify/search
+        const query = "funk";
+        const res = await fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`);
+
         if (!res.ok) {
-          console.error("Erro ao carregar playlist:", await res.text());
-          tracksList.innerHTML = "<p>Erro ao carregar playlist 😕</p>";
+          console.error("Erro em /api/spotify/search:", await res.text());
+          tracksList.innerHTML = "<p>Erro ao carregar músicas 😕</p>";
           return;
         }
 
         const data = await res.json();
-        allTracks = data;
-        renderTracks(allTracks);
+        allTracks = data;          // guarda todas
+        renderTracks(allTracks);   // mostra na tela
       } catch (err) {
-        console.error("Erro inesperado ao carregar playlist:", err);
+        console.error("Erro inesperado ao carregar músicas:", err);
         tracksList.innerHTML = "<p>Erro inesperado 😕</p>";
       }
     }
@@ -345,11 +346,12 @@
           artists: m.artists,
           album: m.album,
           coverUrl: m.coverUrl,
-          mesaId: mesaId,
+          mesaId: Number(mesaId),
           clienteNome: nomeCliente,
         };
 
-        const res = await fetch("/api/pedido-musica/queue", {
+        // aqui é SEM /api, igual no resto do sistema
+        const res = await fetch("/pedido-musica/queue", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -369,7 +371,7 @@
     }
 
     // ===========================
-    //   FILTRO LOCAL NA PLAYLIST
+    //   FILTRO LOCAL NA LISTA
     // ===========================
     searchInput.addEventListener("input", () => {
       const termo = searchInput.value.trim().toLowerCase();
@@ -386,9 +388,10 @@
       renderTracks(filtradas);
     });
 
-    // Carregar playlist ao abrir a página
+    // Carrega músicas ao abrir a página
     carregarPlaylistFunk();
   </script>
+
 </body>
 
 </html>

@@ -135,6 +135,8 @@
 
           localStorage.setItem('moderadorId', data.moderadorId);
           localStorage.setItem('moderadorEmail', email);
+          localStorage.setItem('moderadorNome', data.nome);
+sessionStorage.setItem('nomeModerador', data.nome);
 
           window.location.href = 'moderador-dashboard.html';
 

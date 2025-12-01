@@ -36,7 +36,7 @@ export const ModeradorController = {
       const ok = await bcrypt.compare(senha, user.senha);
       if (!ok) return res.status(400).json({ error: "Senha inválida" });
 
-      return res.json({ ok: true, moderadorId: user.id });
+      return res.json({ ok: true, moderadorId: user.id, nome: user.nome });
 
     } catch (e) {
       console.error(e);

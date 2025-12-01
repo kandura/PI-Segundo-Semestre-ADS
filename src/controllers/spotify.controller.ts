@@ -69,6 +69,8 @@ export class SpotifyController {
     }
   }
 
+  // BUSCA LIVRE (pesquisar-musica / telas gerais)
+  
   static async search(req: Request, res: Response) {
     try {
       const q = String(req.query.q ?? "").trim();
@@ -82,7 +84,6 @@ export class SpotifyController {
         return res.status(500).json({ error: "Spotify não configurado no servidor" });
       }
 
-      // 1) Pega um access_token via Client Credentials
       const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
       const tokenResp = await axios.post(
@@ -98,11 +99,10 @@ export class SpotifyController {
 
       const accessToken = tokenResp.data.access_token as string;
 
-      // 2) Usa esse token pra chamar o /search
       const params = new URLSearchParams({
         q,
         type: "track",
-        limit: "10",
+        limit: "30", // 
       });
 
       const { data } = await axios.get(
@@ -130,6 +130,88 @@ export class SpotifyController {
     } catch (err: any) {
       console.error("Erro no search Spotify:", err?.response?.data ?? err);
       return res.status(500).json({ error: "Erro na busca Spotify" });
+    }
+  }
+
+  static async getPlaylistTracks(req: Request, res: Response) {
+    try {
+      const playlistId = String(req.params.playlistId || "").trim();
+      if (!playlistId) {
+        return res.status(400).json({ error: "playlistId é obrigatório" });
+      }
+
+      const clientId = process.env.SPOTIFY_CLIENT_ID;
+      const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+      if (!clientId || !clientSecret) {
+        console.error("SPOTIFY_CLIENT_ID ou SPOTIFY_CLIENT_SECRET não definidos");
+        return res.status(500).json({ error: "Spotify não configurado no servidor" });
+      }
+
+      const basic = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+      // access_token via Client Credentials
+      const tokenResp = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        new URLSearchParams({ grant_type: "client_credentials" }).toString(),
+        {
+          headers: {
+            Authorization: `Basic ${basic}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+
+      const accessToken = tokenResp.data.access_token as string;
+
+      // Pega a playlist pra "quase inteira" (até 200 faixas)
+      const allTracks: any[] = [];
+      let offset = 0;
+      const limit = 100; // Spotify permite até 100 por página
+      const MAX_TRACKS = 200;
+
+      while (true) {
+        const { data } = await axios.get(
+          `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: {
+              limit,
+              offset,
+            },
+          }
+        );
+
+        const items = data.items ?? [];
+        if (!items.length) break;
+
+        allTracks.push(...items);
+        offset += limit;
+
+        if (!data.next || allTracks.length >= MAX_TRACKS) {
+          break;
+        }
+      }
+
+      const results = allTracks
+        .map((item: any) => item.track)
+        .filter((t: any) => !!t)
+        .map((t: any) => ({
+          title: t.name,
+          artists: t.artists.map((a: any) => a.name).join(", "),
+          album: t.album.name,
+          coverUrl: t.album.images?.[0]?.url ?? "",
+          spotifyUri: t.uri,
+          spotifyId: t.id,
+          durationMs: t.duration_ms,
+        }));
+
+      return res.json(results);
+    } catch (err: any) {
+      console.error("Erro ao carregar playlist Spotify:", err?.response?.data ?? err);
+      return res.status(500).json({ error: "Erro ao carregar playlist Spotify" });
     }
   }
 }

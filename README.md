@@ -19,15 +19,6 @@ Criar uma plataforma realista para restaurantes, permitindo:
 
 ---
 
-# Sumário Completo
-
-1. Visão Geral  
-2. Arquitetura Geral  
-3. Tecnologias Utilizadas  
-4. Funcionamento Geral  
-
----
-
 # 1. Visão Geral
 
 O sistema funciona assim:
